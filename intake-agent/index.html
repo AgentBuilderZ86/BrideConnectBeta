@@ -246,6 +246,87 @@ main { flex: 1; min-height: 0; }
 .gate input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; background: var(--bg); font: 500 16px/1.3 var(--font-mono); }
 .gate p { margin: 10px 0; font-size: 14px; color: var(--ink-2); }
 .gate .errtxt { color: var(--danger); }
+/* ---- living fiche, DSI tools ---- */
+.muted { color: var(--ink-3); font-size: 13px; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.tag { font: 500 11.5px/1.7 var(--font-ui); padding: 0 8px; border-radius: 20px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.tag.warn { background: var(--st-deduit-bg); color: var(--st-deduit); }
+.tag.accent { background: var(--accent-soft); color: var(--accent); }
+.tag.ok { background: var(--st-confirme-bg); color: var(--st-confirme); }
+.pill.st-stale { color: var(--danger); background: var(--danger-bg); }
+.seg-inline { display: flex; gap: 4px; flex-wrap: wrap; }
+.seg-inline button, .tool-tabs button { border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 500; }
+.seg-inline button[aria-pressed="true"], .tool-tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tools { display: grid; gap: 10px; }
+.tools-row { display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.tool-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.clock { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
+.clock select, .form-grid select, .form-grid input { border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; background: var(--surface); }
+.tool-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.tool-panel textarea, .lv-block textarea, .copilot textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--bg); resize: vertical; }
+.tp-head { display: grid; gap: 4px; justify-items: start; }
+.tp-head h4, .lv-block h4, .cp-head h4 { margin: 0; font: 600 15px/1.3 var(--font-doc); }
+.tp-head p { margin: 0 0 4px; max-width: 75ch; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 12px; }
+.form-grid label { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); font-weight: 600; }
+.form-grid label.wide { grid-column: 1 / -1; }
+.row-end { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.lv-block { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin: 12px 0; display: grid; gap: 6px; background: var(--surface); min-width: 0; }
+.lv-block p { margin: 0; }
+.lv-block.nudge { border-color: var(--accent); background: var(--accent-soft); }
+.lv-block.pending { border-color: var(--st-deduit); }
+.prop { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; font-size: 14px; padding: 4px 0; }
+.prop input { margin-top: 4px; }
+.prop-line { margin: 4px 0; font-size: 14px; }
+.proposal { border-top: 1px dashed var(--line); margin-top: 8px; padding-top: 8px; display: grid; gap: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-btn { border: 1px solid var(--accent); color: var(--accent); background: var(--surface); padding: 5px 11px; border-radius: 20px; font-size: 13px; }
+.chip-btn:hover { background: var(--accent-soft); }
+.chip-static { border: 1px solid var(--line); padding: 3px 10px; border-radius: 20px; font-size: 12.5px; color: var(--ink-2); }
+.jh { font: 600 15px/1.3 var(--font-doc); margin: 18px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ev { display: grid; grid-template-columns: 6.5em 7.5em minmax(0, 1fr); gap: 8px; font-size: 13.5px; align-items: baseline; }
+.ev-d { font: 400 12px/1.5 var(--font-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ev-k { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.ev-t { overflow-wrap: anywhere; }
+.ev-reponse .ev-k, .ev-qualif .ev-k { color: var(--accent); }
+.ev-observation .ev-k, .ev-relance .ev-k { color: var(--st-deduit); }
+.lf.stale .qv { color: var(--danger); }
+.cp-head { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; }
+.cp-head h4 { flex: 1; min-width: 12em; }
+.cp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.cp-cell { background: var(--bg); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.cp-cell p { margin: 0; font-size: 13.5px; }
+.cp-l { font: 500 11px/1.4 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-top: 6px; }
+.copilot ul, .copilot ol { margin: 2px 0 4px; padding-left: 20px; font-size: 14px; }
+.dots5 { display: inline-flex; gap: 3px; margin-right: 8px; vertical-align: middle; }
+.dots5 i { width: 14px; height: 6px; border-radius: 3px; background: var(--surface-2); }
+.dots5 i.on { background: var(--accent); }
+.traj { font-weight: 600; font-size: 13.5px; }
+.traj-A { color: var(--st-confirme); } .traj-B { color: var(--st-declare); } .traj-C { color: var(--st-deduit); }
+.chain { font-style: italic; color: var(--ink-2); }
+.nudge-item { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 4px; }
+.nudge-item p { margin: 0; }
+.ni-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mail { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.mail-h { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 12px; background: var(--surface-2); font-size: 13px; }
+.mail pre { margin: 0; padding: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.5 var(--font-ui); }
+.mx-wrap { overflow-x: auto; }
+.mx-wrap svg { width: 100%; max-width: 640px; height: auto; display: block; }
+.mx-grid { stroke: var(--line); stroke-width: 1; }
+.mx-mid { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 4 4; }
+.mx-tick { fill: var(--ink-3); font: 11px var(--font-mono); }
+.mx-axis { fill: var(--ink-2); font: 600 12px var(--font-ui); }
+.mx-quad { fill: var(--ink-3); font: 500 12px var(--font-ui); }
+.mx-pt circle { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.mx-pt text { fill: var(--accent-ink); font: 600 11px var(--font-mono); pointer-events: none; }
+.mx-pt:hover circle, .mx-pt:focus circle { stroke: var(--ink); }
+.mx-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.mx-table th { text-align: left; font-weight: 600; color: var(--ink-3); font-size: 12px; border-bottom: 1px solid var(--line); padding: 4px 6px; }
+.mx-table td { border-bottom: 1px solid var(--line); padding: 5px 6px; }
+.mic.rec { background: var(--danger); color: #fff; border-color: var(--danger); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: min(92vw, 560px); z-index: 20; box-shadow: 0 8px 30px rgb(0 0 0 / .25); }
+@media (max-width: 600px) { .ev { grid-template-columns: 1fr; gap: 0; } }
 .notice { margin: 0 20px 10px; font-size: 13px; color: var(--ink-2); background: var(--surface-2); padding: 8px 12px; border-radius: 8px; }
 
 @media (max-width: 900px) {
@@ -284,6 +365,7 @@ main { flex: 1; min-height: 0; }
     </div>
     <nav class="tabs" role="tablist" aria-label="Vues">
       <button id="tab-capture" role="tab" aria-selected="true" aria-controls="view-capture">Exprimer un besoin</button>
+      <button id="tab-mine" role="tab" aria-selected="false" aria-controls="view-mine" hidden>Mes besoins <span class="count" id="mine-count" hidden>0</span></button>
       <button id="tab-dsi" role="tab" aria-selected="false" aria-controls="view-dsi">File DSI <span class="count" id="queue-count" hidden>0</span></button>
     </nav>
   </header>
@@ -314,6 +396,7 @@ main { flex: 1; min-height: 0; }
               <div class="row">
                 <button type="button" class="btn-icon" id="attach" hidden title="Joindre une photo (tableau blanc, capture Excel, document)">Joindre une photo</button>
                 <input type="file" id="file" accept="image/*" hidden>
+                <button type="button" class="btn-icon mic" data-mic="msg" hidden>Dicter</button>
                 <span class="hint" id="composer-hint">Entrée pour envoyer · Maj+Entrée pour un retour à la ligne</span>
                 <button type="button" class="btn-ghost" id="stop" hidden>Arrêter</button>
                 <button type="submit" class="btn-primary" id="send">Envoyer</button>
@@ -349,6 +432,20 @@ main { flex: 1; min-height: 0; }
       </div>
     </section>
 
+    <section id="view-mine" class="view dsi" role="tabpanel" aria-labelledby="tab-mine" hidden>
+      <div class="dsi-inner">
+        <div class="dsi-head">
+          <h2>Mes besoins</h2>
+          <p>Vos besoins restent vivants après l'envoi. L'agent vous pose une question quand une information vieillit, vous soumet ce qu'il observe sur le terrain, et vous pouvez donner des nouvelles en une phrase, écrite ou dictée.</p>
+        </div>
+        <div class="seg-inline" id="mine-filter" role="group" aria-label="Filtre">
+          <button data-mine="mine" aria-pressed="true">Mes besoins</button>
+          <button data-mine="all" aria-pressed="false">Tous les besoins (démo)</button>
+        </div>
+        <div class="queue" id="mine-list"></div>
+      </div>
+    </section>
+
     <section id="view-dsi" class="view dsi" role="tabpanel" aria-labelledby="tab-dsi" hidden>
       <div class="dsi-inner">
         <div class="dsi-head">
@@ -356,6 +453,21 @@ main { flex: 1; min-height: 0; }
           <p>Les besoins validés par les métiers arrivent ici avec leur niveau de maturité, l'historique de l'échange et l'échéance de retour à 5 jours ouvrables.</p>
         </div>
         <div class="kpis" id="kpis"></div>
+        <div class="tools" id="dsi-tools" hidden>
+          <div class="tools-row">
+            <div class="tool-tabs" role="group" aria-label="Outils DSI">
+              <button data-tool="matrix" aria-pressed="false">Matrice valeur / faisabilité</button>
+              <button data-tool="nudges" aria-pressed="false">Relances</button>
+              <button data-tool="signal" aria-pressed="false">Signal terrain</button>
+              <button data-tool="email" aria-pressed="false">E-mail entrant</button>
+            </div>
+            <label class="clock" for="demo-clock">Horloge de démo
+              <select id="demo-clock"><option value="0">Aujourd'hui</option><option value="7">+7 jours</option><option value="30">+30 jours</option><option value="100">+100 jours</option></select>
+            </label>
+            <button class="btn-ghost" id="demo-reset">Vider la file de démo</button>
+          </div>
+          <div class="tool-panel" id="tool-panel" hidden></div>
+        </div>
         <div class="queue" id="queue"></div>
       </div>
     </section>
@@ -372,6 +484,8 @@ main { flex: 1; min-height: 0; }
     <div class="sheet-f" id="modal-foot"></div>
   </div>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <div class="modal" id="gate" hidden>
   <form class="sheet gate" id="gate-form" role="dialog" aria-modal="true" aria-labelledby="gate-title">
@@ -484,7 +598,7 @@ FORMAT DE RÉPONSE : uniquement un objet JSON, avec "message" en premier :
 
 /* ================= State ================= */
 const KEY = "intake-draft-v1";
-const fresh = () => ({ fiche: {}, turns: [], alertes: [], suggestions: [], pret: false, titre: "", submitted: null });
+const fresh = () => ({ fiche: {}, turns: [], alertes: [], suggestions: [], pret: false, titre: "", submitted: null, remoteId: null });
 function loadState() {
   try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); return s && s.fiche && Array.isArray(s.turns) ? s : null; } catch { return null; }
 }
@@ -520,6 +634,10 @@ const hasVal = v => Array.isArray(v) ? v.length > 0 : typeof v === "string" && v
 const valText = v => Array.isArray(v) ? v.join(", ") : String(v ?? "");
 const statutOf = k => (state.fiche[k] && hasVal(state.fiche[k].valeur)) ? (state.fiche[k].statut || "déclaré") : "vide";
 const fmtDate = d => new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+let demoOffsetDays = 0;
+try { demoOffsetDays = +localStorage.getItem("intake-demo-offset") || 0; } catch {}
+const nowMs = () => Date.now() + demoOffsetDays * 864e5;
+const nowIso = () => new Date(nowMs()).toISOString();
 function addBusinessDays(date, n) {
   const r = new Date(date); let added = 0;
   while (added < n) { r.setDate(r.getDate() + 1); const w = r.getDay(); if (w !== 0 && w !== 6) added++; }
@@ -614,7 +732,7 @@ function editorHTML(f, e) {
 $("#fiche-body").addEventListener("click", ev => {
   const b = ev.target.closest("button[data-act]"); if (!b) return;
   const k = b.dataset.k, act = b.dataset.act;
-  if (act === "confirm") { state.fiche[k] = { ...state.fiche[k], statut: "confirmé", maj: Date.now() }; flashKeys.add(k); }
+  if (act === "confirm") { state.fiche[k] = { ...state.fiche[k], statut: "confirmé", maj: nowIso() }; flashKeys.add(k); }
   else if (act === "edit") { editing = k; renderFiche(); const el = document.getElementById("edit-" + k) || document.getElementById("edit-res-0"); el?.focus(); return; }
   else if (act === "cancel") { editing = null; }
   else if (act === "save") {
@@ -623,7 +741,7 @@ $("#fiche-body").addEventListener("click", ev => {
       v = RESULTATS.filter((_, i) => document.getElementById("edit-res-" + i).checked);
       const a = document.getElementById("edit-res-autre").value.trim(); if (a) v.push("Autre : " + a);
     } else v = document.getElementById("edit-" + k).value.trim();
-    if (hasVal(v)) state.fiche[k] = { valeur: v, statut: "confirmé", note: "Saisi par vous", maj: Date.now() };
+    if (hasVal(v)) state.fiche[k] = { valeur: v, statut: "confirmé", note: "Saisi par vous", maj: nowIso() };
     else delete state.fiche[k];
     editing = null; flashKeys.add(k);
   }
@@ -714,7 +832,7 @@ function compactFiche() {
   for (const f of FIELDS) { const e = state.fiche[f.k]; o[f.k] = e && hasVal(e.valeur) ? { valeur: e.valeur, statut: e.statut } : null; }
   return JSON.stringify(o, null, 1);
 }
-const contextLine = () => `CONTEXTE : date du jour ${fmtDate(Date.now())}.${profileName ? ` Nom de l'utilisateur d'après son profil : ${profileName}.` : ""}`;
+const contextLine = () => `CONTEXTE : date du jour ${fmtDate(nowMs())}.${profileName ? ` Nom de l'utilisateur d'après son profil : ${profileName}.` : ""}`;
 function historyTurns() {
   const history = state.turns.slice(0, -1).filter(t => !t.error).slice(-16).map(t => ({
     role: t.role, content: t.role === "user" ? t.content + (t.image ? `\n[Photo jointe : ${t.image}]` : "") : t.content,
@@ -761,6 +879,10 @@ function fileToJpeg(file) {
 async function webAsk(text, file, signal, onText) {
   const body = { context: contextLine(), history: historyTurns(), message: nowContent(text, file) };
   if (file) body.image = await fileToJpeg(file);
+  return postAgent(body, signal, onText);
+}
+const askAgent = (mode, input, onText, signal) => postAgent({ mode, input }, signal, onText || (() => {}));
+async function postAgent(body, signal, onText) {
   let r;
   try { r = await fetch("/api/agent", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body), signal }); }
   catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "upstream_error" }; }
@@ -800,14 +922,18 @@ const webDownloads = {
     return { status: "saved" };
   },
 };
-let webQueueTimer = null, webQueueOk = false;
+let webQueueTimer = null, webQueueOk = false, lastQueueSig = "";
 async function refreshWebQueue() {
   try {
     const r = await fetch("/api/fiches", { headers: apiHeaders() });
     if (r.status === 401) { showGate(); return; }
     if (!r.ok) return;
     const j = await r.json();
-    queue = Array.isArray(j.items) ? j.items : [];
+    const items = Array.isArray(j.items) ? j.items : [];
+    const sig = JSON.stringify(items);
+    if (webQueueOk && sig === lastQueueSig) return;
+    lastQueueSig = sig;
+    queue = items;
     webQueueOk = true;
     renderQueue();
   } catch {}
@@ -922,7 +1048,7 @@ function applyAgent(res) {
     const cur = state.fiche[k];
     if (cur && cur.statut === "confirmé" && st === "déduit") continue; // never overwrite what the user validated with a guess
     if (cur && valText(cur.valeur) === valText(v) && cur.statut === st) continue;
-    state.fiche[k] = { valeur: v, statut: st, note: typeof u.note === "string" ? u.note : "", maj: Date.now() };
+    state.fiche[k] = { valeur: v, statut: st, note: typeof u.note === "string" ? u.note : "", maj: nowIso() };
     changed.push(SHORT[k]);
     flashKeys.add(k);
   }
@@ -1030,24 +1156,27 @@ async function submitFiche() {
   const btn = $("#submit"), box = $("#submit-msg");
   if (!db && MODE !== "web") { box.innerHTML = `<div class="errbox">La transmission n'est pas disponible dans cette vue. Téléchargez la fiche et envoyez-la à la DSI & TD.</div>`; return; }
   btn.disabled = true; btn.textContent = "Transmission…";
-  const at = new Date();
+  const at = new Date(nowMs());
   const echeance = addBusinessDays(at, 5);
   const fiche = {};
-  for (const f of FIELDS) { const e = state.fiche[f.k]; if (e && hasVal(e.valeur)) fiche[f.k] = { valeur: e.valeur, statut: e.statut, note: e.note || "" }; }
+  for (const f of FIELDS) { const e = state.fiche[f.k]; if (e && hasVal(e.valeur)) fiche[f.k] = { valeur: e.valeur, statut: e.statut, note: e.note || "", maj: e.maj || nowIso() }; }
   const doc = {
     titre: state.titre || "Besoin sans titre",
     fiche, score: scoreOf(state.fiche), pret: state.pret, alertes: state.alertes,
     statut: "À qualifier", submittedAt: at.toISOString(), echeance: echeance.toISOString(),
-    submitter: uid || null, echanges: state.turns.filter(t => t.role === "user").length,
+    submitter: uid || null, echanges: state.turns.filter(t => t.role === "user").length, origine: state.remoteId ? "e-mail" : "web",
     transcript: state.turns.filter(t => !t.error).slice(-40).map(t => ({ role: t.role, content: String(t.content).slice(0, 2000) })),
   };
   try {
     let id;
     if (MODE === "web") {
-      const r = await fetch("/api/fiches", { method: "POST", headers: apiHeaders(), body: JSON.stringify(doc) });
+      const r = state.remoteId
+        ? await fetch("/api/fiches/" + encodeURIComponent(state.remoteId), { method: "PATCH", headers: apiHeaders(), body: JSON.stringify({ op: "submit", doc, at: doc.submittedAt }) })
+        : await fetch("/api/fiches", { method: "POST", headers: apiHeaders(), body: JSON.stringify(doc) });
       if (r.status === 401) { showGate(); throw { code: "needs_code" }; }
       if (!r.ok) throw { code: "unavailable" };
-      id = (await r.json()).id;
+      id = state.remoteId || (await r.json()).id;
+      addMine(id);
       refreshWebQueue();
     } else id = (await db.collection("fiches").add(doc)).id;
     state.submitted = { id, at: doc.submittedAt, echeance: doc.echeance };
@@ -1083,12 +1212,15 @@ $("#reset").addEventListener("click", () => {
 
 /* ================= Tabs & mobile panes ================= */
 function showTab(which) {
-  const cap = which === "capture";
-  $("#tab-capture").setAttribute("aria-selected", cap); $("#tab-dsi").setAttribute("aria-selected", !cap);
-  $("#view-capture").hidden = !cap; $("#view-dsi").hidden = cap;
-  if (!cap) renderQueue();
+  for (const t of ["capture", "mine", "dsi"]) {
+    $("#tab-" + t).setAttribute("aria-selected", t === which);
+    $("#view-" + t).hidden = t !== which;
+  }
+  if (which === "dsi") renderQueue();
+  if (which === "mine") renderMine();
 }
 $("#tab-capture").addEventListener("click", () => showTab("capture"));
+$("#tab-mine").addEventListener("click", () => showTab("mine"));
 $("#tab-dsi").addEventListener("click", () => showTab("dsi"));
 function showPane(p) {
   $("#panes").classList.toggle("show-fiche", p === "fiche");
@@ -1101,40 +1233,51 @@ $("#seg-fiche").addEventListener("click", () => showPane("fiche"));
 function renderQueue() {
   const el = $("#queue"), k = $("#kpis");
   const cnt = $("#queue-count");
-  const open = queue.filter(q => !["Clos", "Réorienté", "Qualifié — à instruire"].includes(q.statut));
+  const recus = queue.filter(q => q.statut !== "Brouillon");
+  const open = recus.filter(q => !["Clos", "Réorienté", "Qualifié — à instruire"].includes(q.statut));
   cnt.hidden = !open.length; cnt.textContent = open.length;
+  renderMineCount();
+  if (!$("#view-mine").hidden) renderMine();
   if ($("#view-dsi").hidden) return;
-  const now = Date.now();
+  const now = nowMs();
   const late = open.filter(q => q.echeance && new Date(q.echeance).getTime() < now).length;
-  const avg = queue.length ? Math.round(queue.reduce((a, q) => a + (q.score || 0), 0) / queue.length) : 0;
-  const ready = queue.filter(q => q.pret).length;
+  const avg = recus.length ? Math.round(recus.reduce((a, q) => a + (q.score || 0), 0) / recus.length) : 0;
+  const ready = recus.filter(q => q.pret).length;
+  const drafts = queue.length - recus.length;
+  const pend = queue.reduce((a, q) => a + (q.pending || []).length, 0);
+  const stale = recus.filter(q => staleFields(q).length).length;
   k.innerHTML = [
-    ["Besoins reçus", queue.length, ""],
+    ["Besoins reçus", recus.length, ""],
     ["En attente de retour", open.length, ""],
     ["Délai de 5 jours dépassé", late, late ? "bad" : ""],
-    ["Maturité moyenne", queue.length ? avg + " %" : "—", ""],
-    ["Jugés prêts par l'agent", ready, ""],
+    ["Maturité moyenne", recus.length ? avg + " %" : "—", ""],
+    ...(MODE === "web" ? [
+      ["Brouillons reçus par e-mail", drafts, ""],
+      ["Fiches avec infos à revalider", stale, stale ? "bad" : ""],
+      ["Mises à jour en attente du métier", pend, ""],
+    ] : [["Jugés prêts par l'agent", ready, ""]]),
   ].map(([l, v, c]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${c}">${v}</div></div>`).join("");
 
   if (!db && MODE !== "web") { el.innerHTML = `<div class="empty-state"><h3>File indisponible dans cette vue</h3><p>Ouvrez cette page dans claude.ai, connecté, pour voir les besoins transmis.</p></div>`; return; }
   if (MODE === "web" && !webQueueOk) { el.innerHTML = `<div class="empty-state"><h3>Chargement de la file…</h3><p>Si rien n'apparaît, vérifiez le code d'accès de la démo.</p></div>`; return; }
   if (!queue.length) { el.innerHTML = `<div class="empty-state"><h3>Aucun besoin transmis pour l'instant</h3><p>Dès qu'un collaborateur valide sa fiche dans l'onglet « Exprimer un besoin », elle arrive ici avec son niveau de maturité et l'échéance de retour.</p></div>`; return; }
 
-  el.innerHTML = queue.map(q => {
+  preserveInputs(el, () => { el.innerHTML = queue.map(q => {
     const d = q.echeance ? businessDaysBetween(now, q.echeance) : null;
-    const closed = !open.includes(q);
+    const draft = q.statut === "Brouillon";
+    const closed = !draft && !open.includes(q);
     const dueCls = closed ? "" : d < 0 ? "late" : d <= 1 ? "soon" : "";
-    const dueTxt = closed ? "Traité" : d === null ? "—" : d < 0 ? `En retard de ${-d} j ouvré${-d > 1 ? "s" : ""}` : d === 0 ? "Échéance aujourd'hui" : `J-${d} ouvré${d > 1 ? "s" : ""}`;
+    const dueTxt = draft ? "Brouillon e-mail : attend le métier" : closed ? "Traité" : d === null ? "—" : d < 0 ? `En retard de ${-d} j ouvré${-d > 1 ? "s" : ""}` : d === 0 ? "Échéance aujourd'hui" : `J-${d} ouvré${d > 1 ? "s" : ""}`;
     const f = q.fiche || {};
     const statusCtl = canEditQueue
-      ? `<select class="status-sel" data-status="${esc(q.id)}" aria-label="Statut">${QUEUE_STATUTS.map(s => `<option${s === q.statut ? " selected" : ""}>${esc(s)}</option>`).join("")}</select>`
+      ? `<select class="status-sel" data-status="${esc(q.id)}" aria-label="Statut">${(draft ? ["Brouillon", ...QUEUE_STATUTS] : QUEUE_STATUTS).map(s => `<option${s === q.statut ? " selected" : ""}>${esc(s)}</option>`).join("")}</select>`
       : `<span class="status-chip">${esc(q.statut || "À qualifier")}</span>`;
     const isOpen = openCards.has(q.id);
     return `<article class="card">
       <div class="card-h">
         <button class="open" data-open="${esc(q.id)}" aria-expanded="${isOpen}">
           <span class="ttl">${esc(q.titre || "Besoin sans titre")}</span>
-          <span class="meta"><span>${esc(valText(f.direction?.valeur) || "Direction non précisée")}</span><span>${esc(valText(f.urgence?.valeur) || "Urgence non précisée")}</span><span>Reçu le ${q.submittedAt ? fmtDate(q.submittedAt) : "—"}</span><span>${q.echanges || 0} échange${(q.echanges || 0) > 1 ? "s" : ""}</span></span>
+          <span class="meta">${q.origine === "e-mail" ? `<span class="tag">e-mail</span>` : ""}${q.qualif ? `<span class="tag">V${q.qualif.valeur?.note ?? "?"} · F${q.qualif.faisabilite?.note ?? "?"} · ${esc(q.qualif.trajectoire?.code || "?")}</span>` : ""}${(q.pending || []).length ? `<span class="tag warn">${q.pending.length} màj en attente</span>` : ""}${staleFields(q).length ? `<span class="tag warn">${staleFields(q).length} à revalider</span>` : ""}<span>${esc(valText(f.direction?.valeur) || "Direction non précisée")}</span><span>${esc(valText(f.urgence?.valeur) || "Urgence non précisée")}</span><span>Reçu le ${q.submittedAt ? fmtDate(q.submittedAt) : "—"}</span><span>${q.echanges || 0} échange${(q.echanges || 0) > 1 ? "s" : ""}</span></span>
         </button>
         <div class="right"><span class="score">${q.score ?? 0} %</span><span class="due ${dueCls}">${dueTxt}</span>${statusCtl}</div>
       </div>
@@ -1142,9 +1285,10 @@ function renderQueue() {
         ${(q.alertes || []).length ? `<details open><summary>Points signalés par l'agent (${q.alertes.length})</summary><ul>${q.alertes.map(a => `<li><b>${esc(a.type)}</b> : ${esc(a.texte)}</li>`).join("")}</ul></details>` : ""}
         <details><summary>Historique de l'échange (${(q.transcript || []).length} messages)</summary><div class="transcript">${(q.transcript || []).map(t => `<div class="${t.role === "user" ? "u" : ""}"><b>${t.role === "user" ? "Métier" : "Agent"}</b>${esc(t.content)}</div>`).join("")}</div></details>
         ${downloads ? `<p><button class="btn-ghost" data-dl="${esc(q.id)}">Télécharger la fiche (Word)</button></p>` : ""}
+        ${MODE === "web" ? dsiLivingHTML(q) : ""}
       </div>` : ""}
     </article>`;
-  }).join("");
+  }).join(""); });
 }
 $("#queue").addEventListener("click", ev => {
   const o = ev.target.closest("[data-open]");
@@ -1157,7 +1301,7 @@ $("#queue").addEventListener("change", async ev => {
   s.disabled = true;
   try {
     if (MODE === "web") {
-      const r = await fetch("/api/fiches/" + encodeURIComponent(s.dataset.status), { method: "PATCH", headers: apiHeaders(), body: JSON.stringify({ statut: s.value }) });
+      const r = await fetch("/api/fiches/" + encodeURIComponent(s.dataset.status), { method: "PATCH", headers: apiHeaders(), body: JSON.stringify({ op: "statut", statut: s.value, at: nowIso() }) });
       if (!r.ok) throw new Error("status " + r.status);
       refreshWebQueue();
     } else await db.doc("fiches/" + s.dataset.status).update({ statut: s.value, statutMaj: new Date().toISOString() });
@@ -1166,10 +1310,553 @@ $("#queue").addEventListener("change", async ev => {
   finally { s.disabled = false; }
 });
 
+/* ================= Living fiche, DSI copilot, voice, e-mail (website mode) ================= */
+function preserveInputs(container, render) {
+  const vals = {};
+  container.querySelectorAll("textarea[id], input[id]").forEach(e => { vals[e.id] = e.type === "checkbox" ? e.checked : e.value; });
+  const active = document.activeElement && document.activeElement.id;
+  render();
+  for (const [id, v] of Object.entries(vals)) {
+    const e = document.getElementById(id); if (!e) continue;
+    if (e.type === "checkbox") e.checked = v; else if (e.value !== v) e.value = v;
+  }
+  if (active) { const e = document.getElementById(active); if (e && container.contains(e)) e.focus(); }
+}
+const TTL = { direction: 365, responsable: 365, urgence: 60, probleme: 240, processus: 180, cout: 90, decision: 240, resultats: 240, donnees_existantes: 180, donnees_manquantes: 180, contraintes: 180, budget: 120, similaires: 120 };
+const toMs = v => typeof v === "number" ? v : (Date.parse(v || "") || null);
+const ageDays = e => { const m = toMs(e && e.maj); return m ? Math.max(0, Math.floor((nowMs() - m) / 864e5)) : null; };
+const isStale = (k, e) => { const a = ageDays(e); return a !== null && a > (TTL[k] || 180); };
+const agoTxt = d => d === null ? "" : d === 0 ? "aujourd'hui" : d === 1 ? "hier" : `il y a ${d} j`;
+const fmtDateTime = d => { const t = toMs(d); return t ? new Date(t).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }) + " " + new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "—"; };
+const filled = (q, k) => q.fiche && q.fiche[k] && hasVal(q.fiche[k].valeur);
+function staleFields(q) { return FIELDS.filter(f => filled(q, f.k) && isStale(f.k, q.fiche[f.k])).map(f => f.k); }
+function deduitFields(q) { return FIELDS.filter(f => filled(q, f.k) && q.fiche[f.k].statut === "déduit").map(f => f.k); }
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 4500); }
+async function patchFiche(id, body) {
+  const r = await fetch("/api/fiches/" + encodeURIComponent(id), { method: "PATCH", headers: apiHeaders(), body: JSON.stringify({ at: nowIso(), ...body }) });
+  if (r.status === 401) { showGate(); throw new Error("code"); }
+  if (!r.ok) throw new Error("status " + r.status);
+  const doc = await r.json();
+  const i = queue.findIndex(q => q.id === id);
+  if (i >= 0) queue[i] = doc; else queue.unshift(doc);
+  renderQueue();
+  return doc;
+}
+function ficheForAgent(q) {
+  const o = {};
+  for (const f of FIELDS) {
+    const e = q.fiche && q.fiche[f.k];
+    o[f.k] = e && hasVal(e.valeur) ? { valeur: e.valeur, statut: e.statut, anciennete_jours: ageDays(e), perime: isStale(f.k, e) } : null;
+  }
+  return JSON.stringify(o, null, 1);
+}
+const shortSummary = q => `- id ${q.id} · « ${q.titre || "Sans titre"} » (${valText(q.fiche?.direction?.valeur) || "direction ?"}, statut ${q.statut}) : ${valText(q.fiche?.probleme?.valeur).slice(0, 260)}${q.fiche?.processus ? " | Processus : " + valText(q.fiche.processus.valeur).slice(0, 160) : ""}`;
+
+/* ---- mine ---- */
+const MINE_KEY = "intake-mine";
+let mineFilter = "mine";
+const openMine = new Set();
+function mineIds() { try { const a = JSON.parse(localStorage.getItem(MINE_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch { return []; } }
+function addMine(id) { const a = mineIds().filter(x => x !== id); a.unshift(id); try { localStorage.setItem(MINE_KEY, JSON.stringify(a.slice(0, 50))); } catch {} }
+function mineItems() {
+  if (mineFilter === "all") return queue;
+  const ids = mineIds();
+  return ids.map(id => queue.find(q => q.id === id)).filter(Boolean);
+}
+const needsAction = q => !!q.nudge || (q.pending || []).length > 0 || q.statut === "Brouillon" || staleFields(q).length > 0;
+function renderMineCount() {
+  if (MODE !== "web") return;
+  const n = mineIds().map(id => queue.find(q => q.id === id)).filter(q => q && needsAction(q)).length;
+  const c = $("#mine-count"); c.hidden = !n; c.textContent = n;
+}
+$("#mine-filter").addEventListener("click", e => {
+  const b = e.target.closest("[data-mine]"); if (!b) return;
+  mineFilter = b.dataset.mine;
+  for (const x of $("#mine-filter").querySelectorAll("button")) x.setAttribute("aria-pressed", x === b);
+  renderMine();
+});
+function renderMine() {
+  if (MODE !== "web") return;
+  const el = $("#mine-list");
+  if (!webQueueOk) { el.innerHTML = `<div class="empty-state"><h3>Chargement…</h3><p>Si rien n'apparaît, vérifiez le code d'accès de la démo.</p></div>`; return; }
+  const items = mineItems();
+  if (!items.length) {
+    el.innerHTML = `<div class="empty-state"><h3>Aucun besoin suivi depuis ce navigateur</h3><p>Les besoins que vous transmettez apparaissent ici. Pour la démo, affichez « Tous les besoins ».</p></div>`;
+    return;
+  }
+  preserveInputs(el, () => { el.innerHTML = items.map(q => {
+    const st = staleFields(q).length, pd = (q.pending || []).length, draft = q.statut === "Brouillon";
+    const badges = [
+      draft ? `<span class="tag warn">Brouillon à compléter</span>` : "",
+      q.nudge ? `<span class="tag accent">1 question de l'agent</span>` : "",
+      pd ? `<span class="tag warn">${pd} mise${pd > 1 ? "s" : ""} à jour à valider</span>` : "",
+      st ? `<span class="tag warn">${st} info${st > 1 ? "s" : ""} à revalider</span>` : "",
+      (q.events || []).some(e => e.type === "reponse") ? `<span class="tag ok">Réponse de la DSI</span>` : "",
+    ].join("");
+    const isOpen = openMine.has(q.id);
+    return `<article class="card">
+      <div class="card-h">
+        <button class="open" data-mopen="${esc(q.id)}" aria-expanded="${isOpen}">
+          <span class="ttl">${esc(q.titre || "Besoin sans titre")}</span>
+          <span class="meta">${badges}<span>Statut DSI : ${esc(q.statut)}</span><span>Maturité ${q.score ?? 0} %</span></span>
+        </button>
+      </div>
+      ${isOpen ? `<div class="card-b">${metierLivingHTML(q)}</div>` : ""}
+    </article>`;
+  }).join(""); });
+}
+function livingFieldsHTML(q) {
+  return SECTIONS.map(sec => `<h5><span class="n">${sec.n}</span>${esc(sec.titre)}</h5>` + sec.fields.map(f => {
+    const e = q.fiche && q.fiche[f.k];
+    const st = e && hasVal(e.valeur) ? (e.statut || "déclaré") : "vide", S = STATUTS[st];
+    const stale = st !== "vide" && isStale(f.k, e);
+    return `<div class="q lf${stale ? " stale" : ""}"><div class="ql">${esc(f.label)} <span class="pill ${S.cls}">${S.label}</span>${stale ? `<span class="pill st-stale">À revalider</span>` : ""}</div>
+      <div class="qv${st === "vide" ? " empty" : ""}">${st === "vide" ? "Non renseigné" : esc(valText(e.valeur))}</div>
+      ${st !== "vide" ? `<div class="f-note">Mis à jour ${agoTxt(ageDays(e))}${e.source ? ` · source : ${esc(e.source)}` : ""}</div>` : ""}</div>`;
+  }).join("")).join("");
+}
+const EV_LABEL = { transmise: "Transmission", capture: "Capture", agent: "Agent", statut: "Statut DSI", maj: "Mise à jour", observation: "Observation", refus: "Refus", qualif: "Copilote", relance: "Relance", reponse: "Réponse DSI", note: "Note" };
+function journalHTML(q) {
+  const ev = (q.events || []).slice().reverse();
+  if (!ev.length) return `<p class="muted">Aucun événement pour l'instant.</p>`;
+  return `<ol class="timeline">${ev.map(e => `<li class="ev ev-${esc(e.type)}"><span class="ev-d">${fmtDateTime(e.at)}</span><span class="ev-k">${esc(EV_LABEL[e.type] || e.type)}</span><span class="ev-t">${esc(e.text)}${(e.fields || []).length ? ` <span class="muted">(${e.fields.map(k => SHORT[k] || k).join(", ")})</span>` : ""}</span></li>`).join("")}</ol>`;
+}
+function pendingHTML(q, role) {
+  const p = q.pending || [];
+  if (!p.length) return "";
+  return `<section class="lv-block pending"><h4>Mises à jour observées sur le terrain · ${p.length}</h4>
+    ${p.map(x => `<label class="prop"><input type="checkbox" data-pend="${esc(x.id)}" ${role === "metier" ? "checked" : "disabled"}><span><b>${esc(SHORT[x.champ] || x.champ)}</b> → ${esc(valText(x.valeur))}<br><span class="muted">${esc(x.raison)}${x.source ? " · " + esc(x.source) : ""}</span></span></label>`).join("")}
+    ${role === "metier" ? `<div class="row-end"><button class="btn-ghost" data-act="pend-dismiss" data-id="${esc(q.id)}">Écarter la sélection</button><button class="btn-primary" data-act="pend-apply" data-id="${esc(q.id)}">Valider la sélection</button></div>` : `<p class="muted">En attente de validation par le porteur du besoin.</p>`}
+  </section>`;
+}
+function nudgeHTML(q, role) {
+  if (!q.nudge) return "";
+  if (role !== "metier") return `<section class="lv-block nudge"><h4>Relance en attente de réponse</h4><p>${esc(q.nudge.question)}</p></section>`;
+  return `<section class="lv-block nudge"><h4>L'agent a une question</h4><p>${esc(q.nudge.question)}</p>
+    <div class="chips">${(q.nudge.suggestions || []).map(s => `<button type="button" class="chip-btn" data-act="nudge-reply" data-id="${esc(q.id)}" data-text="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+    <p class="muted">Ou répondez avec vos mots dans « Donner des nouvelles » ci-dessous.</p></section>`;
+}
+function metierLivingHTML(q) {
+  const id = esc(q.id);
+  if (q.statut === "Brouillon") {
+    return `<div class="lv-block nudge"><h4>Brouillon créé à partir de votre e-mail</h4><p>L'agent a commencé la fiche à partir de votre message. Complétez-la avec lui en quelques échanges, puis transmettez-la.</p><div class="row-end"><button class="btn-primary" data-act="load-draft" data-id="${id}">Compléter avec l'agent</button></div></div>
+      ${livingFieldsHTML(q)}<h5>Journal</h5>${journalHTML(q)}`;
+  }
+  return `${nudgeHTML(q, "metier")}${pendingHTML(q, "metier")}
+    <section class="lv-block news"><h4>Donner des nouvelles</h4>
+      <p class="muted">Écrivez ou dictez ce qui a changé : volumes, organisation, délais, données, priorité… L'agent prépare la mise à jour, vous validez.</p>
+      <textarea id="news-${id}" rows="3" aria-label="Vos nouvelles"></textarea>
+      <div class="row-end"><button type="button" class="btn-icon mic" data-mic="news-${id}">Dicter</button><button class="btn-primary" data-act="news" data-id="${id}">Mettre à jour ma fiche</button></div>
+      <div id="upd-${id}">${updating.has(q.id) ? `<p class="thinking">L'agent analyse vos nouvelles<span class="dots"></span></p>` : updateProposalHTML(q.id)}</div>
+    </section>
+    <div class="doc">${livingFieldsHTML(q)}</div>
+    <h5 class="jh">Journal du besoin</h5>${journalHTML(q)}`;
+}
+
+/* ---- update flow (métier news / nudge answer) ---- */
+const pendingUpdates = new Map(), updating = new Set();
+async function runUpdate(q, text, opts = {}) {
+  updating.add(q.id);
+  const box = document.getElementById("upd-" + q.id);
+  if (box) box.innerHTML = `<p class="thinking">L'agent analyse vos nouvelles<span class="dots"></span></p>`;
+  try { await runUpdateInner(q, text, opts); } finally { updating.delete(q.id); }
+}
+async function runUpdateInner(q, text, opts) {
+  const input = `DATE DU JOUR : ${fmtDate(nowMs())}\nSOURCE : métier (le porteur du besoin parle)\n${q.nudge && opts.answeredNudge ? `QUESTION POSÉE PAR L'AGENT : ${q.nudge.question}\n` : ""}\nFICHE ACTUELLE « ${q.titre} » :\n${ficheForAgent(q)}\n\nNOUVELLE INFORMATION :\n${text}`;
+  try {
+    const res = await askAgent("update", input);
+    const props = (Array.isArray(res.propositions) ? res.propositions : []).filter(p => p && FMAP[p.champ]);
+    if (!props.length) {
+      await patchFiche(q.id, { op: "note", by: "métier", text: `${opts.answeredNudge ? "Réponse à la relance : " : "Nouvelles : "}${text}` });
+      if (opts.answeredNudge) await patchFiche(q.id, { op: "apply", changes: {}, answeredNudge: true, text: "Relance traitée.", source: "métier" });
+      toast(res.resume ? "Noté au journal : " + res.resume : "Noté au journal. Rien à changer dans la fiche.");
+      return;
+    }
+    pendingUpdates.set(q.id, { props, resume: res.resume || "Mise à jour par le porteur", text, answeredNudge: !!opts.answeredNudge });
+    const ta = document.getElementById("news-" + q.id); if (ta && !opts.answeredNudge) ta.value = "";
+    const b = document.getElementById("upd-" + q.id);
+    if (b) b.innerHTML = updateProposalHTML(q.id);
+    else toast("Propositions prêtes : ouvrez le besoin pour les valider.");
+  } catch (e) {
+    const b = document.getElementById("upd-" + q.id);
+    if (b) b.innerHTML = `<p class="errbox">${esc(ERR_COPY[e?.code] || "La mise à jour n'a pas abouti. Réessayez.")}</p>`;
+  }
+}
+function updateProposalHTML(id) {
+  const u = pendingUpdates.get(id); if (!u) return "";
+  return `<div class="proposal"><p><b>L'agent propose :</b> ${esc(u.resume)}</p>
+    ${u.props.map((p, i) => `<label class="prop"><input type="checkbox" data-upd="${i}" checked><span><b>${esc(SHORT[p.champ] || p.champ)}</b> → ${esc(valText(p.valeur))} <span class="pill ${STATUTS[p.statut]?.cls || "st-declare"}">${esc(STATUTS[p.statut]?.label || "Déclaré")}</span><br><span class="muted">${esc(p.raison || "")}</span></span></label>`).join("")}
+    <div class="row-end"><button class="btn-ghost" data-act="upd-cancel" data-id="${esc(id)}">Annuler</button><button class="btn-primary" data-act="upd-apply" data-id="${esc(id)}">Appliquer à ma fiche</button></div></div>`;
+}
+
+/* ---- DSI living view + copilot ---- */
+const copilotRunning = new Map();
+function dsiLivingHTML(q) {
+  return `${nudgeHTML(q, "dsi")}${pendingHTML(q, "dsi")}${copilotHTML(q)}<h5 class="jh">Journal du besoin</h5>${journalHTML(q)}`;
+}
+function scoreBar(n) {
+  if (n === null || n === undefined) return `<span class="muted">Non noté</span>`;
+  return `<span class="dots5" aria-label="${n} sur 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span><b class="mono">${n}/5</b>`;
+}
+function copilotHTML(q) {
+  const c = q.qualif, id = esc(q.id), run = copilotRunning.get(q.id);
+  const head = `<div class="cp-head"><h4>Copilote de qualification</h4><span class="tag">Proposition IA — à valider par la DSI</span>
+    <button class="btn-ghost" data-act="qualify" data-id="${id}" ${run ? "disabled" : ""}>${c ? "Relancer l'analyse" : "Analyser avec le copilote"}</button></div>`;
+  if (run) return `<section class="lv-block copilot">${head}<p class="thinking">Analyse en cours : valeur, faisabilité, bottleneck shift, besoins proches<span class="dots"></span></p></section>`;
+  if (!c) return `<section class="lv-block copilot">${head}<p class="muted">Le copilote propose un score Valeur / Faisabilité argumenté, une lecture « bottleneck shift », une trajectoire, les questions d'atelier, les besoins proches et un brouillon de réponse au porteur.</p></section>`;
+  const near = (c.besoins_proches || []).map(b => { const o = queue.find(x => x.id === b.id); return o ? `<li><b>${esc(o.titre)}</b> : ${esc(b.raison)}</li>` : ""; }).join("");
+  const traj = c.trajectoire || {};
+  return `<section class="lv-block copilot">${head}
+    <div class="cp-grid">
+      <div class="cp-cell"><div class="cp-l">Valeur</div>${scoreBar(c.valeur?.note)}<p>${esc(c.valeur?.justification || "")}</p></div>
+      <div class="cp-cell"><div class="cp-l">Faisabilité</div>${scoreBar(c.faisabilite?.note)}<p>${esc(c.faisabilite?.justification || "")}</p></div>
+      <div class="cp-cell"><div class="cp-l">Trajectoire proposée</div><span class="traj traj-${esc(traj.code || "x")}">${esc(traj.code || "?")} · ${esc(traj.libelle || "")}</span><p>${esc(traj.critere || "")}</p></div>
+      <div class="cp-cell"><div class="cp-l">Bottleneck shift</div><p><b>Aujourd'hui</b> (${esc(c.bottleneck_actuel?.categorie || "?")}) : ${esc(c.bottleneck_actuel?.description || "")}</p><p><b>Demain</b> (${esc(c.bottleneck_potentiel?.categorie || "?")}) : ${esc(c.bottleneck_potentiel?.description || "")}</p><p class="chain">${esc(c.chaine_second_ordre || "")}</p></div>
+    </div>
+    ${(c.prerequis || []).length ? `<div class="cp-l">Prérequis et risques</div><ul>${c.prerequis.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${(c.questions_atelier || []).length ? `<div class="cp-l">Questions pour l'atelier</div><ol>${c.questions_atelier.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
+    ${near ? `<div class="cp-l">Besoins proches (regroupement possible)</div><ul>${near}</ul>` : ""}
+    <div class="cp-l">Brouillon de réponse au porteur</div>
+    <textarea id="rep-${id}" rows="7" aria-label="Réponse au porteur">${esc(c.reponse_metier || "")}</textarea>
+    <div class="row-end"><button class="btn-primary" data-act="send-rep" data-id="${id}">Envoyer au porteur</button></div>
+  </section>`;
+}
+async function runQualify(q) {
+  copilotRunning.set(q.id, true); renderQueue();
+  const others = queue.filter(x => x.id !== q.id && x.statut !== "Brouillon").slice(0, 30).map(shortSummary).join("\n") || "(aucun)";
+  const tr = (q.transcript || []).slice(-8).map(t => `${t.role === "user" ? "Métier" : "Agent"} : ${String(t.content).slice(0, 600)}`).join("\n");
+  const input = `DATE DU JOUR : ${fmtDate(nowMs())}\n\nFICHE À QUALIFIER (id ${q.id}) — « ${q.titre} » :\n${ficheForAgent(q)}\n\nPOINTS SIGNALÉS PAR L'AGENT D'INTAKE :\n${(q.alertes || []).map(a => "- " + a.texte).join("\n") || "(aucun)"}\n\nEXTRAITS DE L'ÉCHANGE AVEC LE MÉTIER :\n${tr || "(aucun)"}\n\nJOURNAL :\n${(q.events || []).slice(-10).map(e => `- ${fmtDate(e.at)} ${e.text}`).join("\n")}\n\nAUTRES BESOINS DU PORTEFEUILLE :\n${others}`;
+  try {
+    const res = await askAgent("qualify", input);
+    if (!res || typeof res !== "object" || !res.valeur) throw { code: "invalid_json" };
+    copilotRunning.delete(q.id);
+    await patchFiche(q.id, { op: "qualif", qualif: res });
+  } catch (e) {
+    copilotRunning.delete(q.id); renderQueue();
+    toast(ERR_COPY[e?.code] || "L'analyse n'a pas abouti. Relancez-la.");
+  }
+}
+
+/* ---- delegated actions (Mes besoins + File DSI) ---- */
+async function onLivingClick(ev) {
+  const mo = ev.target.closest("[data-mopen]");
+  if (mo) { const id = mo.dataset.mopen; openMine.has(id) ? openMine.delete(id) : openMine.add(id); renderMine(); return; }
+  const b = ev.target.closest("[data-act]"); if (!b || !b.dataset.id) return;
+  const q = queue.find(x => x.id === b.dataset.id); if (!q) return;
+  const act = b.dataset.act;
+  try {
+    if (act === "news") {
+      const ta = document.getElementById("news-" + q.id); const t = ta.value.trim(); if (!t) { ta.focus(); return; }
+      b.disabled = true; await runUpdate(q, t); b.disabled = false;
+    } else if (act === "nudge-reply") {
+      openMine.add(q.id); await runUpdate(q, b.dataset.text, { answeredNudge: true });
+    } else if (act === "upd-cancel") {
+      pendingUpdates.delete(q.id); renderMine();
+    } else if (act === "upd-apply") {
+      const u = pendingUpdates.get(q.id); if (!u) return;
+      const box = document.getElementById("upd-" + q.id);
+      const keep = [...box.querySelectorAll("[data-upd]")].filter(x => x.checked).map(x => u.props[+x.dataset.upd]);
+      const changes = Object.fromEntries(keep.map(p => [p.champ, { valeur: p.valeur, statut: p.statut, note: p.raison }]));
+      b.disabled = true;
+      await patchFiche(q.id, { op: "apply", changes, text: `${u.answeredNudge ? "Réponse à la relance" : "Nouvelles du porteur"} : ${u.resume}`, source: "métier", answeredNudge: u.answeredNudge });
+      pendingUpdates.delete(q.id); renderMine(); toast("Fiche mise à jour.");
+    } else if (act === "pend-apply" || act === "pend-dismiss") {
+      const card = b.closest(".card");
+      const ids = [...card.querySelectorAll("[data-pend]")].filter(x => x.checked).map(x => x.dataset.pend);
+      if (!ids.length) return;
+      b.disabled = true;
+      if (act === "pend-apply") {
+        const changes = Object.fromEntries((q.pending || []).filter(p => ids.includes(p.id)).map(p => [p.champ, { valeur: p.valeur, statut: "confirmé", note: p.raison }]));
+        await patchFiche(q.id, { op: "apply", changes, pendingIds: ids, text: "Mises à jour observées validées par le porteur.", source: q.pending.find(p => ids.includes(p.id))?.source || "observation" });
+        toast("Mises à jour validées.");
+      } else { await patchFiche(q.id, { op: "dismiss", pendingIds: ids }); toast("Propositions écartées."); }
+    } else if (act === "load-draft") {
+      loadDraft(q);
+    } else if (act === "qualify") {
+      await runQualify(q);
+    } else if (act === "send-rep") {
+      const t = document.getElementById("rep-" + q.id).value.trim(); if (!t) return;
+      b.disabled = true; await patchFiche(q.id, { op: "reponse", text: t }); toast("Réponse ajoutée au journal du besoin, visible par le porteur.");
+    }
+  } catch { b.disabled = false; toast("L'opération n'a pas abouti. Réessayez."); }
+}
+$("#mine-list").addEventListener("click", onLivingClick);
+$("#queue").addEventListener("click", ev => { if (ev.target.closest("[data-act]")) onLivingClick(ev); });
+
+function loadDraft(q) {
+  state = fresh();
+  state.remoteId = q.id;
+  state.titre = q.titre || "";
+  for (const f of FIELDS) if (filled(q, f.k)) state.fiche[f.k] = { ...q.fiche[f.k] };
+  state.turns = (q.transcript || []).map(t => ({ role: t.role, content: t.content, ts: Date.now() }));
+  state.alertes = Array.isArray(q.alertes) ? q.alertes : [];
+  state.pret = !!q.pret;
+  addMine(q.id); saveState();
+  showTab("capture"); renderChat(); renderFiche();
+  toast("Brouillon chargé : poursuivez avec l'agent puis transmettez.");
+}
+
+/* ---- DSI tools ---- */
+let currentTool = null;
+$("#dsi-tools").addEventListener("click", e => {
+  const b = e.target.closest("[data-tool]"); if (!b) return;
+  currentTool = currentTool === b.dataset.tool ? null : b.dataset.tool;
+  for (const x of $("#dsi-tools").querySelectorAll("[data-tool]")) x.setAttribute("aria-pressed", x.dataset.tool === currentTool);
+  renderTool();
+});
+$("#demo-clock").addEventListener("change", e => {
+  demoOffsetDays = +e.target.value || 0;
+  try { localStorage.setItem("intake-demo-offset", String(demoOffsetDays)); } catch {}
+  toast(demoOffsetDays ? `Horloge de démo : ${fmtDate(nowMs())} (+${demoOffsetDays} j)` : "Horloge de démo : aujourd'hui");
+  renderQueue(); renderMine();
+});
+let resetTimer = null;
+$("#demo-reset").addEventListener("click", async e => {
+  const b = e.currentTarget;
+  if (!resetTimer) {
+    b.textContent = "Confirmer : supprimer toutes les fiches"; b.classList.add("warn");
+    resetTimer = setTimeout(() => { resetTimer = null; b.textContent = "Vider la file de démo"; b.classList.remove("warn"); }, 4000);
+    return;
+  }
+  clearTimeout(resetTimer); resetTimer = null; b.disabled = true;
+  try {
+    const r = await fetch("/api/fiches?all=1", { method: "DELETE", headers: apiHeaders() });
+    if (!r.ok) throw new Error("status " + r.status);
+    try { localStorage.removeItem(MINE_KEY); } catch {}
+    openCards.clear(); openMine.clear(); currentTool = null; renderTool();
+    for (const x of $("#dsi-tools").querySelectorAll("[data-tool]")) x.setAttribute("aria-pressed", "false");
+    await refreshWebQueue(); toast("File de démo vidée.");
+  } catch { toast("La remise à zéro n'a pas abouti."); }
+  finally { b.disabled = false; b.textContent = "Vider la file de démo"; b.classList.remove("warn"); }
+});
+function renderTool() {
+  const p = $("#tool-panel");
+  p.hidden = !currentTool;
+  if (!currentTool) { p.innerHTML = ""; return; }
+  if (currentTool === "matrix") p.innerHTML = matrixHTML();
+  if (currentTool === "nudges") p.innerHTML = `<div class="tp-head"><h4>Relances ciblées</h4><p class="muted">L'agent repère les informations non confirmées ou périmées, les propositions sans réponse et les délais DSI, puis rédige une question précise pour la bonne personne. Avancez l'horloge de démo pour voir les informations vieillir.</p><button class="btn-primary" id="run-nudges">Préparer les relances</button></div><div id="nudge-out"></div>`;
+  if (currentTool === "signal") p.innerHTML = `<div class="tp-head"><h4>Signal terrain</h4><p class="muted">Collez ce que la réalité dit : compte rendu de comité, ticket, mise à jour de projet, extrait de données. L'agent le rattache aux besoins concernés et propose les mises à jour, que chaque porteur valide.</p></div>
+    <div class="form-grid"><label>Type de source<select id="sig-type"><option>Compte rendu de réunion</option><option>Ticket ITSM</option><option>Mise à jour de projet (Planner)</option><option>Extrait de données SAP / BI</option><option>Note terrain</option></select></label></div>
+    <textarea id="sig-text" rows="6" aria-label="Signal"></textarea>
+    <div class="row-end"><button class="btn-ghost" id="sig-ex">Exemple</button><button type="button" class="btn-icon mic" data-mic="sig-text">Dicter</button><button class="btn-primary" id="sig-run">Analyser le signal</button></div><div id="sig-out"></div>`;
+  if (currentTool === "email") p.innerHTML = `<div class="tp-head"><h4>E-mail entrant</h4><p class="muted">En production, une adresse dédiée (par exemple besoins@votre-domaine) est reliée à un service d'e-mail entrant qui appelle <code>/api/inbound-email</code>. L'agent crée un brouillon de fiche et répond à l'expéditeur avec ses questions et un lien pour compléter. Ici, simulez la réception.</p></div>
+    <div class="form-grid"><label>De<input type="text" id="em-from" value=""></label><label>Nom<input type="text" id="em-name" value=""></label><label class="wide">Objet<input type="text" id="em-subject" value=""></label></div>
+    <textarea id="em-body" rows="7" aria-label="Corps de l'e-mail"></textarea>
+    <div class="row-end"><button class="btn-ghost" id="em-ex">Exemple</button><button class="btn-primary" id="em-run">Simuler la réception</button></div><div id="em-out"></div>`;
+}
+$("#tool-panel").addEventListener("click", async e => {
+  const t = e.target;
+  if (t.id === "sig-ex") {
+    $("#sig-type").value = "Compte rendu de réunion";
+    $("#sig-text").value = "Comité de préparation de campagne — 07/10\n- Amont Agricole : la campagne betteravière démarre le 15/04 ; volume attendu en hausse d'environ 20 % par rapport à l'an dernier.\n- Les pointeurs des centres de collecte saisissent toujours les tickets de pesée sur papier ; 2 saisisseurs intérimaires seront recrutés pour la campagne.\n- Maintenance sucrerie : 3 arrêts non planifiés des centrifugeuses en septembre, environ 6 h chacun ; l'historique d'interventions est dans SAP PM depuis 2021.\n- DSI : la migration SAP S/4HANA est confirmée pour mars, gel des développements SAP de février à avril.";
+    return;
+  }
+  if (t.id === "em-ex") {
+    $("#em-from").value = "k.benali@exemple.ma"; $("#em-name").value = "Karim Benali";
+    $("#em-subject").value = "Suivi des tournées de collecte";
+    $("#em-body").value = "Bonjour,\n\nPendant la campagne, nos chefs de zone appellent chaque matin les transporteurs pour savoir quels camions passent dans quels points de collecte. Tout est noté sur un tableau Excel partagé qui n'est jamais à jour, et on découvre trop tard les points saturés, ce qui fait attendre les agriculteurs plusieurs heures. Est-ce qu'un outil pourrait nous aider ?\n\nCordialement,\nKarim Benali\nChef de service Logistique amont";
+    return;
+  }
+  if (t.id === "run-nudges") return runNudges(t);
+  if (t.id === "sig-run") return runSignal(t);
+  if (t.id === "em-run") return runEmail(t);
+  const sn = t.closest("[data-send-nudge]");
+  if (sn) {
+    const n = lastNudges[+sn.dataset.sendNudge]; if (!n) return;
+    sn.disabled = true;
+    try {
+      if (n.destinataire === "DSI") await patchFiche(n.id, { op: "note", by: "agent", text: `Rappel DSI : ${n.question}` });
+      else await patchFiche(n.id, { op: "nudge", nudge: n });
+      sn.textContent = "Envoyé"; n.sent = true;
+    } catch { sn.disabled = false; toast("Envoi impossible. Réessayez."); }
+    return;
+  }
+  if (t.id === "send-all-nudges") {
+    t.disabled = true;
+    for (const [i, n] of lastNudges.entries()) { if (!n.sent) { const btn = document.querySelector(`[data-send-nudge="${i}"]`); if (btn) btn.click(); await new Promise(r => setTimeout(r, 250)); } }
+    return;
+  }
+  const sp = t.closest("[data-send-props]");
+  if (sp) {
+    const m = lastSignal[+sp.dataset.sendProps]; if (!m) return;
+    sp.disabled = true;
+    try { await patchFiche(m.id, { op: "propose", proposals: m.propositions, source: `observation : ${m.sourceType}`, text: `Signal « ${m.sourceType} » : ${m.resume}` }); sp.textContent = "Envoyé au porteur"; }
+    catch { sp.disabled = false; toast("Envoi impossible. Réessayez."); }
+    return;
+  }
+  const od = t.closest("[data-open-draft]");
+  if (od) { const q = queue.find(x => x.id === od.dataset.openDraft); if (q) loadDraft(q); }
+});
+let lastNudges = [], lastSignal = [];
+async function runNudges(btn) {
+  const out = $("#nudge-out");
+  const active = queue.filter(q => !["Clos", "Réorienté", "Brouillon"].includes(q.statut));
+  if (!active.length) { out.innerHTML = `<p class="muted">Aucun besoin actif.</p>`; return; }
+  btn.disabled = true; out.innerHTML = `<p class="thinking">L'agent passe en revue ${active.length} besoin${active.length > 1 ? "s" : ""}<span class="dots"></span></p>`;
+  const lines = active.map(q => {
+    const lastEv = (q.events || []).map(e => toMs(e.at)).filter(Boolean).sort().pop();
+    const dd = q.echeance ? businessDaysBetween(nowMs(), q.echeance) : null;
+    return JSON.stringify({
+      id: q.id, titre: q.titre, statut: q.statut, porteur: valText(q.fiche?.responsable?.valeur) || null,
+      jours_depuis_transmission: q.submittedAt ? Math.floor((nowMs() - toMs(q.submittedAt)) / 864e5) : null,
+      jours_depuis_dernier_evenement: lastEv ? Math.floor((nowMs() - lastEv) / 864e5) : null,
+      jours_ouvres_avant_echeance_dsi: dd,
+      hypotheses_non_confirmees: deduitFields(q).map(k => ({ champ: SHORT[k], valeur: valText(q.fiche[k].valeur) })),
+      informations_perimees: staleFields(q).map(k => ({ champ: SHORT[k], valeur: valText(q.fiche[k].valeur), anciennete_jours: ageDays(q.fiche[k]) })),
+      propositions_en_attente: (q.pending || []).length,
+      relance_en_attente: q.nudge ? q.nudge.question : null,
+      qualification: q.qualif ? `trajectoire ${q.qualif.trajectoire?.code || "?"}` : null,
+    });
+  }).join("\n");
+  try {
+    const res = await askAgent("nudge", `DATE DU JOUR : ${fmtDate(nowMs())}\n\nBESOINS SUIVIS (un JSON par ligne) :\n${lines}`);
+    lastNudges = (Array.isArray(res.relances) ? res.relances : []).filter(n => n && n.question && queue.find(q => q.id === n.id));
+    if (!lastNudges.length) { out.innerHTML = `<p class="okbox">Rien à relancer aujourd'hui : les informations sont confirmées et récentes.</p>`; return; }
+    out.innerHTML = `<div class="row-end"><button class="btn-ghost" id="send-all-nudges">Tout envoyer</button></div>` + lastNudges.map((n, i) => {
+      const q = queue.find(x => x.id === n.id);
+      return `<div class="nudge-item"><div class="ni-top"><span class="tag ${n.destinataire === "DSI" ? "warn" : "accent"}">Pour : ${esc(n.destinataire || "métier")}</span><b>${esc(q.titre)}</b></div>
+        <p class="muted">${esc(n.motif || "")}</p><p>${esc(n.question)}</p>
+        ${(n.suggestions || []).length ? `<div class="chips">${n.suggestions.map(s => `<span class="chip-static">${esc(s)}</span>`).join("")}</div>` : ""}
+        <div class="row-end"><button class="btn-primary" data-send-nudge="${i}">${n.destinataire === "DSI" ? "Noter au journal" : "Envoyer au porteur"}</button></div></div>`;
+    }).join("");
+  } catch (e) { out.innerHTML = `<p class="errbox">${esc(ERR_COPY[e?.code] || "La préparation des relances n'a pas abouti.")}</p>`; }
+  finally { btn.disabled = false; }
+}
+async function runSignal(btn) {
+  const text = $("#sig-text").value.trim(), type = $("#sig-type").value, out = $("#sig-out");
+  if (!text) { $("#sig-text").focus(); return; }
+  const active = queue.filter(q => !["Clos", "Réorienté"].includes(q.statut));
+  if (!active.length) { out.innerHTML = `<p class="muted">Aucun besoin suivi auquel rattacher ce signal.</p>`; return; }
+  btn.disabled = true; out.innerHTML = `<p class="thinking">L'agent rapproche le signal des besoins suivis<span class="dots"></span></p>`;
+  const list = active.map(q => `### id ${q.id} — « ${q.titre} »\n${ficheForAgent(q)}`).join("\n\n");
+  try {
+    const res = await askAgent("observe", `DATE DU JOUR : ${fmtDate(nowMs())}\nTYPE DE SOURCE : ${type}\n\nSIGNAL :\n${text}\n\nBESOINS SUIVIS :\n${list}`);
+    lastSignal = (Array.isArray(res.correspondances) ? res.correspondances : []).filter(m => m && queue.find(q => q.id === m.id)).map(m => ({ ...m, sourceType: type, propositions: (m.propositions || []).filter(p => p && FMAP[p.champ]) }));
+    out.innerHTML = (lastSignal.length ? lastSignal.map((m, i) => {
+      const q = queue.find(x => x.id === m.id);
+      return `<div class="nudge-item"><div class="ni-top"><span class="tag ${m.confiance === "forte" ? "ok" : "warn"}">Lien ${esc(m.confiance || "?")}</span><b>${esc(q.titre)}</b></div><p>${esc(m.resume || "")}</p>
+        ${m.propositions.map(p => `<p class="prop-line"><b>${esc(SHORT[p.champ] || p.champ)}</b> → ${esc(valText(p.valeur))}<br><span class="muted">${esc(p.raison || "")}</span></p>`).join("")}
+        ${m.propositions.length ? `<div class="row-end"><button class="btn-primary" data-send-props="${i}">Soumettre au porteur pour validation</button></div>` : ""}</div>`;
+    }).join("") : `<p class="muted">Aucun besoin suivi n'est clairement concerné par ce signal.</p>`)
+      + (res.non_rattache ? `<p class="muted">Non rattaché : ${esc(res.non_rattache)}</p>` : "");
+  } catch (e) { out.innerHTML = `<p class="errbox">${esc(ERR_COPY[e?.code] || "L'analyse du signal n'a pas abouti.")}</p>`; }
+  finally { btn.disabled = false; }
+}
+async function runEmail(btn) {
+  const out = $("#em-out");
+  const body = { from: $("#em-from").value.trim(), fromName: $("#em-name").value.trim(), subject: $("#em-subject").value.trim(), text: $("#em-body").value.trim() };
+  if (!body.from || !body.text) { out.innerHTML = `<p class="errbox">Renseignez au moins l'expéditeur et le corps de l'e-mail.</p>`; return; }
+  btn.disabled = true; out.innerHTML = `<p class="thinking">Réception, analyse par l'agent et préparation de la réponse<span class="dots"></span></p>`;
+  try {
+    const r = await fetch("/api/inbound-email", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body) });
+    if (r.status === 401) { showGate(); throw new Error("code"); }
+    if (!r.ok) throw new Error("status " + r.status);
+    const j = await r.json();
+    await refreshWebQueue();
+    out.innerHTML = `<div class="okbox">Brouillon créé : <b>${esc(j.titre)}</b> · maturité ${j.score} %.</div>
+      <div class="mail"><div class="mail-h"><span>À : ${esc(j.reply.to)}</span><span>Objet : ${esc(j.reply.subject)}</span><span class="muted">${j.reply.sent ? "Envoyé" : "Non envoyé : service d'envoi non configuré pour la démo"}</span></div><pre>${esc(j.reply.body)}</pre></div>
+      <div class="row-end"><button class="btn-primary" data-open-draft="${esc(j.id)}">Ouvrir le lien côté métier</button></div>`;
+  } catch { out.innerHTML = `<p class="errbox">La réception simulée n'a pas abouti. Réessayez.</p>`; }
+  finally { btn.disabled = false; }
+}
+
+/* ---- matrix (inline SVG) ---- */
+function matrixHTML() {
+  const pts = queue.filter(q => q.qualif && q.qualif.valeur?.note && q.qualif.faisabilite?.note);
+  const unplaced = queue.filter(q => q.qualif && !(q.qualif.valeur?.note && q.qualif.faisabilite?.note));
+  if (!pts.length) return `<div class="tp-head"><h4>Matrice valeur / faisabilité</h4><p class="muted">Aucun besoin positionné pour l'instant. Ouvrez une fiche dans la file et lancez « Analyser avec le copilote ».</p></div>`;
+  const W = 560, H = 380, L = 56, R = 16, T = 16, B = 48;
+  const x = f => L + (f - 0.5) / 5 * (W - L - R), y = v => T + (5.5 - v) / 5 * (H - T - B);
+  const groups = {};
+  pts.forEach((q, i) => { const key = q.qualif.valeur.note + "-" + q.qualif.faisabilite.note; (groups[key] = groups[key] || []).push(i); });
+  const pos = pts.map((q, i) => {
+    const key = q.qualif.valeur.note + "-" + q.qualif.faisabilite.note, g = groups[key], j = g.indexOf(i), n = g.length;
+    const a = n > 1 ? (j / n) * 2 * Math.PI : 0, rr = n > 1 ? 16 : 0;
+    return [x(q.qualif.faisabilite.note) + rr * Math.cos(a), y(q.qualif.valeur.note) + rr * Math.sin(a)];
+  });
+  const grid = [1, 2, 3, 4, 5].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" class="mx-grid"/><text x="${L - 10}" y="${y(v) + 4}" class="mx-tick" text-anchor="end">${v}</text><line y1="${T}" y2="${H - B}" x1="${x(v)}" x2="${x(v)}" class="mx-grid"/><text x="${x(v)}" y="${H - B + 18}" class="mx-tick" text-anchor="middle">${v}</text>`).join("");
+  const mid = `<line x1="${x(3)}" x2="${x(3)}" y1="${T}" y2="${H - B}" class="mx-mid"/><line x1="${L}" x2="${W - R}" y1="${y(3)}" y2="${y(3)}" class="mx-mid"/>`;
+  const quad = [[x(4.25), y(5.2), "Quick wins"], [x(1.75), y(5.2), "À rendre faisable"], [x(4.25), y(0.85), "Faciles, valeur faible"], [x(1.75), y(0.85), "À approfondir"]].map(([a, b, t]) => `<text x="${a}" y="${b}" class="mx-quad" text-anchor="middle">${t}</text>`).join("");
+  const dots = pts.map((q, i) => `<g class="mx-pt" tabindex="0"><title>${esc(q.titre)} — Valeur ${q.qualif.valeur.note}/5, Faisabilité ${q.qualif.faisabilite.note}/5, trajectoire ${esc(q.qualif.trajectoire?.code || "?")}</title><circle cx="${pos[i][0]}" cy="${pos[i][1]}" r="11"/><text x="${pos[i][0]}" y="${pos[i][1] + 4}" text-anchor="middle">${i + 1}</text></g>`).join("");
+  return `<div class="tp-head"><h4>Matrice valeur / faisabilité</h4><p class="muted">Positions proposées par le copilote, à valider en comité. Survolez un point pour le détail.</p></div>
+    <div class="mx-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Matrice valeur faisabilité des besoins qualifiés">${grid}${mid}${quad}${dots}
+      <text x="${(L + W - R) / 2}" y="${H - 8}" class="mx-axis" text-anchor="middle">Faisabilité</text><text x="14" y="${(T + H - B) / 2}" class="mx-axis" text-anchor="middle" transform="rotate(-90 14 ${(T + H - B) / 2})">Valeur</text></svg></div>
+    <table class="mx-table"><thead><tr><th>N°</th><th>Besoin</th><th>Valeur</th><th>Faisabilité</th><th>Trajectoire</th></tr></thead><tbody>
+      ${pts.map((q, i) => `<tr><td class="mono">${i + 1}</td><td>${esc(q.titre)}</td><td class="mono">${q.qualif.valeur.note}</td><td class="mono">${q.qualif.faisabilite.note}</td><td>${esc((q.qualif.trajectoire?.code || "?") + " · " + (q.qualif.trajectoire?.libelle || ""))}</td></tr>`).join("")}
+      ${unplaced.map(q => `<tr><td>—</td><td>${esc(q.titre)}</td><td colspan="3" class="muted">Information insuffisante pour positionner</td></tr>`).join("")}
+    </tbody></table>`;
+}
+
+/* ---- voice dictation: records PCM, encodes 16 kHz WAV, transcribes server-side ---- */
+const Voice = { rec: null };
+function encodeWav(samples, rate) {
+  const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + samples.length * 2, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) { const s = Math.max(-1, Math.min(1, samples[i])); v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true); }
+  return buf;
+}
+function b64(buf) { const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+async function startVoice(btn) {
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch { toast("Accès au micro refusé. Autorisez le micro dans votre navigateur."); return; }
+  const AC = window.AudioContext || window.webkitAudioContext, ctx = new AC();
+  const src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), chunks = [];
+  proc.onaudioprocess = e => chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+  src.connect(proc); proc.connect(ctx.destination);
+  const t0 = Date.now();
+  const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); btn.textContent = `Arrêter · ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; if (s >= 90) stopVoice(); }, 250);
+  btn.classList.add("rec"); btn.textContent = "Arrêter · 0:00";
+  Voice.rec = { btn, stream, ctx, src, proc, chunks, tick, rate: ctx.sampleRate, target: btn.dataset.mic };
+}
+async function stopVoice() {
+  const r = Voice.rec; if (!r) return; Voice.rec = null;
+  clearInterval(r.tick); r.src.disconnect(); r.proc.disconnect(); r.stream.getTracks().forEach(t => t.stop()); r.ctx.close();
+  r.btn.classList.remove("rec"); r.btn.textContent = "Transcription…"; r.btn.disabled = true;
+  try {
+    const len = r.chunks.reduce((a, c) => a + c.length, 0);
+    if (len < r.rate * 0.6) throw new Error("short");
+    const all = new Float32Array(len); let o = 0; for (const c of r.chunks) { all.set(c, o); o += c.length; }
+    const ratio = r.rate / 16000, out = new Float32Array(Math.floor(len / ratio));
+    for (let i = 0; i < out.length; i++) { const a = Math.floor(i * ratio), b = Math.min(len, Math.floor((i + 1) * ratio)); let s = 0; for (let j = a; j < b; j++) s += all[j]; out[i] = s / Math.max(1, b - a); }
+    const res = await fetch("/api/transcribe", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ audio: b64(encodeWav(out, 16000)) }) });
+    if (res.status === 401) { showGate(); throw new Error("code"); }
+    if (!res.ok) throw new Error("status " + res.status);
+    const j = await res.json();
+    const ta = document.getElementById(r.target);
+    if (ta) { ta.value = (ta.value.trim() ? ta.value.trim() + " " : "") + j.francais; ta.dispatchEvent(new Event("input")); ta.focus(); }
+    if (j.langue && j.langue !== "fr") toast(`Dicté en ${j.langue === "darija" ? "darija" : j.langue}, traduit en français. Original : « ${j.transcription.slice(0, 140)}${j.transcription.length > 140 ? "…" : ""} »`);
+  } catch (e) { toast(e && e.message === "short" ? "Enregistrement trop court." : "La transcription n'a pas abouti. Réessayez."); }
+  finally { r.btn.disabled = false; r.btn.textContent = "Dicter"; }
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-mic]"); if (!b) return;
+  e.preventDefault();
+  if (Voice.rec && Voice.rec.btn === b) stopVoice();
+  else if (!Voice.rec) startVoice(b);
+});
+
+async function openFicheFromLink() {
+  const id = new URLSearchParams(location.search).get("fiche"); if (!id) return;
+  history.replaceState(null, "", location.pathname);
+  try {
+    const r = await fetch("/api/fiches/" + encodeURIComponent(id), { headers: apiHeaders() });
+    if (!r.ok) return;
+    const q = await r.json();
+    if (!queue.find(x => x.id === q.id)) queue.unshift(q);
+    addMine(q.id);
+    if (q.statut === "Brouillon") loadDraft(q);
+    else { openMine.add(q.id); showTab("mine"); }
+  } catch {}
+}
+
 /* ================= Boot ================= */
 function prefillIdentity() {
   if (profileName && !state.fiche.responsable) {
-    state.fiche.responsable = { valeur: profileName, statut: "déduit", note: "D'après votre profil : précisez votre fonction.", maj: Date.now() };
+    state.fiche.responsable = { valeur: profileName, statut: "déduit", note: "D'après votre profil : précisez votre fonction.", maj: nowIso() };
   }
 }
 renderChat(); renderFiche(); autosize();
@@ -1179,8 +1866,13 @@ const use = n => (window.claude && typeof window.claude.use === "function") ? wi
 if (MODE === "web") {
   agentReady = true; canEditQueue = true; downloads = webDownloads;
   $("#attach").hidden = false;
+  $("#tab-mine").hidden = false; $("#dsi-tools").hidden = false;
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) for (const m of document.querySelectorAll(".mic")) m.hidden = false;
+  $("#demo-clock").value = String(demoOffsetDays);
+  if (![0, 7, 30, 100].includes(demoOffsetDays)) { demoOffsetDays = 0; $("#demo-clock").value = "0"; }
   renderChat();
   startWebQueue();
+  openFicheFromLink();
 } else {
 use("sample").then(async s => {
   sample = s; agentReady = true;
