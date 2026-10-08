@@ -1,8 +1,8 @@
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
 // Builds the Messages API turns for the intake agent: a context turn, the prior conversation,
-// then the new message (with an optional image), merging consecutive turns of the same role.
-export function buildIntakeMessages({ context, history, message, image }) {
+// then the new message (with optional attachment blocks, or a single image), merging consecutive turns of the same role.
+export function buildIntakeMessages({ context, history, message, image, blocks }) {
   const turns = [];
   const push = (role, content) => {
     const last = turns[turns.length - 1];
@@ -16,11 +16,12 @@ export function buildIntakeMessages({ context, history, message, image }) {
   }
   const text = String(message || "").slice(0, 30000);
   if (!text.trim()) return null;
+  const extra = Array.isArray(blocks) ? [...blocks] : [];
   if (image && IMAGE_TYPES.has(image.media_type) && typeof image.data === "string" && image.data.length < 4_500_000) {
-    const content = [
-      { type: "image", source: { type: "base64", media_type: image.media_type, data: image.data } },
-      { type: "text", text },
-    ];
+    extra.push({ type: "image", source: { type: "base64", media_type: image.media_type, data: image.data } });
+  }
+  if (extra.length) {
+    const content = [...extra, { type: "text", text }];
     const last = turns[turns.length - 1];
     if (last.role === "user") last.content = [{ type: "text", text: last.content }, ...content];
     else turns.push({ role: "user", content });

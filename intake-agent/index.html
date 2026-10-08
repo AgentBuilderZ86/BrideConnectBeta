@@ -396,6 +396,58 @@ main { flex: 1; min-height: 0; }
 @media (max-width: 760px) { .adm-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 900px) { .sim-layout { grid-template-columns: minmax(0, 1fr); } .phone { height: 72vh; } }
 @media (max-width: 520px) { .fn-row { grid-template-columns: minmax(0, 1fr) 2.5em; } .fn-bar { grid-column: 1 / -1; grid-row: 2; } .ph-btn { padding: 7px 8px; } }
+/* ---------- wave 4: roles, attachments, synergies, scoping, compliance ---------- */
+.who { display: flex; align-items: center; gap: 8px; }
+.who-chip { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 20px; padding: 3px 4px 3px 10px; font-size: 13px; max-width: 100%; }
+.who-chip b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 14em; }
+.who-chip .role { font: 500 11px/1.7 var(--font-ui); padding: 0 8px; border-radius: 20px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.who-chip button { border: 0; background: var(--surface-2); border-radius: 16px; padding: 3px 10px; font-size: 12.5px; font-weight: 500; white-space: nowrap; }
+.personas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
+.persona { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 12px; display: grid; gap: 3px; }
+.persona:hover, .persona:focus-visible { border-color: var(--accent); }
+.persona b { font-size: 14.5px; }
+.persona .r { font: 500 11px/1.7 var(--font-ui); padding: 0 8px; border-radius: 20px; background: var(--accent-soft); color: var(--accent); justify-self: start; }
+.persona span { font-size: 12.5px; color: var(--ink-3); }
+.persona .rights { color: var(--ink-2); }
+.btn-ms { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--surface); padding: 9px 16px; border-radius: 8px; font-weight: 600; text-decoration: none; color: var(--ink); }
+.consent { margin: 0 20px 10px; border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--surface); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--ink-2); display: grid; gap: 6px; }
+.consent p { margin: 0; }
+.consent.flash { box-shadow: 0 0 0 3px var(--accent-soft); }
+.consent pre, .notice-pre { white-space: pre-wrap; font: 12.5px/1.5 var(--font-ui); margin: 6px 0 0; color: var(--ink-2); }
+.pieces { display: grid; gap: 8px; }
+.piece { display: flex; gap: 6px 8px; align-items: baseline; flex-wrap: wrap; font-size: 13.5px; min-width: 0; }
+.piece .k { font: 500 11px/1.7 var(--font-mono); background: var(--surface-2); padding: 0 6px; border-radius: 4px; }
+.piece .nm { overflow-wrap: anywhere; }
+.piece .r { flex-basis: 100%; color: var(--ink-2); font-size: 13px; }
+.alerts .pieces { margin-top: 6px; }
+.kanban { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.kcol { background: var(--bg); border-radius: 8px; padding: 8px; display: grid; gap: 6px; min-width: 0; }
+.kcol h6 { margin: 0; font: 600 12px/1.4 var(--font-ui); color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+.story { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px; font-size: 13px; display: grid; gap: 4px; min-width: 0; }
+.story p { margin: 0; }
+.story .sid { font: 500 11.5px/1.4 var(--font-mono); color: var(--accent); }
+.story ul { margin: 2px 0 0; padding-left: 16px; color: var(--ink-2); font-size: 12.5px; }
+.story select { font-size: 12.5px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); padding: 2px 4px; justify-self: start; }
+.progress { height: 8px; background: var(--surface-2); border-radius: 8px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--st-confirme); }
+.cad details { border-top: 1px solid var(--line); padding: 6px 0; }
+.cad details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.cad ul, .cad ol { margin: 6px 0; padding-left: 20px; font-size: 13.5px; }
+.cad p { font-size: 13.5px; }
+.grappe { border: 1px solid var(--line); border-left: 3px solid var(--st-declare); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; background: var(--surface); margin-bottom: 10px; }
+.grappe.doublon { border-left-color: var(--danger); }
+.grappe p { margin: 0; font-size: 13.5px; }
+.grappe ul { margin: 0; padding-left: 18px; font-size: 13.5px; }
+.near { display: grid; gap: 8px; }
+.near-item { border-top: 1px solid var(--line); padding-top: 8px; display: grid; gap: 4px; font-size: 13.5px; }
+.near-item p { margin: 0; }
+.rights-table td, .rights-table th { text-align: center; }
+.rights-table td:first-child, .rights-table th:first-child { text-align: left; }
+.audit-wrap { max-height: 520px; overflow: auto; }
+.audit-table td { font-size: 12.5px; vertical-align: top; }
+.check { display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; }
+.check .tag { flex: none; }
+@media (max-width: 760px) { .kanban { grid-template-columns: minmax(0, 1fr); } .personas { grid-template-columns: minmax(0, 1fr); } .who { width: 100%; } .who-chip { width: 100%; } .who-chip b { max-width: none; flex: 1; } }
 .notice { margin: 0 20px 10px; font-size: 13px; color: var(--ink-2); background: var(--surface-2); padding: 8px 12px; border-radius: 8px; }
 
 @media (max-width: 900px) {
@@ -442,6 +494,7 @@ main { flex: 1; min-height: 0; }
       <button id="tab-dsi" role="tab" aria-selected="false" aria-controls="view-dsi">File DSI <span class="count" id="queue-count" hidden>0</span></button>
       <button id="tab-admin" role="tab" aria-selected="false" aria-controls="view-admin" hidden>Administration</button>
     </nav>
+    <div class="who" id="who" hidden></div>
   </header>
 
   <main>
@@ -462,14 +515,15 @@ main { flex: 1; min-height: 0; }
           </div>
           <div class="log" id="log" aria-live="polite"></div>
           <div class="notice" id="agent-notice" hidden></div>
+          <div class="consent" id="consent" hidden></div>
           <div class="suggest" id="suggest"></div>
           <form class="composer" id="composer">
             <div class="box">
-              <span class="file-chip" id="file-chip" hidden><span id="file-name"></span><button type="button" id="file-remove" aria-label="Retirer l'image">×</button></span>
+              <span class="file-chip" id="file-chip" hidden><span id="file-name"></span><button type="button" id="file-remove" aria-label="Retirer les pièces jointes">×</button></span>
               <textarea id="msg" rows="2" aria-label="Votre message" placeholder="Ex. : on ressaisit à la main les bons de pesée dans SAP pendant la campagne…"></textarea>
               <div class="row">
-                <button type="button" class="btn-icon" id="attach" hidden title="Joindre une photo (tableau blanc, capture Excel, document)">Joindre une photo</button>
-                <input type="file" id="file" accept="image/*" hidden>
+                <button type="button" class="btn-icon" id="attach" hidden title="Joindre une photo, un PDF, un fichier Excel, Word ou PowerPoint (3 fichiers, 4 Mo chacun)">Joindre</button>
+                <input type="file" id="file" accept="image/*" multiple hidden>
                 <button type="button" class="btn-icon mic" data-mic="msg" hidden>Dicter</button>
                 <span class="hint" id="composer-hint">Entrée pour envoyer · Maj+Entrée pour un retour à la ligne</span>
                 <button type="button" class="btn-ghost" id="stop" hidden>Arrêter</button>
@@ -532,8 +586,8 @@ main { flex: 1; min-height: 0; }
             <div class="ph-body" id="ph-body" aria-live="polite"></div>
             <div class="ph-quick" id="ph-quick"></div>
             <form class="ph-compose" id="ph-form">
-              <button type="button" class="ph-btn" id="ph-photo" title="Envoyer une photo">Photo</button>
-              <input type="file" id="ph-file" accept="image/*" hidden>
+              <button type="button" class="ph-btn" id="ph-photo" title="Envoyer une photo ou un document">Joindre</button>
+              <input type="file" id="ph-file" accept="image/*,.pdf,.xlsx,.xlsm,.docx,.pptx,.csv,.txt" multiple hidden>
               <input type="text" id="ph-text" placeholder="Message" autocomplete="off" aria-label="Message">
               <button type="button" class="ph-btn mic" data-mic="__sim" title="Note vocale">Vocal</button>
               <button type="submit" class="ph-btn send">Envoyer</button>
@@ -551,6 +605,7 @@ main { flex: 1; min-height: 0; }
           <p>Vos besoins restent vivants après l'envoi. L'agent vous pose une question quand une information vieillit, vous soumet ce qu'il observe sur le terrain, et vous pouvez donner des nouvelles en une phrase, écrite ou dictée.</p>
         </div>
         <div class="app-bar" id="app-bar" hidden></div>
+        <div class="app-bar" id="my-data" hidden></div>
         <div class="seg-inline" id="mine-filter" role="group" aria-label="Filtre">
           <button data-mine="mine" aria-pressed="true">Mes besoins</button>
           <button data-mine="all" aria-pressed="false">Tous les besoins (démo)</button>
@@ -570,6 +625,7 @@ main { flex: 1; min-height: 0; }
           <div class="tools-row">
             <div class="tool-tabs" role="group" aria-label="Outils DSI">
               <button data-tool="roadmap" aria-pressed="false">Feuille de route</button>
+              <button data-tool="synergies" aria-pressed="false">Doublons & synergies</button>
               <button data-tool="matrix" aria-pressed="false">Matrice valeur / faisabilité</button>
               <button data-tool="nudges" aria-pressed="false">Relances</button>
               <button data-tool="signal" aria-pressed="false">Signal terrain</button>
@@ -606,6 +662,39 @@ main { flex: 1; min-height: 0; }
           <section class="lv-block"><div class="cp-head"><h4>Directions</h4><button class="btn-ghost" data-adm-default="directions">Par défaut</button></div><p class="muted">Une par ligne. L'agent utilise ces libellés pour le champ « Direction ».</p><textarea id="adm-directions" rows="9" aria-label="Directions"></textarea></section>
           <section class="lv-block"><div class="cp-head"><h4>Signature des messages</h4></div><p class="muted">Utilisée dans les e-mails envoyés par l'agent.</p><input type="text" id="adm-signature" aria-label="Signature"></section>
         </div>
+        <section class="lv-block"><div class="cp-head"><h4>Comptes et rôles</h4><button class="btn-ghost" data-adm-default="roles">Vider</button></div>
+          <div id="adm-auth" class="muted"></div>
+          <div class="mx-wrap"><table class="mx-table rights-table"><thead><tr><th>Droit</th><th>Métier</th><th>Direction</th><th>DSI</th><th>Admin</th></tr></thead><tbody>
+            <tr><td>Exprimer un besoin, suivre et compléter les siens</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Voir tous les besoins, le portefeuille et la feuille de route</td><td>—</td><td>✓ lecture</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Qualifier, relancer, fusionner, mettre en relation, cadrer</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Lancer le pilotage, construire la feuille de route</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Réglages, journal d'audit, demandes loi 09-08</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+          </tbody></table></div>
+          <label class="ev-l">Rôles attribués par e-mail (une ligne « adresse = rôle », rôles : metier, dsi, direction, admin)<textarea id="adm-roles" rows="4" placeholder="n.berrada@votre-domaine.ma = dsi"></textarea></label>
+          <p class="muted">Les rôles d'application définis dans Microsoft Entra ID (Metier, DSI, Direction, Admin) priment sur cette liste. Sans rôle, une personne connectée est « Métier ».</p></section>
+        <section class="lv-block"><div class="cp-head"><h4>Conformité loi 09-08 (CNDP)</h4><button class="btn-ghost" data-adm-default="conformite">Par défaut</button></div>
+          <div class="form-grid">
+            <label class="wide">Responsable du traitement<input type="text" id="adm-c-responsable"></label>
+            <label>Contact protection des données<input type="text" id="adm-c-contact"></label>
+            <label>N° de déclaration ou d'autorisation CNDP<input type="text" id="adm-c-declaration" placeholder="À obtenir avant la mise en production"></label>
+            <label class="wide">Finalité<input type="text" id="adm-c-finalite"></label>
+            <label>Conservation après clôture (mois)<input type="number" min="1" max="120" id="adm-c-conservation_mois"></label>
+            <label>Suppression des brouillons abandonnés (jours)<input type="number" min="1" max="3650" id="adm-c-brouillon_jours"></label>
+            <label>Conservation du journal d'audit (mois)<input type="number" min="1" max="120" id="adm-c-audit_mois"></label>
+          </div>
+          <details><summary>Information affichée aux personnes</summary><pre class="notice-pre" id="adm-notice"></pre></details>
+          <details><summary>Registre du traitement et sous-traitants</summary><div id="adm-registre"></div></details>
+          <h5 class="jh">Demandes des personnes (accès, effacement)</h5>
+          <div class="form-grid"><label class="wide">Personne concernée : e-mail, téléphone WhatsApp ou nom complet<input type="text" id="adm-subject" placeholder="salma.idrissi@exemple.ma"></label></div>
+          <div class="row-end"><button class="btn-ghost" id="adm-subject-export">Exporter ses données</button><button class="btn-ghost warn" id="adm-subject-erase">Effacer ses données</button></div>
+          <div id="adm-subject-out"></div></section>
+        <section class="lv-block"><div class="cp-head"><h4>Journal d'audit</h4>
+            <select id="adm-audit-days" aria-label="Période"><option value="7">7 derniers jours</option><option value="30" selected>30 derniers jours</option><option value="90">90 derniers jours</option></select>
+            <button class="btn-ghost" id="adm-audit-csv">Exporter (CSV)</button></div>
+          <p class="muted">Qui a fait quoi, quand : connexions, transmissions, changements de statut, qualifications, fusions, cadrages, réglages, exports et effacements de données. Une entrée par action, jamais réécrite.</p>
+          <input type="text" id="adm-audit-q" placeholder="Filtrer : personne, action, besoin…" aria-label="Filtrer le journal">
+          <div id="adm-audit"></div></section>
         <section class="lv-block"><div class="cp-head"><h4>Banc d'essai</h4><span class="muted" id="adm-lastrun"></span></div>
           <p class="muted">Chaque cas envoie un message à l'agent avec les réglages ci-dessus. Des contrôles fixes vérifient le format, le nombre de questions et les statuts, puis une IA juge la réponse au regard des attentes.</p>
           <div id="adm-evals" class="adm-evals"></div>
@@ -632,6 +721,13 @@ main { flex: 1; min-height: 0; }
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<div class="modal" id="login" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="login-title">
+    <div class="sheet-h"><h3 id="login-title">Se connecter</h3><button class="btn-ghost" id="login-close">Fermer</button></div>
+    <div class="sheet-b" id="login-body"></div>
+  </div>
+</div>
 
 <div class="modal" id="gate" hidden>
   <form class="sheet gate" id="gate-form" role="dialog" aria-modal="true" aria-labelledby="gate-title">
@@ -686,6 +782,7 @@ const STATUTS = {
   "confirmé": { label: "Confirmé", cls: "st-confirme", f: 1 },
 };
 const QUEUE_STATUTS = ["À qualifier", "En qualification", "Qualifié — à instruire", "En réalisation", "En production", "Réorienté", "Clos"];
+const CLOSED = ["Clos", "Réorienté", "Fusionné"];
 
 const EXAMPLES = [
   { who: "Amont Agricole", text: "Pendant la campagne, on ressaisit à la main dans SAP les tickets de pesée et les bons de livraison de betteraves des agriculteurs. Ça prend énormément de temps et les erreurs créent des réclamations sur les paiements." },
@@ -744,7 +841,7 @@ FORMAT DE RÉPONSE : uniquement un objet JSON, avec "message" en premier :
 
 /* ================= State ================= */
 const KEY = "intake-draft-v1";
-const fresh = () => ({ fiche: {}, turns: [], alertes: [], suggestions: [], pret: false, titre: "", submitted: null, remoteId: null });
+const fresh = () => ({ fiche: {}, turns: [], alertes: [], suggestions: [], pret: false, titre: "", submitted: null, remoteId: null, pieces: [] });
 function loadState() {
   try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); return s && s.fiche && Array.isArray(s.turns) ? s : null; } catch { return null; }
 }
@@ -753,7 +850,10 @@ let state = loadState() || fresh();
 
 let sample = null, db = null, user = null, downloads = null;
 let agentReady = false, agentOff = false, canEditQueue = false, uid = null, profileName = "";
-let busy = false, ctl = null, pendingFile = null, editing = null, flashKeys = new Set();
+let busy = false, ctl = null, pendingFiles = [], editing = null, flashKeys = new Set();
+// Signed-in user and rights (website mode). Without a session the demo code grants every right.
+let me = { role: "demo", perms: [], session: null, entra: false, required: false, demoLogin: true };
+const canDo = p => MODE !== "web" || (me.perms || []).includes(p);
 let queue = [], openCards = new Set();
 
 /* ================= Helpers ================= */
@@ -823,7 +923,11 @@ function renderFiche() {
     al.hidden = false;
     al.innerHTML = `<h4>Points à renforcer · ${state.alertes.length}</h4>` + state.alertes.map(a =>
       `<div class="alert"><span class="k ${esc(a.type)}">${esc(a.type || "point")}</span><span>${esc(a.texte)}</span></div>`).join("");
-  } else al.hidden = true;
+  } else { al.hidden = true; al.innerHTML = ""; }
+  if ((state.pieces || []).length) {
+    al.hidden = false;
+    al.insertAdjacentHTML("beforeend", `<h4>Pièces jointes · ${state.pieces.length}</h4>${piecesHTML(state.pieces)}`);
+  }
 
   $("#fiche-body").innerHTML = SECTIONS.map(sec => `
     <section class="sec">
@@ -902,7 +1006,7 @@ function welcomeHTML() {
   </div>${state.turns.length ? "" : `<div class="examples"><span class="lbl">Exemples pour essayer</span>${EXAMPLES.map((e, i) => `<button type="button" class="ex" data-ex="${i}"><b>${esc(e.who)}</b>${esc(e.text)}</button>`).join("")}</div>`}</div>`;
 }
 function turnHTML(t, i) {
-  if (t.role === "user") return `<div class="msg user"><span class="who">Vous</span><div class="bubble">${esc(t.content)}</div>${t.image ? `<span class="attach-note">Photo jointe : ${esc(t.image)}</span>` : ""}</div>`;
+  if (t.role === "user") { const f = t.files || (t.image ? [t.image] : []); return `<div class="msg user"><span class="who">Vous</span><div class="bubble">${esc(t.content)}</div>${f.length ? `<span class="attach-note">Pièce${f.length > 1 ? "s" : ""} jointe${f.length > 1 ? "s" : ""} : ${esc(f.join(", "))}</span>` : ""}</div>`; }
   if (t.error) return `<div class="msg agent err"><span class="who">Agent</span><div class="bubble">${esc(t.content)}${t.retry ? ` <button type="button" class="btn-ghost" data-retry="${i}">Renvoyer le message</button>` : ""}</div></div>`;
   const ch = t.changed?.length ? `<div class="changed">Fiche mise à jour : ${t.changed.map(c => `<span class="c">${esc(c)}</span>`).join("")}</div>` : "";
   return `<div class="msg agent"><span class="who">Agent</span><div class="bubble">${md(t.content)}</div>${ch}</div>`;
@@ -956,16 +1060,30 @@ msgEl.addEventListener("input", () => { autosize(); try { localStorage.setItem(K
 msgEl.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("#composer").requestSubmit(); } });
 $("#composer").addEventListener("submit", e => {
   e.preventDefault();
-  const t = msgEl.value.trim(); if (!t || busy || !agentReady || agentOff) return;
+  let t = msgEl.value.trim(); if ((!t && !pendingFiles.length) || busy || !agentReady || agentOff) return;
+  if (!consentOk()) { const c = $("#consent"); c.classList.add("flash"); c.scrollIntoView({ block: "nearest" }); setTimeout(() => c.classList.remove("flash"), 1500); return; }
+  if (!t) t = pendingFiles.length > 1 ? "Voici des documents sur mon besoin." : "Voici un document sur mon besoin.";
   msgEl.value = ""; autosize(); try { localStorage.removeItem(KEY + "-msg"); } catch {}
-  send(t, pendingFile);
-  setFile(null);
+  send(t, pendingFiles);
+  setFile([]);
 });
 $("#stop").addEventListener("click", () => ctl?.abort());
 $("#attach").addEventListener("click", () => $("#file").click());
-$("#file").addEventListener("change", e => { setFile(e.target.files[0] || null); e.target.value = ""; });
-$("#file-remove").addEventListener("click", () => setFile(null));
-function setFile(f) { pendingFile = f; $("#file-chip").hidden = !f; $("#file-name").textContent = f ? "Photo : " + f.name : ""; }
+$("#file").addEventListener("change", e => { setFile([...pendingFiles, ...e.target.files]); e.target.value = ""; });
+$("#file-remove").addEventListener("click", () => setFile([]));
+const MAX_FILE = 4 * 1024 * 1024;
+function setFile(list) {
+  const ok = [];
+  for (const f of list || []) {
+    if (ok.length >= 3) { toast("3 pièces jointes au plus par message."); break; }
+    if (!f.type.startsWith("image/") && f.size > MAX_FILE) { toast(`« ${f.name} » dépasse 4 Mo.`); continue; }
+    if (/\.xls$/i.test(f.name)) { toast(`« ${f.name} » : enregistrez-le au format .xlsx.`); continue; }
+    ok.push(f);
+  }
+  pendingFiles = ok;
+  $("#file-chip").hidden = !ok.length;
+  $("#file-name").textContent = ok.map(f => f.name).join(", ");
+}
 try { const d = localStorage.getItem(KEY + "-msg"); if (d) { msgEl.value = d; } } catch {}
 
 /* ================= Agent call ================= */
@@ -981,14 +1099,14 @@ function compactFiche() {
 const contextLine = () => `CONTEXTE : date du jour ${fmtDate(nowMs())}.${profileName ? ` Nom de l'utilisateur d'après son profil : ${profileName}.` : ""}`;
 function historyTurns() {
   const history = state.turns.slice(0, -1).filter(t => !t.error).slice(-16).map(t => ({
-    role: t.role, content: t.role === "user" ? t.content + (t.image ? `\n[Photo jointe : ${t.image}]` : "") : t.content,
+    role: t.role, content: t.role === "user" ? t.content + ((t.files || (t.image ? [t.image] : [])).length ? `\n[Pièce(s) jointe(s) : ${(t.files || [t.image]).join(", ")}]` : "") : t.content,
   }));
   while (history.length && history[0].role === "assistant") history.shift();
   return history;
 }
-const nowContent = (text, file) => `ÉTAT ACTUEL DE LA FICHE (JSON, null = vide) :\n${compactFiche()}\n\nBESOINS DÉJÀ TRANSMIS À LA DSI (pour détecter les doublons) :\n${existingNeeds()}\n\nNOUVEAU MESSAGE DE L'UTILISATEUR :\n${text}${file ? "\n\n(Une image est jointe à ce message.)" : ""}`;
-function buildInput(text, file) {
-  return [{ role: "user", content: `${RULES}\n\n${contextLine()}` }, ...historyTurns(), { role: "user", content: nowContent(text, file) }];
+const nowContent = (text, files) => `ÉTAT ACTUEL DE LA FICHE (JSON, null = vide) :\n${compactFiche()}\n\nBESOINS DÉJÀ TRANSMIS À LA DSI (pour détecter les doublons) :\n${existingNeeds()}\n\nNOUVEAU MESSAGE DE L'UTILISATEUR :\n${text}${files && files.length ? `\n\n(Pièce(s) jointe(s) à ce message : ${files.map(f => f.name).join(", ")}.)` : ""}`;
+function buildInput(text, files) {
+  return [{ role: "user", content: `${RULES}\n\n${contextLine()}` }, ...historyTurns(), { role: "user", content: nowContent(text, files) }];
 }
 
 /* ---- Standalone website mode: same page, served with its own API (/api/agent, /api/fiches) ---- */
@@ -1029,17 +1147,26 @@ function fileToJpeg(file) {
     img.src = url;
   });
 }
-async function webAsk(text, file, signal, onText) {
-  const body = { context: contextLine(), history: historyTurns(), message: nowContent(text, file) };
-  if (file) body.image = await fileToJpeg(file);
-  return postAgent(body, signal, onText);
+function fileToB64(file) {
+  return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(String(r.result).split(",")[1] || ""); r.onerror = () => reject({ code: "file_rejected" }); r.readAsDataURL(file); });
+}
+// Photos are re-encoded as JPEG (≤ 1568 px); other files are sent as they are.
+async function toAttachment(f) {
+  if (f.type.startsWith("image/")) { const j = await fileToJpeg(f); return { name: f.name.replace(/\.[^.]+$/, "") + ".jpg", mime: "image/jpeg", data: j.data }; }
+  return { name: f.name, mime: f.type || "", data: await fileToB64(f) };
+}
+async function webAsk(text, files, signal, onText, onMeta) {
+  const body = { context: contextLine(), history: historyTurns(), message: nowContent(text, files) };
+  if (files && files.length) body.attachments = await Promise.all(files.map(toAttachment));
+  return postAgent(body, signal, onText, onMeta);
 }
 const askAgent = (mode, input, onText, signal) => postAgent({ mode, input }, signal, onText || (() => {}));
-async function postAgent(body, signal, onText) {
+async function postAgent(body, signal, onText, onMeta) {
   let r;
   try { r = await fetchRetry("/api/agent", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body), signal }); }
   catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "upstream_error" }; }
   if (r.status === 401) { showGate(); throw { code: "needs_code" }; }
+  if (r.status === 403) throw { code: "forbidden" };
   if (r.status === 429) throw { code: "rate_limited" };
   if (!r.ok || !r.body) throw { code: "upstream_error" };
   const reader = r.body.getReader(), dec = new TextDecoder();
@@ -1055,6 +1182,7 @@ async function postAgent(body, signal, onText) {
         if (!line.trim()) continue;
         let ev; try { ev = JSON.parse(line); } catch { continue; }
         if (typeof ev.d === "string") { out += ev.d; onText({ text: out }); }
+        else if (ev.pieces && onMeta) onMeta(ev);
         else if (ev.done) stop = ev.stop;
         else if (ev.error) err = ev.error;
       }
@@ -1096,6 +1224,7 @@ function startWebQueue() {
   if (!webQueueTimer) webQueueTimer = setInterval(() => { if (!document.hidden) refreshWebQueue(); }, 15000);
 }
 function showGate() {
+  if (MODE === "web" && me.required) { if ($("#login").hidden) openLogin(); return; }
   const g = $("#gate"); if (!g.hidden) return;
   g.hidden = false; $("#gate-code").focus();
 }
@@ -1132,6 +1261,8 @@ const ERR_COPY = {
   rate_limited: "Trop de demandes en peu de temps. Patientez un instant puis renvoyez votre message.",
   session_expired: "Votre session a expiré. Reconnectez-vous, puis renvoyez votre message.",
   image_rejected: "La photo n'a pas pu être lue. Essayez une image JPEG ou PNG plus légère.",
+  file_rejected: "Le fichier n'a pas pu être lu. Réessayez avec un autre fichier.",
+  forbidden: "Votre rôle ne permet pas cette action.",
   refused: "L'agent n'a pas pu traiter ce message. Reformulez-le autrement.",
   invalid_json: "La réponse de l'agent était incomplète. Renvoyez votre message.",
   empty_completion: "L'agent n'a rien répondu. Renvoyez votre message, éventuellement plus court.",
@@ -1140,10 +1271,12 @@ const ERR_COPY = {
 };
 const OFF_CODES = new Set(["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"]);
 
-async function send(text, file) {
+async function send(text, files) {
   if (busy || (!sample && MODE !== "web")) return;
+  if (!consentOk()) { flashConsent(); return; }
+  files = Array.isArray(files) ? files : files ? [files] : [];
   busy = true;
-  state.turns.push({ role: "user", content: text, image: file ? file.name : null, ts: Date.now() });
+  state.turns.push({ role: "user", content: text, files: files.map(f => f.name), ts: Date.now() });
   saveState(); renderChat();
   const log = $("#log");
   const pend = document.createElement("div");
@@ -1161,13 +1294,22 @@ async function send(text, file) {
         if (m && m.trim()) { pend.querySelector(".bubble").innerHTML = md(m); log.scrollTop = log.scrollHeight; }
       },
     };
-    let res;
-    if (MODE === "web") res = await webAsk(text, file, ctl.signal, opts.onText);
+    let res, got = [];
+    if (MODE === "web") res = await webAsk(text, files, ctl.signal, opts.onText, ev => {
+      got = ev.pieces || [];
+      if ((ev.refused || []).length) toast("Non lu : " + ev.refused.join(" ; "));
+    });
     else {
-      if (file) opts.images = [file];
-      res = await sample.json(buildInput(text, file), opts);
+      const imgs = files.filter(f => f.type.startsWith("image/"));
+      if (imgs.length) opts.images = imgs;
+      if (imgs.length < files.length) toast("Dans cette vue, seules les photos sont transmises à l'agent.");
+      res = await sample.json(buildInput(text, imgs), opts);
     }
     applyAgent(res);
+    if (got.length) {
+      for (const p of got) { const r = (Array.isArray(res.pieces) ? res.pieces : []).find(x => x && x.nom === p.name) || (got.length === 1 && Array.isArray(res.pieces) ? res.pieces[0] : null); if (r && typeof r.retenu === "string") p.retenu = r.retenu.slice(0, 400); }
+      state.pieces = [...(state.pieces || []), ...got];
+    }
   } catch (e) {
     const code = e && e.code;
     if (code === "needs_code") {
@@ -1318,6 +1460,7 @@ async function submitFiche() {
     fiche, score: scoreOf(state.fiche), pret: state.pret, alertes: state.alertes,
     statut: "À qualifier", submittedAt: at.toISOString(), echeance: echeance.toISOString(),
     submitter: uid || null, echanges: state.turns.filter(t => t.role === "user").length, origine: state.remoteId ? "e-mail" : "web",
+    pieces: state.pieces || [], consentement: consentRecord(),
     transcript: state.turns.filter(t => !t.error).slice(-40).map(t => ({ role: t.role, content: String(t.content).slice(0, 2000) })),
   };
   try {
@@ -1327,6 +1470,7 @@ async function submitFiche() {
         ? await fetch("/api/fiches/" + encodeURIComponent(state.remoteId), { method: "PATCH", headers: apiHeaders(), body: JSON.stringify({ op: "submit", doc, at: doc.submittedAt }) })
         : await fetch("/api/fiches", { method: "POST", headers: apiHeaders(), body: JSON.stringify(doc) });
       if (r.status === 401) { showGate(); throw { code: "needs_code" }; }
+      if (r.status === 403) throw { code: "forbidden" };
       if (!r.ok) throw { code: "unavailable" };
       id = state.remoteId || (await r.json()).id;
       addMine(id);
@@ -1339,6 +1483,7 @@ async function submitFiche() {
   } catch (e) {
     btn.disabled = false; btn.textContent = "Transmettre à la DSI";
     const msg = e?.code === "needs_code" ? "Saisissez le code d'accès de la démo, puis transmettez à nouveau."
+      : e?.code === "forbidden" ? "Votre rôle ne permet pas de transmettre ce besoin."
       : e?.code === "invalid_argument" ? "Vous n'avez pas les droits pour transmettre depuis cette vue. Demandez un accès Contributeur, ou téléchargez la fiche."
       : e?.code === "quota_exceeded" ? "La file DSI est pleine. Prévenez l'équipe DSI & TD."
       : "La transmission a échoué. Réessayez dans un instant.";
@@ -1372,7 +1517,7 @@ function showTab(which) {
   if (which === "dsi") renderQueue();
   if (which === "mine") renderMine();
   if (which === "chat") simOpen();
-  if (which === "admin") admLoad();
+  if (which === "admin") { admLoad(); admLoadAudit(); }
   if (which !== "chat") simClose();
 }
 $("#tab-capture").addEventListener("click", () => showTab("capture"));
@@ -1425,7 +1570,7 @@ function renderQueue() {
     const dueCls = closed ? "" : d < 0 ? "late" : d <= 1 ? "soon" : "";
     const dueTxt = draft ? "Brouillon e-mail : attend le métier" : closed ? "Traité" : d === null ? "—" : d < 0 ? `En retard de ${-d} j ouvré${-d > 1 ? "s" : ""}` : d === 0 ? "Échéance aujourd'hui" : `J-${d} ouvré${d > 1 ? "s" : ""}`;
     const f = q.fiche || {};
-    const statusCtl = canEditQueue
+    const statusCtl = canEditQueue && q.statut !== "Fusionné"
       ? `<select class="status-sel" data-status="${esc(q.id)}" aria-label="Statut">${(draft ? ["Brouillon", ...QUEUE_STATUTS] : QUEUE_STATUTS).map(s => `<option${s === q.statut ? " selected" : ""}>${esc(s)}</option>`).join("")}</select>`
       : `<span class="status-chip">${esc(q.statut || "À qualifier")}</span>`;
     const isOpen = openCards.has(q.id);
@@ -1433,7 +1578,7 @@ function renderQueue() {
       <div class="card-h">
         <button class="open" data-open="${esc(q.id)}" aria-expanded="${isOpen}">
           <span class="ttl">${esc(q.titre || "Besoin sans titre")}</span>
-          <span class="meta">${q.origine && q.origine !== "web" ? `<span class="tag">${esc({ "e-mail": "e-mail", whatsapp: "WhatsApp", teams: "Teams" }[q.origine] || q.origine)}</span>` : ""}${q.qualif ? `<span class="tag">V${q.qualif.valeur?.note ?? "?"} · F${q.qualif.faisabilite?.note ?? "?"} · ${esc(q.qualif.trajectoire?.code || "?")}</span>` : ""}${(q.pending || []).length ? `<span class="tag warn">${q.pending.length} màj en attente</span>` : ""}${staleFields(q).length ? `<span class="tag warn">${staleFields(q).length} à revalider</span>` : ""}<span>${esc(valText(f.direction?.valeur) || "Direction non précisée")}</span><span>${esc(valText(f.urgence?.valeur) || "Urgence non précisée")}</span><span>Reçu le ${q.submittedAt ? fmtDate(q.submittedAt) : "—"}</span><span>${q.echanges || 0} échange${(q.echanges || 0) > 1 ? "s" : ""}</span></span>
+          <span class="meta">${queueTagsHTML(q)}${q.origine && q.origine !== "web" ? `<span class="tag">${esc({ "e-mail": "e-mail", whatsapp: "WhatsApp", teams: "Teams" }[q.origine] || q.origine)}</span>` : ""}${q.qualif ? `<span class="tag">V${q.qualif.valeur?.note ?? "?"} · F${q.qualif.faisabilite?.note ?? "?"} · ${esc(q.qualif.trajectoire?.code || "?")}</span>` : ""}${(q.pending || []).length ? `<span class="tag warn">${q.pending.length} màj en attente</span>` : ""}${staleFields(q).length ? `<span class="tag warn">${staleFields(q).length} à revalider</span>` : ""}<span>${esc(valText(f.direction?.valeur) || "Direction non précisée")}</span><span>${esc(valText(f.urgence?.valeur) || "Urgence non précisée")}</span><span>Reçu le ${q.submittedAt ? fmtDate(q.submittedAt) : "—"}</span><span>${q.echanges || 0} échange${(q.echanges || 0) > 1 ? "s" : ""}</span></span>
         </button>
         <div class="right"><span class="score">${q.score ?? 0} %</span><span class="due ${dueCls}">${dueTxt}</span>${statusCtl}</div>
       </div>
@@ -1517,12 +1662,18 @@ function addMine(id) { const a = mineIds().filter(x => x !== id); a.unshift(id);
 function mineItems() {
   if (mineFilter === "all") return queue;
   const ids = mineIds();
-  return ids.map(id => queue.find(q => q.id === id)).filter(Boolean);
+  const local = ids.map(id => queue.find(q => q.id === id)).filter(Boolean);
+  if (!me.session) return local;
+  // Signed in: the fiches they own (on any device), plus those this browser created before sign-in.
+  const own = queue.filter(q => q.owner?.sub === me.session.sub || (q.coporteurs || []).some(c => c.owner?.sub === me.session.sub));
+  return [...own, ...local.filter(q => !q.owner && !own.includes(q))];
 }
 const needsAction = q => !!q.nudge || (q.pending || []).length > 0 || q.statut === "Brouillon" || staleFields(q).length > 0;
 function renderMineCount() {
   if (MODE !== "web") return;
-  const n = mineIds().map(id => queue.find(q => q.id === id)).filter(q => q && needsAction(q)).length;
+  const saved = mineFilter; mineFilter = "mine";
+  const n = mineItems().filter(needsAction).length;
+  mineFilter = saved;
   const c = $("#mine-count"); c.hidden = !n; c.textContent = n;
 }
 $("#mine-filter").addEventListener("click", e => {
@@ -1571,7 +1722,7 @@ function livingFieldsHTML(q) {
       ${st !== "vide" ? `<div class="f-note">Mis à jour ${agoTxt(ageDays(e))}${e.source ? ` · source : ${esc(e.source)}` : ""}</div>` : ""}</div>`;
   }).join("")).join("");
 }
-const EV_LABEL = { valeur: "Valeur", transmise: "Transmission", capture: "Capture", agent: "Agent", statut: "Statut DSI", maj: "Mise à jour", observation: "Observation", refus: "Refus", qualif: "Copilote", relance: "Relance", reponse: "Réponse DSI", note: "Note" };
+const EV_LABEL = { synergie: "Synergie", cadrage: "Cadrage", livraison: "Livraison", conformite: "Conformité", valeur: "Valeur", transmise: "Transmission", capture: "Capture", agent: "Agent", statut: "Statut DSI", maj: "Mise à jour", observation: "Observation", refus: "Refus", qualif: "Copilote", relance: "Relance", reponse: "Réponse DSI", note: "Note" };
 function journalHTML(q) {
   const ev = (q.events || []).slice().reverse();
   if (!ev.length) return `<p class="muted">Aucun événement pour l'instant.</p>`;
@@ -1598,14 +1749,15 @@ function metierLivingHTML(q) {
     return `<div class="lv-block nudge"><h4>Brouillon créé à partir de votre e-mail</h4><p>L'agent a commencé la fiche à partir de votre message. Complétez-la avec lui en quelques échanges, puis transmettez-la.</p><div class="row-end"><button class="btn-primary" data-act="load-draft" data-id="${id}">Compléter avec l'agent</button></div></div>
       ${livingFieldsHTML(q)}<h5>Journal</h5>${journalHTML(q)}`;
   }
-  return `${nudgeHTML(q, "metier")}${pendingHTML(q, "metier")}
+  if (q.statut === "Fusionné") return `${fusionInfoHTML(q, "metier")}<h5 class="jh">Journal du besoin</h5>${journalHTML(q)}`;
+  return `${fusionInfoHTML(q, "metier")}${nudgeHTML(q, "metier")}${pendingHTML(q, "metier")}${nearHTML(q, "metier")}${cadrageHTML(q, "metier")}
     <section class="lv-block news"><h4>Donner des nouvelles</h4>
       <p class="muted">Écrivez ou dictez ce qui a changé : volumes, organisation, délais, données, priorité… L'agent prépare la mise à jour, vous validez.</p>
       <textarea id="news-${id}" rows="3" aria-label="Vos nouvelles"></textarea>
       <div class="row-end"><button type="button" class="btn-icon mic" data-mic="news-${id}">Dicter</button><button class="btn-primary" data-act="news" data-id="${id}">Mettre à jour ma fiche</button></div>
       <div id="upd-${id}">${updating.has(q.id) ? `<p class="thinking">L'agent analyse vos nouvelles<span class="dots"></span></p>` : updateProposalHTML(q.id)}</div>
     </section>
-    ${valueHTML(q, "metier")}
+    ${valueHTML(q, "metier")}${piecesBlockHTML(q)}
     <div class="doc">${livingFieldsHTML(q)}</div>
     <h5 class="jh">Journal du besoin</h5>${journalHTML(q)}`;
 }
@@ -1652,7 +1804,7 @@ function updateProposalHTML(id) {
 /* ---- DSI living view + copilot ---- */
 const copilotRunning = new Map();
 function dsiLivingHTML(q) {
-  return `${nudgeHTML(q, "dsi")}${pendingHTML(q, "dsi")}${valueHTML(q, "dsi")}${copilotHTML(q)}<h5 class="jh">Journal du besoin</h5>${journalHTML(q)}`;
+  return `${fusionInfoHTML(q, "dsi")}${nudgeHTML(q, "dsi")}${pendingHTML(q, "dsi")}${nearHTML(q, "dsi")}${piecesBlockHTML(q)}${valueHTML(q, "dsi")}${copilotHTML(q)}${cadrageHTML(q, "dsi")}<h5 class="jh">Journal du besoin</h5>${journalHTML(q)}`;
 }
 function scoreBar(n) {
   if (n === null || n === undefined) return `<span class="muted">Non noté</span>`;
@@ -1661,8 +1813,9 @@ function scoreBar(n) {
 function copilotHTML(q) {
   const c = q.qualif, id = esc(q.id), run = copilotRunning.get(q.id);
   const head = `<div class="cp-head"><h4>Copilote de qualification</h4><span class="tag">Proposition IA — à valider par la DSI</span>
-    <button class="btn-ghost" data-act="qualify" data-id="${id}" ${run ? "disabled" : ""}>${c ? "Relancer l'analyse" : "Analyser avec le copilote"}</button></div>`;
+    ${canEditQueue ? `<button class="btn-ghost" data-act="qualify" data-id="${id}" ${run ? "disabled" : ""}>${c ? "Relancer l'analyse" : "Analyser avec le copilote"}</button>` : ""}</div>`;
   if (run) return `<section class="lv-block copilot">${head}<p class="thinking">Analyse en cours : valeur, faisabilité, bottleneck shift, besoins proches<span class="dots"></span></p></section>`;
+  if (!c && !canEditQueue) return "";
   if (!c) return `<section class="lv-block copilot">${head}<p class="muted">Le copilote propose un score Valeur / Faisabilité argumenté, une lecture « bottleneck shift », une trajectoire, les questions d'atelier, les besoins proches et un brouillon de réponse au porteur.</p></section>`;
   const near = (c.besoins_proches || []).map(b => { const o = queue.find(x => x.id === b.id); return o ? `<li><b>${esc(o.titre)}</b> : ${esc(b.raison)}</li>` : ""; }).join("");
   const traj = c.trajectoire || {};
@@ -1676,9 +1829,9 @@ function copilotHTML(q) {
     ${(c.prerequis || []).length ? `<div class="cp-l">Prérequis et risques</div><ul>${c.prerequis.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     ${(c.questions_atelier || []).length ? `<div class="cp-l">Questions pour l'atelier</div><ol>${c.questions_atelier.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
     ${near ? `<div class="cp-l">Besoins proches (regroupement possible)</div><ul>${near}</ul>` : ""}
-    <div class="cp-l">Brouillon de réponse au porteur</div>
+    ${canEditQueue ? `<div class="cp-l">Brouillon de réponse au porteur</div>
     <textarea id="rep-${id}" rows="7" aria-label="Réponse au porteur">${esc(c.reponse_metier || "")}</textarea>
-    <div class="row-end"><button class="btn-primary" data-act="send-rep" data-id="${id}">Envoyer au porteur</button></div>
+    <div class="row-end"><button class="btn-primary" data-act="send-rep" data-id="${id}">Envoyer au porteur</button></div>` : ""}
   </section>`;
 }
 async function runQualify(q) {
@@ -1750,13 +1903,44 @@ async function onLivingClick(ev) {
       b.disabled = true;
       await patchFiche(q.id, { op: "mesure", mesures: [{ indicateurId: document.getElementById("mes-ind-" + q.id).value, valeur: v }], source: "DSI" });
       document.getElementById("mes-val-" + q.id).value = ""; toast("Mesure enregistrée.");
+    } else if (act === "fusion-prep") {
+      await prepFusion(q, (b.dataset.src || "").split(",").filter(Boolean));
+    } else if (act === "fusion-cancel") {
+      fusionProposals.delete(q.id); renderQueue();
+    } else if (act === "fusion-apply") {
+      const fp = fusionProposals.get(q.id); if (!fp) return;
+      const card = b.closest(".card");
+      const keep = [...card.querySelectorAll("[data-fus]")].filter(x => x.checked).map(x => fp.propositions[+x.dataset.fus]);
+      b.disabled = true;
+      await patchFiche(q.id, { op: "fusion", sources: fp.sources, titre: card.querySelector("#fus-titre-" + CSS.escape(q.id))?.value.trim() || fp.titre, propositions: keep, resume: fp.resume });
+      fusionProposals.delete(q.id); await refreshWebQueue(); toast("Fusion faite : les porteurs sont prévenus.");
+    } else if (act === "relation") {
+      b.disabled = true;
+      await patchFiche(q.id, { op: "relation", with: b.dataset.with, message: b.dataset.msg || "" });
+      await refreshWebQueue(); toast("Mise en relation envoyée aux deux porteurs.");
+    } else if (act === "near-dismiss") {
+      await patchFiche(q.id, { op: "proche_ecarte", with: b.dataset.with });
+    } else if (act === "cadrage") {
+      await runCadrage(q, b);
+    } else if (act === "cad-export") {
+      b.disabled = true;
+      try { await exportCadrage(q, b.dataset.fmt); } finally { b.disabled = false; }
+    } else if (act === "piece-dl") {
+      await downloadPiece(b.dataset.piece, b.dataset.name);
     } else if (act === "send-rep") {
       const t = document.getElementById("rep-" + q.id).value.trim(); if (!t) return;
       b.disabled = true; await patchFiche(q.id, { op: "reponse", text: t }); toast("Réponse ajoutée au journal du besoin, visible par le porteur.");
     }
-  } catch { b.disabled = false; toast("L'opération n'a pas abouti. Réessayez."); }
+  } catch (e) { b.disabled = false; toast(String(e?.message || "").includes("403") ? "Votre rôle ne permet pas cette action." : "L'opération n'a pas abouti. Réessayez."); }
 }
 $("#mine-list").addEventListener("click", onLivingClick);
+document.addEventListener("change", async ev => {
+  const s = ev.target.closest("[data-story]"); if (!s) return;
+  s.disabled = true;
+  try { await patchFiche(s.dataset.fiche, { op: "story", sid: s.dataset.story, statut: s.value }); }
+  catch { toast("La mise à jour n'a pas abouti."); }
+  finally { s.disabled = false; }
+});
 $("#queue").addEventListener("click", ev => { if (ev.target.closest("[data-act]")) onLivingClick(ev); });
 
 function loadDraft(q) {
@@ -1766,6 +1950,7 @@ function loadDraft(q) {
   for (const f of FIELDS) if (filled(q, f.k)) state.fiche[f.k] = { ...q.fiche[f.k] };
   state.turns = (q.transcript || []).map(t => ({ role: t.role, content: t.content, ts: Date.now() }));
   state.alertes = Array.isArray(q.alertes) ? q.alertes : [];
+  state.pieces = Array.isArray(q.pieces) ? q.pieces : [];
   state.pret = !!q.pret;
   addMine(q.id); saveState();
   showTab("capture"); renderChat(); renderFiche();
@@ -1814,6 +1999,7 @@ function renderTool() {
   if (currentTool === "pilot") { p.innerHTML = pilotHTML(); loadPilot(); }
   if (currentTool === "roadmap") { p.innerHTML = roadmapHTML(); loadPortfolio(); }
   if (currentTool === "value") { p.innerHTML = valueDashHTML(); loadPilot(); }
+  if (currentTool === "synergies") { p.innerHTML = synergiesHTML(); loadSynergies(); }
   if (currentTool === "nudges") p.innerHTML = `<div class="tp-head"><h4>Relances ciblées</h4><p class="muted">L'agent repère les informations non confirmées ou périmées, les propositions sans réponse et les délais DSI, puis rédige une question précise pour la bonne personne. Avancez l'horloge de démo pour voir les informations vieillir.</p><button class="btn-primary" id="run-nudges">Préparer les relances</button></div><div id="nudge-out"></div>`;
   if (currentTool === "signal") p.innerHTML = `<div class="tp-head"><h4>Signal terrain</h4><p class="muted">Collez ce que la réalité dit : compte rendu de comité, ticket, mise à jour de projet, extrait de données. L'agent le rattache aux besoins concernés et propose les mises à jour, que chaque porteur valide.</p></div>
     <div class="form-grid"><label>Type de source<select id="sig-type"><option>Compte rendu de réunion</option><option>Ticket ITSM</option><option>Mise à jour de projet (Planner)</option><option>Extrait de données SAP / BI</option><option>Note terrain</option></select></label></div>
@@ -1870,7 +2056,7 @@ $("#tool-panel").addEventListener("click", async e => {
 let lastNudges = [], lastSignal = [];
 async function runNudges(btn) {
   const out = $("#nudge-out");
-  const active = queue.filter(q => !["Clos", "Réorienté", "Brouillon"].includes(q.statut));
+  const active = queue.filter(q => ![...CLOSED, "Brouillon"].includes(q.statut));
   if (!active.length) { out.innerHTML = `<p class="muted">Aucun besoin actif.</p>`; return; }
   btn.disabled = true; out.innerHTML = `<p class="thinking">L'agent passe en revue ${active.length} besoin${active.length > 1 ? "s" : ""}<span class="dots"></span></p>`;
   const lines = active.map(q => {
@@ -1905,7 +2091,7 @@ async function runNudges(btn) {
 async function runSignal(btn) {
   const text = $("#sig-text").value.trim(), type = $("#sig-type").value, out = $("#sig-out");
   if (!text) { $("#sig-text").focus(); return; }
-  const active = queue.filter(q => !["Clos", "Réorienté"].includes(q.statut));
+  const active = queue.filter(q => !CLOSED.includes(q.statut));
   if (!active.length) { out.innerHTML = `<p class="muted">Aucun besoin suivi auquel rattacher ce signal.</p>`; return; }
   btn.disabled = true; out.innerHTML = `<p class="thinking">L'agent rapproche le signal des besoins suivis<span class="dots"></span></p>`;
   const list = active.map(q => `### id ${q.id} — « ${q.titre} »\n${ficheForAgent(q)}`).join("\n\n");
@@ -2074,7 +2260,7 @@ function bubbleHTML(m) {
   const t = `<span class="ph-time">${hhmm(m.at)}</span>`;
   let inner;
   if (m.kind === "audio") inner = `<div class="ph-voice">Note vocale${m.duree ? ` · 0:${String(m.duree).padStart(2, "0")}` : ""}</div>${m.transcription ? `<div class="ph-tr">« ${esc(m.transcription)} »</div><div class="ph-meta">Transcrit${m.langue && m.langue !== "fr" ? ` (${esc(m.langue)}) et traduit` : ""} par l'agent</div>` : m.pending ? `<div class="ph-meta">Envoi…</div>` : ""}`;
-  else if (m.kind === "image") inner = `<div class="ph-voice">Photo</div>${m.text ? `<div>${esc(m.text)}</div>` : ""}`;
+  else if (m.kind === "image" || m.kind === "file") inner = `<div class="ph-voice">${m.kind === "image" ? "Photo" : "Fichier"}${(m.files || []).length ? " · " + esc(m.files.join(", ")) : ""}</div>${m.text ? `<div>${esc(m.text)}</div>` : ""}`;
   else inner = esc(m.text).replace(/\n/g, "<br>");
   return `<div class="ph-msg ${m.dir === "in" ? "me" : "agent"}${m.nudge ? " nudge" : ""}">${m.nudge ? `<div class="ph-meta">Relance de suivi</div>` : ""}${inner}${t}</div>`;
 }
@@ -2123,9 +2309,14 @@ async function simSendAudio(b64wav, duree) { await simPost({ audio: b64wav, dure
 $("#ph-form").addEventListener("submit", e => { e.preventDefault(); const i = $("#ph-text"); const t = i.value; i.value = ""; simSendText(t); });
 $("#ph-photo").addEventListener("click", () => $("#ph-file").click());
 $("#ph-file").addEventListener("change", async e => {
-  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
-  try { const img = await fileToJpeg(f); const cap = $("#ph-text").value.trim(); $("#ph-text").value = ""; simPost({ image: img, text: cap }, { kind: "image", text: cap }); }
-  catch { toast("Cette image n'a pas pu être lue."); }
+  const list = [...e.target.files].slice(0, 3); e.target.value = ""; if (!list.length) return;
+  const big = list.find(f => !f.type.startsWith("image/") && f.size > MAX_FILE);
+  if (big) { toast(`« ${big.name} » dépasse 4 Mo.`); return; }
+  try {
+    const files = await Promise.all(list.map(toAttachment));
+    const cap = $("#ph-text").value.trim(); $("#ph-text").value = "";
+    simPost({ files, text: cap }, { kind: list.every(f => f.type.startsWith("image/")) ? "image" : "file", text: cap, files: files.map(f => f.name) });
+  } catch { toast("Ce fichier n'a pas pu être lu."); }
 });
 $("#view-chat").addEventListener("click", async e => {
   const ex = e.target.closest("[data-simex]"); if (ex) { simSendText(PERSONAS[simPersona].ex[+ex.dataset.simex]); return; }
@@ -2219,7 +2410,7 @@ function valueBodyHTML() {
     ["Valeur mesurée", `${k.valeur_mesuree ?? 0} / ${k.en_production ?? 0}`],
     ["Relances / mises à jour métier (7 j)", `${k.relances_7j ?? 0} / ${k.maj_metier_7j ?? 0}`],
   ].map(([l, v]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div></div>`).join("");
-  const order = ["Brouillon", "À qualifier", "En qualification", "Qualifié — à instruire", "En réalisation", "En production", "Réorienté", "Clos"];
+  const order = ["Brouillon", "À qualifier", "En qualification", "Qualifié — à instruire", "En réalisation", "En production", "Réorienté", "Fusionné", "Clos"];
   const counts = order.map(s => [s, queue.filter(q => q.statut === s).length]);
   const max = Math.max(1, ...counts.map(c => c[1]));
   const funnel = `<div class="funnel" role="table" aria-label="Besoins par statut">${counts.map(([s, n]) => `<div class="fn-row" role="row"><span class="fn-l" role="cell">${esc(s)}</span><span class="fn-bar" role="cell"><i style="width:${n ? Math.max(2, n / max * 100) : 0}%"></i></span><span class="fn-n mono" role="cell">${n}</span></div>`).join("")}</div>`;
@@ -2242,7 +2433,7 @@ function valueHTML(q, role) {
   const inds = q.valeur?.indicateurs || [], id = esc(q.id);
   const eligible = ["Qualifié — à instruire", "En réalisation", "En production"].includes(q.statut);
   if (!inds.length) {
-    if (role !== "dsi" || !eligible) return "";
+    if (role !== "dsi" || !eligible || !canEditQueue) return "";
     const prop = valueProposals.get(q.id), run = valueRunning.has(q.id);
     return `<section class="lv-block value"><div class="cp-head"><h4>Indicateurs de valeur</h4><button class="btn-ghost" data-act="ind-propose" data-id="${id}" ${run ? "disabled" : ""}>${prop ? "Proposer à nouveau" : "Proposer les indicateurs"}</button></div>
       ${run ? `<p class="thinking">L'agent tire les indicateurs de la fiche<span class="dots"></span></p>` : prop ? `${prop.map((i, n) => `<label class="prop"><input type="checkbox" data-ind="${n}" checked><span><b>${esc(i.nom)}</b>${i.unite ? ` (${esc(i.unite)})` : ""} · avant : ${esc(i.avant ?? "à mesurer")} · cible : ${esc(i.cible ?? "à définir")}<br><span class="muted">${esc(i.comment_mesurer || "")} ${esc(i.justification || "")}</span></span></label>`).join("")}<div class="row-end"><button class="btn-primary" data-act="ind-save" data-id="${id}">Valider ces indicateurs</button></div>` : `<p class="muted">Avant la mise en production, définissez comment la valeur sera mesurée : l'agent propose 1 à 3 indicateurs tirés de la fiche, avec leur valeur « avant ».</p>`}
@@ -2251,8 +2442,8 @@ function valueHTML(q, role) {
   const rows = inds.map(i => { const m = lastMeasure(q, i.id); return `<tr><td>${esc(i.nom)}${i.unite ? ` <span class="muted">(${esc(i.unite)})</span>` : ""}</td><td class="mono">${esc(i.avant ?? "à mesurer")}</td><td class="mono">${esc(i.cible ?? "à définir")}</td><td class="mono">${m ? esc(String(m.valeur)) + `<br><span class="muted">${fmtDate(m.at)}${m.source ? " · " + esc(m.source) : ""}</span>` : "—"}</td><td class="mono">${m ? evolution(i.avant, m.valeur) : "—"}</td></tr>`; }).join("");
   return `<section class="lv-block value"><div class="cp-head"><h4>Valeur du projet</h4>${q.productionAt ? `<span class="tag ok">En production depuis le ${fmtDate(q.productionAt)}</span>` : ""}</div>
     <div class="mx-wrap"><table class="mx-table"><thead><tr><th>Indicateur</th><th>Avant</th><th>Cible</th><th>Dernière mesure</th><th>Évolution</th></tr></thead><tbody>${rows}</tbody></table></div>
-    ${role === "dsi" ? `<div class="form-grid"><label>Indicateur<select id="mes-ind-${id}">${inds.map(i => `<option value="${esc(i.id)}">${esc(i.nom)}</option>`).join("")}</select></label><label>Valeur mesurée<input type="text" id="mes-val-${id}"></label></div><div class="row-end"><button class="btn-ghost" data-act="mes-save" data-id="${id}">Enregistrer la mesure</button></div>`
-      : `<p class="muted">Donnez la valeur actuelle dans « Donner des nouvelles » : l'agent l'enregistre en face du bon indicateur.</p>`}
+    ${role === "dsi" && canEditQueue ? `<div class="form-grid"><label>Indicateur<select id="mes-ind-${id}">${inds.map(i => `<option value="${esc(i.id)}">${esc(i.nom)}</option>`).join("")}</select></label><label>Valeur mesurée<input type="text" id="mes-val-${id}"></label></div><div class="row-end"><button class="btn-ghost" data-act="mes-save" data-id="${id}">Enregistrer la mesure</button></div>`
+      : role === "dsi" ? "" : `<p class="muted">Donnez la valeur actuelle dans « Donner des nouvelles » : l'agent l'enregistre en face du bon indicateur.</p>`}
   </section>`;
 }
 async function runIndicators(q) {
@@ -2297,6 +2488,8 @@ function admFill(v) {
   $("#adm-seuils").innerHTML = Object.keys(v.seuils).map(k => `<label>${esc(SEUIL_LABELS[k] || k)}<input type="number" min="1" max="3650" data-seuil="${k}" value="${v.seuils[k]}"></label>`).join("");
   $("#adm-directions").value = v.directions.join("\n");
   $("#adm-signature").value = v.signature;
+  $("#adm-roles").value = admRolesText(v.roles);
+  admConfFill(v.conformite || {});
   admRenderEvals(v.evals);
 }
 function admRenderEvals(evals) {
@@ -2311,7 +2504,7 @@ function admRead() {
   document.querySelectorAll("[data-ttl]").forEach(i => { ttl[i.dataset.ttl] = Number(i.value); });
   document.querySelectorAll("[data-seuil]").forEach(i => { seuils[i.dataset.seuil] = Number(i.value); });
   const evals = [...document.querySelectorAll(".eval-case")].map(c => ({ nom: c.querySelector(".ev-nom").value.trim(), message: c.querySelector(".ev-msg").value.trim(), attentes: c.querySelector(".ev-att").value.trim() })).filter(e => e.message);
-  return { intake: $("#adm-intake").value, qualify: $("#adm-qualify").value, ttl, seuils, directions: $("#adm-directions").value.split("\n").map(x => x.trim()).filter(Boolean), signature: $("#adm-signature").value.trim(), evals };
+  return { intake: $("#adm-intake").value, qualify: $("#adm-qualify").value, ttl, seuils, directions: $("#adm-directions").value.split("\n").map(x => x.trim()).filter(Boolean), signature: $("#adm-signature").value.trim(), evals, roles: admRolesRead(), conformite: admConfRead() };
 }
 function admDirty() {
   if (!adm) return;
@@ -2378,6 +2571,8 @@ $("#view-admin").addEventListener("click", async e => {
     if (k === "directions") $("#adm-directions").value = def.join("\n");
     if (k === "ttl") document.querySelectorAll("[data-ttl]").forEach(i => { i.value = def[i.dataset.ttl]; });
     if (k === "seuils") document.querySelectorAll("[data-seuil]").forEach(i => { i.value = def[i.dataset.seuil]; });
+    if (k === "roles") $("#adm-roles").value = "";
+    if (k === "conformite") admConfFill(def);
     admDirty(); return;
   }
   if (t.id === "adm-eval-add") {
@@ -2393,7 +2588,7 @@ $("#view-admin").addEventListener("click", async e => {
       const r = await fetch("/api/admin/config", { method: "PUT", headers: apiHeaders(), body: JSON.stringify({ values: admRead(), note: $("#adm-note").value.trim() }) });
       if (!r.ok) throw new Error();
       adm = await r.json(); $("#adm-note").value = "";
-      admFill(adm.values); admRenderHistory(); admDirty(); loadPublicConfig();
+      admFill(adm.values); admRenderHistory(); admDirty(); loadPublicConfig(); loadPrivacy(); admLoadAudit();
       toast(`Version ${adm.version} enregistrée. Les agents l'appliquent sous une minute.`);
     } catch { toast("L'enregistrement n'a pas abouti."); }
     finally { t.disabled = false; }
@@ -2645,6 +2840,493 @@ $("#app-bar").addEventListener("click", async e => {
   finally { b.disabled = false; renderAppBar(); }
 });
 
+/* ================= Roles & sign-in ================= */
+const DEMO_USERS = [
+  { role: "metier", name: "Salma Idrissi", email: "salma.idrissi@exemple.ma", fn: "Responsable qualité · Raffinerie" },
+  { role: "metier", name: "Youssef Alami", email: "youssef.alami@exemple.ma", fn: "Chef de zone · Amont agricole" },
+  { role: "dsi", name: "Nadia Berrada", email: "nadia.berrada@exemple.ma", fn: "Responsable Innovation Digitale & IA · DSI & TD" },
+  { role: "direction", name: "Omar El Fassi", email: "omar.elfassi@exemple.ma", fn: "Directeur industriel · Comité de direction" },
+  { role: "admin", name: "Administrateur", email: "admin@exemple.ma", fn: "Administration de la plateforme" },
+];
+const ROLE_LABEL = { metier: "Métier", dsi: "DSI", direction: "Direction", admin: "Administrateur", demo: "Démo · tous droits" };
+const ROLE_RIGHTS = {
+  metier: "Exprime ses besoins et suit les siens. Ne voit pas ceux des autres.",
+  dsi: "Qualifie, relance, fusionne, met en relation, cadre et pilote.",
+  direction: "Consulte la file, le portefeuille, la feuille de route et la valeur, sans rien modifier.",
+  admin: "Réglages, rôles, conformité loi 09-08 et journal d'audit.",
+};
+const TOOL_PERM = { roadmap: "portfolio.read", synergies: "portfolio.read", matrix: "fiche.read", nudges: "fiche.dsi", signal: "fiche.dsi", email: "fiche.dsi", pilot: "pilot.read", value: "pilot.read" };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function loadMe() {
+  try { const r = await fetch("/api/auth/me", { headers: apiHeaders() }); if (r.ok) me = await r.json(); } catch {}
+  applyRole();
+}
+function applyRole() {
+  if (MODE !== "web") return;
+  const vis = { capture: canDo("fiche.create"), chat: canDo("fiche.create"), mine: true, dsi: canDo("fiche.read"), admin: canDo("admin") };
+  for (const [t, v] of Object.entries(vis)) $("#tab-" + t).hidden = !v;
+  canEditQueue = canDo("fiche.dsi");
+  for (const b of $("#dsi-tools").querySelectorAll("[data-tool]")) b.hidden = !canDo(TOOL_PERM[b.dataset.tool]);
+  $("#demo-reset").hidden = !canDo("demo.reset");
+  $("#mine-filter").hidden = !canDo("fiche.read");
+  if (!canDo("fiche.read")) mineFilter = "mine";
+  if (currentTool && !canDo(TOOL_PERM[currentTool])) { currentTool = null; renderTool(); }
+  if (me.session && !profileName) { profileName = me.session.name; if (!state.submitted && !state.turns.length) { prefillIdentity(); saveState(); renderFiche(); } }
+  const cur = ["capture", "chat", "mine", "dsi", "admin"].find(t => !$("#view-" + t).hidden);
+  if (cur && !vis[cur]) showTab(Object.keys(vis).find(t => vis[t]));
+  renderWho(); renderQueue(); renderMine(); renderMyData();
+}
+function renderWho() {
+  const w = $("#who"); w.hidden = MODE !== "web";
+  w.innerHTML = me.session
+    ? `<div class="who-chip"><b title="${esc(me.session.email || "")}">${esc(me.session.name)}</b><span class="role">${esc(ROLE_LABEL[me.role] || me.role)}</span><button type="button" id="who-switch">${me.session.via === "démo" ? "Changer" : "Déconnexion"}</button></div>`
+    : `<div class="who-chip"><b>Mode démo</b><span class="role">tous droits</span><button type="button" id="who-switch">Se connecter</button></div>`;
+}
+function openLogin() {
+  $("#login-body").innerHTML = `${me.entra
+      ? `<p>Connectez-vous avec votre compte professionnel : vos droits dépendent de votre rôle.</p><p><a class="btn-ms" href="/api/auth/login">Se connecter avec Microsoft</a></p>`
+      : `<p class="muted">En production, chacun se connecte avec son compte professionnel Microsoft (Entra ID) et reçoit son rôle. Pour la démonstration, choisissez une personne : l'application et l'API appliquent ses droits.</p>`}
+    ${me.demoLogin ? `<div class="personas">${DEMO_USERS.map((u, i) => `<button type="button" class="persona" data-persona="${i}"><span class="r">${ROLE_LABEL[u.role]}</span><b>${esc(u.name)}</b><span>${esc(u.fn)}</span><span class="rights">${esc(ROLE_RIGHTS[u.role])}</span></button>`).join("")}</div>` : ""}
+    ${me.session ? `<div class="row-end"><button type="button" class="btn-ghost" id="login-out">${me.required ? "Se déconnecter" : "Revenir au mode démo (tous droits)"}</button></div>` : ""}`;
+  $("#login").hidden = false;
+}
+async function afterIdentityChange() {
+  openCards.clear(); openMine.clear(); currentTool = null; renderTool();
+  for (const x of $("#dsi-tools").querySelectorAll("[data-tool]")) x.setAttribute("aria-pressed", "false");
+  adm = null; lastQueueSig = ""; webQueueOk = false;
+  await loadMe(); await refreshWebQueue();
+}
+$("#who").addEventListener("click", async e => {
+  if (e.target.id !== "who-switch") return;
+  if (me.session && me.session.via !== "démo") { await fetch("/api/auth/logout", { method: "POST", headers: apiHeaders() }).catch(() => {}); await afterIdentityChange(); return; }
+  openLogin();
+});
+$("#login-close").addEventListener("click", () => { $("#login").hidden = true; });
+$("#login").addEventListener("click", async e => {
+  if (e.target.id === "login") { $("#login").hidden = true; return; }
+  const p = e.target.closest("[data-persona]");
+  if (p) {
+    const u = DEMO_USERS[+p.dataset.persona];
+    const r = await fetch("/api/auth/demo", { method: "POST", headers: apiHeaders(), body: JSON.stringify(u) }).catch(() => null);
+    if (r && r.status === 401) { $("#login").hidden = true; $("#gate").hidden = false; $("#gate-code").focus(); return; }
+    if (!r || !r.ok) { toast("La connexion n'a pas abouti."); return; }
+    $("#login").hidden = true; await afterIdentityChange();
+    toast(`Connecté : ${u.name} (${ROLE_LABEL[u.role]})`);
+    return;
+  }
+  if (e.target.id === "login-out") {
+    await fetch("/api/auth/logout", { method: "POST", headers: apiHeaders() }).catch(() => {});
+    $("#login").hidden = true; await afterIdentityChange(); toast("Déconnecté.");
+  }
+});
+
+/* ================= Loi 09-08: notice, consent, own data ================= */
+const CONSENT_KEY = "intake-consent";
+let privacy = null;
+function consentStored() { try { return JSON.parse(localStorage.getItem(CONSENT_KEY) || "null"); } catch { return null; } }
+const consentOk = () => MODE !== "web" || !privacy || consentStored()?.version === privacy.version;
+const consentRecord = () => { const c = consentStored(); return c ? { at: c.at, version: c.version } : null; };
+async function loadPrivacy() {
+  try { const r = await fetch("/api/privacy", { headers: apiHeaders() }); if (r.ok) privacy = await r.json(); } catch {}
+  renderConsent();
+}
+function renderConsent() {
+  const el = $("#consent");
+  el.hidden = consentOk() || !!state.submitted;
+  if (el.hidden) return;
+  const short = privacy.short.replace(/ : écrivez MES DONNÉES ou SUPPRIMER MES DONNÉES, ou contactez/, " depuis « Mes besoins » ou auprès de");
+  el.innerHTML = `<p><b>Avant de commencer.</b> ${esc(short)}</p><details><summary>Information complète (loi 09-08)</summary><pre>${esc(privacy.notice)}</pre></details><div class="row-end"><button type="button" class="btn-primary" id="consent-ok">J'ai compris, continuer</button></div>`;
+}
+function flashConsent() { const c = $("#consent"); c.hidden = false; c.classList.add("flash"); c.scrollIntoView({ block: "nearest" }); setTimeout(() => c.classList.remove("flash"), 1500); }
+$("#consent").addEventListener("click", e => {
+  if (e.target.id !== "consent-ok" || !privacy) return;
+  const rec = { at: new Date().toISOString(), version: privacy.version };
+  try { localStorage.setItem(CONSENT_KEY, JSON.stringify(rec)); } catch {}
+  renderConsent();
+  fetch("/api/privacy", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ action: "consent", version: rec.version, canal: "web" }) }).catch(() => {});
+  msgEl.focus();
+});
+let eraseArmed = null;
+function renderMyData() {
+  if (MODE !== "web") return;
+  const el = $("#my-data"); el.hidden = false;
+  el.innerHTML = `<span class="muted">Vos données personnelles (loi 09-08) :</span><button type="button" class="btn-ghost" data-my="export">Télécharger mes données</button><button type="button" class="btn-ghost" data-my="erase">Supprimer mes données</button>`;
+}
+$("#my-data").addEventListener("click", async e => {
+  const b = e.target.closest("[data-my]"); if (!b) return;
+  if (b.dataset.my === "erase" && !eraseArmed) {
+    b.textContent = "Confirmer : brouillons supprimés, besoins anonymisés"; b.classList.add("warn");
+    eraseArmed = setTimeout(() => { eraseArmed = null; renderMyData(); }, 5000);
+    return;
+  }
+  clearTimeout(eraseArmed); eraseArmed = null; b.disabled = true;
+  try {
+    const r = await fetch("/api/privacy", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ action: b.dataset.my, ficheIds: mineIds() }) });
+    if (r.status === 401) { showGate(); return; }
+    if (!r.ok) throw new Error("status " + r.status);
+    const j = await r.json();
+    if (b.dataset.my === "export") {
+      await webDownloads.save({ filename: `Mes_donnees_${todayTag()}.json`, data: new Blob([JSON.stringify(j, null, 2)], { type: "application/json" }) });
+      toast(`Export prêt : ${j.fiches.length} besoin(s), ${j.conversations.length} conversation(s).`);
+    } else {
+      try { localStorage.removeItem(MINE_KEY); localStorage.removeItem(CONSENT_KEY); } catch {}
+      toast(`Fait : ${j.fiches_anonymisees} besoin(s) anonymisé(s), ${j.brouillons_supprimes} brouillon(s) supprimé(s).`);
+      lastQueueSig = ""; await refreshWebQueue(); renderConsent();
+    }
+  } catch { toast("La demande n'a pas abouti."); }
+  finally { renderMyData(); }
+});
+
+/* ================= Attachments, merges, relations ================= */
+const PIECE_K = { image: "PHOTO", pdf: "PDF", xlsx: "XLSX", docx: "DOCX", pptx: "PPTX", text: "TXT" };
+function piecesHTML(list, ficheId) {
+  return `<div class="pieces">${list.map(p => `<div class="piece"><span class="k">${PIECE_K[p.kind] || "FICHIER"}</span><span class="nm">${esc(p.name)}</span><span class="muted">${p.size ? Math.max(1, Math.round(p.size / 1024)) + " Ko" : ""}${p.canal ? " · " + esc(p.canal) : ""}</span>${p.supprime ? `<span class="muted">· fichier supprimé</span>` : ficheId ? `<button type="button" class="linkish" data-act="piece-dl" data-id="${esc(ficheId)}" data-piece="${esc(p.id)}" data-name="${esc(p.name)}">Ouvrir</button>` : ""}${p.retenu ? `<span class="r">Retenu par l'agent : ${esc(p.retenu)}</span>` : ""}</div>`).join("")}</div>`;
+}
+function piecesBlockHTML(q) {
+  return (q.pieces || []).length ? `<section class="lv-block"><h4>Pièces jointes · ${q.pieces.length}</h4>${piecesHTML(q.pieces, q.id)}</section>` : "";
+}
+async function downloadPiece(id, name) {
+  const r = await fetch("/api/pieces/" + encodeURIComponent(id), { headers: apiHeaders() });
+  if (!r.ok) throw new Error("status " + r.status);
+  await webDownloads.save({ filename: name || "piece", data: await r.blob() });
+}
+function queueTagsHTML(q) {
+  const t = [], near = (q.proches || []).filter(p => !queue.length || queue.some(x => x.id === p.id && x.statut !== "Fusionné"));
+  if (q.statut === "Fusionné") t.push(`<span class="tag">Fusionné</span>`);
+  if (near.some(p => p.type === "doublon")) t.push(`<span class="tag bad">Doublon possible</span>`);
+  if (near.some(p => p.type !== "doublon")) t.push(`<span class="tag accent">Synergie</span>`);
+  if ((q.coporteurs || []).length) t.push(`<span class="tag ok">${q.coporteurs.length + 1} porteurs</span>`);
+  if ((q.pieces || []).length) t.push(`<span class="tag">${q.pieces.length} pièce${q.pieces.length > 1 ? "s" : ""}</span>`);
+  if (q.cadrage) t.push(`<span class="tag ok">Cadré · ${q.cadrage.avancement?.pct ?? 0} %</span>`);
+  return t.join("");
+}
+function fusionInfoHTML(q) {
+  const parts = [];
+  if (q.statut === "Fusionné") {
+    const t = queue.find(x => x.id === q.fusionneDans);
+    parts.push(`<p>Ce besoin a été <b>fusionné</b> dans « ${esc(t?.titre || "un besoin commun")} », qui réunit les demandes identiques de plusieurs équipes. Le suivi continue sur cette fiche commune${q.fusionneDans ? ` : <button type="button" class="linkish" data-goto="${esc(q.fusionneDans)}">l'ouvrir</button>` : ""}.</p>`);
+  }
+  if ((q.coporteurs || []).length) parts.push(`<p><b>Porté conjointement</b> avec ${q.coporteurs.map(c => `${esc(c.demandeur || "un autre demandeur")}${c.direction ? ` (${esc(c.direction)})` : ""}`).join(", ")}.</p>`);
+  if ((q.relations || []).length) parts.push(`<p><b>Mis en relation</b> avec ${q.relations.map(r => `${esc(r.avec)}, au sujet de « ${esc(r.titre)} »`).join(" ; ")}.</p>`);
+  return parts.length ? `<section class="lv-block">${parts.join("")}</section>` : "";
+}
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-goto]"); if (!g) return;
+  const id = g.dataset.goto;
+  if (!$("#view-mine").hidden) {
+    addMine(id); openMine.add(id);
+    if (!queue.find(x => x.id === id)) fetch("/api/fiches/" + encodeURIComponent(id), { headers: apiHeaders() }).then(r => r.ok ? r.json() : null).then(d => { if (d) { queue.unshift(d); renderMine(); } }).catch(() => {});
+    renderMine();
+  } else { openCards.add(id); renderQueue(); document.querySelector(`[data-open="${CSS.escape(id)}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }
+});
+const fusionProposals = new Map(), fusionRunning = new Set();
+function nearHTML(q, role) {
+  if (role === "metier") {
+    if (!(q.proches || []).length) return "";
+    return `<section class="lv-block"><h4>Un besoin proche existe ailleurs dans le Groupe</h4>${q.proches.map(p => `<p>« ${esc(p.titre || "Besoin")} » (${esc(p.direction || "autre direction")}) : ${esc(p.raison)}</p>`).join("")}<p class="muted">La DSI examine le rapprochement : un seul projet porté conjointement, ou une mise en relation avec l'autre demandeur.</p></section>`;
+  }
+  const near = (q.proches || []).map(p => ({ p, o: queue.find(x => x.id === p.id) })).filter(x => x.o && x.o.statut !== "Fusionné");
+  const fp = fusionProposals.get(q.id), run = fusionRunning.has(q.id);
+  if (!near.length && !fp && !run) return "";
+  return `<section class="lv-block"><div class="cp-head"><h4>Doublons et synergies</h4><span class="tag">Détection IA — à valider par la DSI</span></div>
+    ${run ? `<p class="thinking">L'agent prépare la fiche commune<span class="dots"></span></p>` : ""}
+    ${fp ? fusionPreviewHTML(q, fp) : ""}
+    <div class="near">${near.map(({ p, o }) => `<div class="near-item"><p><span class="tag ${p.type === "doublon" ? "bad" : "accent"}">${p.type === "doublon" ? "Doublon possible" : "Synergie"}</span> <b>${esc(o.titre)}</b> · ${esc(valText(o.fiche?.direction?.valeur) || "direction non précisée")} · ${esc(o.statut)}</p><p class="muted">${esc(p.raison)}</p>
+      ${canEditQueue ? `<div class="row-end"><button type="button" class="btn-ghost" data-act="near-dismiss" data-id="${esc(q.id)}" data-with="${esc(o.id)}">Écarter</button><button type="button" class="btn-ghost" data-act="relation" data-id="${esc(q.id)}" data-with="${esc(o.id)}">Mettre les porteurs en relation</button>${p.type === "doublon" ? `<button type="button" class="btn-primary" data-act="fusion-prep" data-id="${esc(q.id)}" data-src="${esc(o.id)}" ${run ? "disabled" : ""}>Fusionner dans ce besoin</button>` : ""}</div>` : ""}</div>`).join("")}</div></section>`;
+}
+function fusionPreviewHTML(q, fp) {
+  return `<div class="proposal"><p><b>Fiche commune proposée</b> : ${fp.sources.map(id => `« ${esc(qTitle(id))} »`).join(", ")} rejoint ce besoin. ${esc(fp.resume || "")}</p>
+    <div class="form-grid"><label class="wide">Titre du besoin commun<input type="text" id="fus-titre-${esc(q.id)}" value="${esc(fp.titre || q.titre)}"></label></div>
+    ${fp.propositions.map((p, i) => `<label class="prop"><input type="checkbox" data-fus="${i}" checked><span><b>${esc(SHORT[p.champ] || p.champ)}</b> → ${esc(valText(p.valeur))} <span class="pill ${STATUTS[p.statut]?.cls || "st-deduit"}">${esc(STATUTS[p.statut]?.label || "Proposé par l'agent")}</span><br><span class="muted">${esc(p.raison || "")}</span></span></label>`).join("")}
+    <p class="muted">La fiche fusionnée passe au statut « Fusionné » ; son porteur devient co-porteur et il est prévenu sur son canal.</p>
+    <div class="row-end"><button type="button" class="btn-ghost" data-act="fusion-cancel" data-id="${esc(q.id)}">Annuler</button><button type="button" class="btn-primary" data-act="fusion-apply" data-id="${esc(q.id)}">Valider la fusion</button></div></div>`;
+}
+async function prepFusion(q, srcIds) {
+  const srcs = srcIds.map(id => queue.find(x => x.id === id)).filter(Boolean); if (!srcs.length) return;
+  fusionRunning.add(q.id); openCards.add(q.id); renderQueue();
+  try {
+    const who = o => o.owner?.name || o.contact?.name || o.demandeur || "?";
+    const input = `FICHE PRINCIPALE (id ${q.id}) — « ${q.titre} » (${valText(q.fiche?.direction?.valeur) || "direction ?"}, demandeur ${who(q)}) :\n${ficheForAgent(q)}\n\n${srcs.map(o => `FICHE FUSIONNÉE (id ${o.id}) — « ${o.titre} » (${valText(o.fiche?.direction?.valeur) || "direction ?"}, demandeur ${who(o)}) :\n${ficheForAgent(o)}`).join("\n\n")}`;
+    const res = await askAgent("fusion", input);
+    fusionProposals.set(q.id, { sources: srcs.map(o => o.id), titre: res.titre || q.titre, resume: res.resume || "", propositions: (Array.isArray(res.propositions) ? res.propositions : []).filter(p => p && FMAP[p.champ]) });
+  } catch (e) { toast(ERR_COPY[e?.code] || "La préparation de la fusion n'a pas abouti."); }
+  finally { fusionRunning.delete(q.id); renderQueue(); }
+}
+
+/* ================= Synergies tool ================= */
+let syn = null;
+function synergiesHTML() {
+  return `<div class="tp-head"><h4>Doublons et synergies</h4><p class="muted">Les besoins arrivent de toutes les directions et de tous les sites. L'agent repère ceux qui décrivent le même problème (doublons, à fusionner en un seul projet porté conjointement) et ceux qui partagent données, solution ou prérequis (synergies, à instruire ensemble). Chaque nouveau besoin est aussi comparé aux autres dès sa transmission.</p>
+    ${canDo("portfolio.build") ? `<div class="row-start"><button type="button" class="btn-primary" data-syn="build">Analyser tout le portefeuille</button></div>` : ""}</div><div id="syn-body"><p class="thinking">Chargement<span class="dots"></span></p></div>`;
+}
+async function loadSynergies() {
+  try {
+    const r = await fetch("/api/synergies", { headers: apiHeaders() });
+    if (r.status === 401) { showGate(); return; }
+    if (r.ok) syn = await r.json();
+  } catch {}
+  if (currentTool === "synergies" && $("#syn-body")) $("#syn-body").innerHTML = synBodyHTML();
+}
+function synBodyHTML() {
+  const p = syn?.synergies;
+  let head = "";
+  if (syn?.running) head += `<p class="thinking">L'agent compare tous les besoins, comptez une minute<span class="dots"></span></p>`;
+  if (syn?.error && !syn.running) head += `<p class="errbox">Dernière analyse en échec : ${esc(syn.error.message)}</p>`;
+  const live = queue.filter(q => !CLOSED.includes(q.statut) && (q.proches || []).some(x => queue.some(o => o.id === x.id && o.statut !== "Fusionné")));
+  const auto = live.length ? `<h5 class="jh">Détectés à la transmission</h5><ul>${live.map(q => `<li><button type="button" class="linkish" data-pf-open="${esc(q.id)}">${esc(q.titre)}</button> : ${q.proches.map(x => `${x.type === "doublon" ? "doublon possible" : "synergie"} avec « ${esc(qTitle(x.id))} »`).join(", ")}</li>`).join("")}</ul>` : "";
+  if (!p) return head + auto + (auto ? "" : `<div class="empty-state"><h3>Pas encore d'analyse du portefeuille</h3><p>Lancez « Analyser tout le portefeuille » pour regrouper les besoins similaires de toutes les directions.</p></div>`);
+  const dir = id => valText(queue.find(q => q.id === id)?.fiche?.direction?.valeur) || "direction non précisée";
+  const st = id => queue.find(q => q.id === id)?.statut || "?";
+  return head + `<div class="lv-block digest"><div class="cp-head"><h4>Analyse du portefeuille</h4><span class="tag">v${p.version} · ${fmtDateTime(p.at)} · ${p.besoins_consideres} besoins</span></div><p>${esc(p.synthese || "")}</p></div>
+    ${p.grappes.length ? p.grappes.map((g, i) => {
+      const done = g.type === "doublon" && g.besoins.filter(id => id !== g.principal).every(id => st(id) === "Fusionné");
+      return `<div class="grappe ${g.type}"><div class="cp-head"><h4>${esc(g.titre)}</h4><span class="tag ${g.type === "doublon" ? "bad" : "accent"}">${g.type === "doublon" ? "Doublon" : "Synergie"}</span>${done ? `<span class="tag ok">Fusion faite</span>` : ""}</div>
+        <ul>${g.besoins.map(id => `<li><button type="button" class="linkish" data-pf-open="${esc(id)}">${esc(qTitle(id))}</button> · ${esc(dir(id))} · ${esc(st(id))}${g.type === "doublon" && id === g.principal ? " · <b>fiche principale proposée</b>" : ""}</li>`).join("")}</ul>
+        <p>${esc(g.raison)}</p>${g.gain ? `<p class="muted"><b>Ce que le regroupement apporte</b> : ${esc(g.gain)}</p>` : ""}
+        ${canEditQueue && !done ? `<div class="row-end"><button type="button" class="btn-ghost" data-syn="relation" data-g="${i}">Mettre les porteurs en relation</button>${g.type === "doublon" ? `<button type="button" class="btn-primary" data-syn="fusion" data-g="${i}">Préparer la fusion</button>` : ""}</div>` : ""}</div>`;
+    }).join("") : `<p class="okbox">Aucun doublon ni synergie nette entre les besoins actuels.</p>`}${auto}`;
+}
+$("#tool-panel").addEventListener("click", async e => {
+  const b = e.target.closest("[data-syn]"); if (!b) return;
+  const g = syn?.synergies?.grappes?.[+b.dataset.g];
+  b.disabled = true;
+  try {
+    if (b.dataset.syn === "build") {
+      const before = syn?.synergies?.version || 0;
+      const r = await fetch("/api/synergies-bg", { method: "POST", headers: apiHeaders(), body: "{}" });
+      if (r.status === 401) { showGate(); return; }
+      if (r.status === 403) throw new Error("403");
+      const t0 = Date.now();
+      await sleep(1500);
+      for (;;) {
+        await loadSynergies();
+        if ((syn?.synergies?.version || 0) > before || (syn?.error && toMs(syn.error.at) > t0 - 5000 && !syn.running) || Date.now() - t0 > 240000) break;
+        await sleep(4000);
+      }
+      toast((syn?.synergies?.version || 0) > before ? `Analyse prête : ${syn.synergies.grappes.length} regroupement(s).` : "L'analyse n'a pas abouti.");
+    } else if (b.dataset.syn === "fusion" && g) {
+      const target = queue.find(q => q.id === g.principal); if (!target) return;
+      openCards.add(target.id); renderQueue();
+      document.querySelector(`[data-open="${CSS.escape(target.id)}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      await prepFusion(target, g.besoins.filter(id => id !== g.principal && queue.find(q => q.id === id)?.statut !== "Fusionné"));
+    } else if (b.dataset.syn === "relation" && g) {
+      const main = g.principal || g.besoins[0];
+      for (const id of g.besoins.filter(x => x !== main)) await patchFiche(main, { op: "relation", with: id, message: g.message_relation || "" });
+      await refreshWebQueue(); toast("Les porteurs ont été mis en relation.");
+    }
+  } catch (err) { toast(String(err?.message || "").includes("403") ? "Votre rôle ne permet pas cette action." : "L'opération n'a pas abouti."); }
+  finally { b.disabled = false; }
+});
+
+/* ================= From need to project: scoping file ================= */
+const STORY_COLS = ["À faire", "En cours", "Fait"];
+const li = l => (l || []).filter(Boolean).map(x => `<li>${esc(x)}</li>`).join("");
+function cadrageHTML(q, role) {
+  const c = q.cadrage, id = esc(q.id);
+  if (role === "metier") {
+    if (!c) return "";
+    const done = c.user_stories.filter(u => u.statut === "Fait"), pct = c.avancement?.pct || 0;
+    return `<section class="lv-block"><h4>Avancement du projet</h4><div class="meter"><div class="bar"><i style="width:${pct}%"></i></div><b>${pct} %</b></div>
+      <p class="muted">${done.length} fonctionnalité${done.length > 1 ? "s" : ""} livrée${done.length > 1 ? "s" : ""} sur ${c.user_stories.length}.</p>${done.length ? `<ul>${done.map(u => `<li>${esc(u.je_veux)}</li>`).join("")}</ul>` : ""}</section>`;
+  }
+  if (["Brouillon", "Fusionné"].includes(q.statut)) return "";
+  const run = q.cadrageRunning && Date.now() - toMs(q.cadrageRunning.since) < 6 * 60e3;
+  const btns = `${canEditQueue ? `<button type="button" class="btn-ghost" data-act="cadrage" data-id="${id}" ${run ? "disabled" : ""}>${c ? "Régénérer" : "Générer le dossier de cadrage"}</button>` : ""}${c ? `<button type="button" class="btn-ghost" data-act="cad-export" data-fmt="docx" data-id="${id}">Word</button><button type="button" class="btn-ghost" data-act="cad-export" data-fmt="jira" data-id="${id}">Backlog Jira (CSV)</button><button type="button" class="btn-ghost" data-act="cad-export" data-fmt="ado" data-id="${id}">Backlog Azure DevOps (CSV)</button>` : ""}`;
+  const head = `<div class="cp-head"><h4>Du besoin au projet</h4>${c ? `<span class="tag">Proposition IA · v${c.version} · ${fmtDateTime(c.at)}</span>` : ""}${btns}</div>`;
+  const wait = run ? `<p class="thinking">L'agent rédige le dossier : exigences, backlog, plan de POC et business case. Comptez une à trois minutes<span class="dots"></span></p>` : "";
+  const err = q.cadrageError && !run ? `<p class="errbox">Dernière génération en échec : ${esc(q.cadrageError.message)}</p>` : "";
+  if (!c) return canEditQueue || run ? `<section class="lv-block cad">${head}${wait}${err}${run ? "" : `<p class="muted">Une fois le besoin qualifié, l'agent rédige le dossier de cadrage : contexte, périmètre, exigences, données, backlog d'user stories avec critères d'acceptation, plan de POC et business case. Exportable en Word et en backlog Jira ou Azure DevOps ; la livraison se suit ensuite ici.</p>`}</section>` : "";
+  const pct = c.avancement?.pct || 0, bc = c.business_case || {}, poc = c.poc || {};
+  const tbl = (h, rows) => rows.length ? `<div class="mx-wrap"><table class="mx-table"><thead><tr>${h.map(x => `<th>${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(x => `<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>` : "";
+  const epic = e => c.epics.find(x => x.id === e)?.titre || e || "";
+  return `<section class="lv-block cad">${head}${wait}${err}
+    <p>${esc(c.resume)}</p>
+    <details><summary>Contexte, objectifs et périmètre</summary><p>${esc(c.contexte)}</p>${c.objectifs.length ? `<p><b>Objectifs</b></p><ul>${li(c.objectifs)}</ul>` : ""}<p><b>Dans le périmètre</b></p><ul>${li(c.perimetre.inclus)}</ul><p><b>Hors périmètre</b></p><ul>${li(c.perimetre.exclus)}</ul>${c.parties_prenantes.length ? `<p><b>Parties prenantes</b></p><ul>${li(c.parties_prenantes.map(p => `${p.role} : ${p.qui}`))}</ul>` : ""}</details>
+    <details><summary>Exigences · ${c.exigences_fonctionnelles.length} fonctionnelles, ${c.exigences_non_fonctionnelles.length} non fonctionnelles</summary>${tbl(["ID", "Exigence", "Priorité"], c.exigences_fonctionnelles.map(e => [e.id, e.texte, e.priorite]))}<p><b>Non fonctionnelles</b></p><ul>${li(c.exigences_non_fonctionnelles)}</ul></details>
+    <details><summary>Données · ${c.donnees.length} source${c.donnees.length > 1 ? "s" : ""}</summary>${tbl(["Source", "Usage dans le projet", "État"], c.donnees.map(d => [d.source, d.usage, d.etat]))}</details>
+    <details><summary>Plan de POC${poc.duree_semaines ? ` · ${poc.duree_semaines} semaines` : ""}</summary><p>${esc(poc.objectif)}</p>${tbl(["Période", "Livrable"], (poc.etapes || []).map(e => [e.periode, e.livrable]))}<p><b>Critères de succès</b></p><ul>${li(poc.criteres_succes)}</ul><p><b>Go / no go</b> : ${esc(poc.go_no_go)}</p></details>
+    <details><summary>Business case</summary>${tbl(["Gain", "Hypothèse", "Estimation"], (bc.gains || []).map(g => [g.nature, g.hypothese, g.estimation]))}${tbl(["Coût", "Estimation"], (bc.couts || []).map(x => [x.poste, x.estimation]))}<p>${esc(bc.conclusion || "")}</p></details>
+    <details><summary>Risques, jalons et questions ouvertes</summary>${tbl(["Risque", "Parade"], c.risques.map(r => [r.risque, r.parade]))}${tbl(["Jalon", "Échéance"], c.jalons.map(j => [j.nom, j.echeance]))}${c.questions_ouvertes.length ? `<p><b>À trancher avant le lancement</b></p><ul>${li(c.questions_ouvertes)}</ul>` : ""}</details>
+    <h5 class="jh">Backlog et livraison · ${c.avancement?.faites || 0}/${c.user_stories.length} stories · ${pct} %</h5>
+    <div class="meter"><div class="bar"><i style="width:${pct}%"></i></div><b>${pct} %</b></div>
+    <div class="kanban">${STORY_COLS.map(col => `<div class="kcol"><h6>${col} · ${c.user_stories.filter(u => (u.statut || "À faire") === col).length}</h6>${c.user_stories.filter(u => (u.statut || "À faire") === col).map(u => `<div class="story"><p><span class="sid">${esc(u.id)}</span> <span class="muted">${esc(epic(u.epic))} · ${esc(u.priorite)}${u.points ? ` · ${u.points} pts` : ""}</span></p><p>En tant que ${esc(u.en_tant_que)}, je veux ${esc(u.je_veux)}${u.afin_de ? `, afin de ${esc(u.afin_de)}` : ""}.</p>${u.criteres.length ? `<details><summary class="muted">Critères d'acceptation</summary><ul>${li(u.criteres)}</ul></details>` : ""}${canEditQueue ? `<select data-story="${esc(u.id)}" data-fiche="${id}" aria-label="Statut de ${esc(u.id)}">${STORY_COLS.map(s => `<option${s === (u.statut || "À faire") ? " selected" : ""}>${s}</option>`).join("")}</select>` : ""}</div>`).join("")}</div>`).join("")}</div>
+  </section>`;
+}
+async function runCadrage(q, btn) {
+  const before = q.cadrage?.version || 0;
+  btn.disabled = true;
+  const r = await fetch("/api/cadrage-bg", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ id: q.id }) });
+  if (r.status === 401) { showGate(); return; }
+  if (r.status === 403) throw new Error("403");
+  q.cadrageRunning = { since: new Date().toISOString() }; delete q.cadrageError; renderQueue();
+  const t0 = Date.now();
+  let d = q;
+  while (Date.now() - t0 < 6 * 60e3) {
+    await sleep(5000);
+    try {
+      const x = await fetch("/api/fiches/" + encodeURIComponent(q.id), { headers: apiHeaders() });
+      if (!x.ok) continue;
+      d = await x.json();
+      const i = queue.findIndex(z => z.id === q.id); if (i >= 0) queue[i] = d;
+      if ((d.cadrage?.version || 0) > before || (d.cadrageError && !d.cadrageRunning)) break;
+      if (!d.cadrageRunning) d.cadrageRunning = q.cadrageRunning;
+      renderQueue();
+    } catch {}
+  }
+  renderQueue();
+  toast((d.cadrage?.version || 0) > before ? `Dossier de cadrage prêt : ${d.cadrage.user_stories.length} user stories.` : "Le dossier n'a pas pu être généré. Réessayez.");
+}
+const fileBase = t => String(t || "besoin").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "_").slice(0, 50);
+const csvCell = v => { const s = String(v ?? ""); return /[",\n\r;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+const toCsv = rows => "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
+const storyText = u => `En tant que ${u.en_tant_que}, je veux ${u.je_veux}${u.afin_de ? `, afin de ${u.afin_de}` : ""}.`;
+async function exportCadrage(q, fmt) {
+  const c = q.cadrage; if (!c) return;
+  const base = `Cadrage_${fileBase(q.titre)}_${todayTag()}`;
+  const epicsUsed = [...c.epics];
+  if (c.user_stories.some(u => !c.epics.find(e => e.id === u.epic))) epicsUsed.push({ id: "_", titre: "Autres", objectif: "" });
+  const storiesOf = e => c.user_stories.filter(u => e.id === "_" ? !c.epics.find(x => x.id === u.epic) : u.epic === e.id);
+  if (fmt === "jira") {
+    const P = { Must: "High", Should: "Medium", Could: "Low", "Won't": "Lowest" };
+    const rows = [["Issue ID", "Parent ID", "Issue Type", "Summary", "Description", "Priority", "Story Points", "Labels"]];
+    let n = 1;
+    for (const e of epicsUsed) {
+      const eid = n++;
+      rows.push([eid, "", "Epic", `${e.titre}`, e.objectif || "", "", "", "intake-ia"]);
+      for (const u of storiesOf(e)) rows.push([n++, eid, "Story", `${u.id} ${u.je_veux}`.slice(0, 250), `${storyText(u)}\n\nCritères d'acceptation :\n${u.criteres.map(x => "- " + x).join("\n")}\n\nSource : fiche « ${q.titre} » (${q.id})`, P[u.priorite] || "Medium", u.points ?? "", "intake-ia"]);
+    }
+    await webDownloads.save({ filename: base + "_Jira.csv", data: new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8" }) });
+  } else if (fmt === "ado") {
+    const P = { Must: 1, Should: 2, Could: 3, "Won't": 4 };
+    const rows = [["ID", "Work Item Type", "Title 1", "Title 2", "Description", "Acceptance Criteria", "Priority", "Story Points", "Tags"]];
+    for (const e of epicsUsed) {
+      rows.push(["", "Epic", e.titre, "", e.objectif || "", "", "", "", "intake-ia"]);
+      for (const u of storiesOf(e)) rows.push(["", "User Story", "", `${u.id} ${u.je_veux}`.slice(0, 250), storyText(u), u.criteres.join("\n"), P[u.priorite] || 2, u.points ?? "", "intake-ia"]);
+    }
+    await webDownloads.save({ filename: base + "_AzureDevOps.csv", data: new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8" }) });
+  } else {
+    await loadScript("https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.js");
+    const D = window.docx;
+    const H = (t, l = 1) => new D.Paragraph({ text: t, heading: D.HeadingLevel["HEADING_" + l], spacing: { before: 240, after: 80 } });
+    const P = (t, opt = {}) => new D.Paragraph({ children: [new D.TextRun({ text: String(t ?? ""), ...opt })], spacing: { after: 80 } });
+    const B = l => (l || []).filter(Boolean).map(t => new D.Paragraph({ text: String(t), bullet: { level: 0 } }));
+    const cell = (t, head) => new D.TableCell({ children: [new D.Paragraph({ children: [new D.TextRun({ text: String(t ?? ""), bold: !!head, size: 20 })] })], shading: head ? { fill: "E8EDEF" } : undefined });
+    const T = (h, rows) => rows.length ? [new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, rows: [new D.TableRow({ tableHeader: true, children: h.map(x => cell(x, true)) }), ...rows.map(r => new D.TableRow({ children: r.map(x => cell(x)) }))] }), P("")] : [];
+    const bc = c.business_case || {}, poc = c.poc || {};
+    const children = [
+      new D.Paragraph({ text: "Dossier de cadrage", heading: D.HeadingLevel.TITLE }),
+      P(q.titre, { bold: true, size: 28 }),
+      P(`DSI & TD — Innovation Digitale & IA · version ${c.version} du ${fmtDate(c.at)} · proposition générée par l'agent, à valider par la DSI`, { italics: true, color: "6B7A83" }),
+      H("1. Synthèse"), P(c.resume),
+      H("2. Contexte et objectifs"), P(c.contexte), ...B(c.objectifs),
+      H("3. Périmètre"), P("Dans le périmètre", { bold: true }), ...B(c.perimetre.inclus), P("Hors périmètre", { bold: true }), ...B(c.perimetre.exclus),
+      H("4. Parties prenantes"), ...T(["Rôle", "Qui"], c.parties_prenantes.map(p => [p.role, p.qui])),
+      H("5. Exigences fonctionnelles"), ...T(["ID", "Exigence", "Priorité"], c.exigences_fonctionnelles.map(e => [e.id, e.texte, e.priorite])),
+      H("6. Exigences non fonctionnelles"), ...B(c.exigences_non_fonctionnelles),
+      H("7. Données"), ...T(["Source", "Usage", "État"], c.donnees.map(d => [d.source, d.usage, d.etat])),
+      H("8. Backlog"), ...c.epics.flatMap(e => [H(`${e.id} — ${e.titre}`, 2), ...(e.objectif ? [P(e.objectif, { italics: true })] : []), ...c.user_stories.filter(u => u.epic === e.id).flatMap(u => [P(`${u.id} · ${u.priorite}${u.points ? ` · ${u.points} pts` : ""}`, { bold: true }), P(storyText(u)), ...B(u.criteres)])]),
+      ...(c.user_stories.some(u => !c.epics.find(e => e.id === u.epic)) ? [H("Autres stories", 2), ...c.user_stories.filter(u => !c.epics.find(e => e.id === u.epic)).flatMap(u => [P(`${u.id} · ${u.priorite}`, { bold: true }), P(storyText(u)), ...B(u.criteres)])] : []),
+      H(`9. Plan de POC${poc.duree_semaines ? ` (${poc.duree_semaines} semaines)` : ""}`), P(poc.objectif), ...T(["Période", "Livrable"], (poc.etapes || []).map(e => [e.periode, e.livrable])), P("Critères de succès", { bold: true }), ...B(poc.criteres_succes), P(`Go / no go : ${poc.go_no_go || "à définir"}`),
+      H("10. Business case"), ...T(["Gain", "Hypothèse", "Estimation"], (bc.gains || []).map(g => [g.nature, g.hypothese, g.estimation])), ...T(["Coût", "Estimation"], (bc.couts || []).map(x => [x.poste, x.estimation])), P(bc.conclusion || ""),
+      H("11. Risques"), ...T(["Risque", "Parade"], c.risques.map(r => [r.risque, r.parade])),
+      H("12. Jalons"), ...T(["Jalon", "Échéance"], c.jalons.map(j => [j.nom, j.echeance])),
+      H("13. Questions ouvertes"), ...B(c.questions_ouvertes),
+      H("Annexe — fiche d'expression de besoin"), ...FIELDS.filter(f => filled(q, f.k)).flatMap(f => [P(f.label, { bold: true }), P(valText(q.fiche[f.k].valeur))]),
+    ];
+    const doc = new D.Document({ creator: "Agent d'intake DSI & TD", title: `Dossier de cadrage — ${q.titre}`, styles: { default: { document: { run: { font: "Calibri", size: 22 } } } }, sections: [{ children }] });
+    await webDownloads.save({ filename: base + ".docx", data: await D.Packer.toBlob(doc) });
+  }
+}
+
+/* ================= Admin: roles, compliance, audit ================= */
+const ROLE_KEYS = ["metier", "dsi", "direction", "admin"];
+function admRolesText(m) { return Object.entries(m || {}).map(([e, r]) => `${e} = ${r}`).join("\n"); }
+function admRolesRead() {
+  const o = {};
+  for (const l of $("#adm-roles").value.split("\n")) { const m = l.match(/^\s*([^=\s]+@[^=\s]+)\s*=\s*(\w+)\s*$/); if (m && ROLE_KEYS.includes(m[2].toLowerCase())) o[m[1].toLowerCase()] = m[2].toLowerCase(); }
+  return o;
+}
+const CONF_KEYS = ["responsable", "contact", "declaration", "finalite", "conservation_mois", "brouillon_jours", "audit_mois"];
+function admConfFill(c) { for (const k of CONF_KEYS) $("#adm-c-" + k).value = c[k] ?? ""; admConfRender(); }
+function admConfRead() { const o = {}; for (const k of CONF_KEYS) { const v = $("#adm-c-" + k).value; o[k] = $("#adm-c-" + k).type === "number" ? Number(v) : v.trim(); } return o; }
+function admConfRender() {
+  const c = admConfRead();
+  $("#adm-auth").innerHTML = `<p>Connexion par compte professionnel (Microsoft Entra ID) : ${me.entra ? `<span class="tag ok">configurée</span>` : `<span class="tag warn">à configurer</span> — variables ENTRA_TENANT_ID, ENTRA_CLIENT_ID, ENTRA_CLIENT_SECRET`}. Connexion obligatoire : ${me.required ? `<span class="tag ok">oui</span>` : `<span class="tag warn">non, mode démo ouvert avec le code d'accès</span>`}.</p>`;
+  $("#adm-notice").textContent = privacy ? privacy.notice : "";
+  const check = (ok, t) => `<p class="check"><span class="tag ${ok ? "ok" : "warn"}">${ok ? "En place" : "À faire"}</span><span>${t}</span></p>`;
+  $("#adm-registre").innerHTML = `<div class="mx-wrap"><table class="mx-table"><tbody>
+      <tr><td><b>Responsable</b></td><td>${esc(c.responsable)}</td></tr>
+      <tr><td><b>Finalité</b></td><td>${esc(c.finalite)}</td></tr>
+      <tr><td><b>Personnes concernées</b></td><td>Collaborateurs du Groupe qui expriment ou suivent un besoin ; tiers cités dans les messages ou pièces (l'agent ne les recopie pas dans la fiche).</td></tr>
+      <tr><td><b>Données</b></td><td>Identité et coordonnées professionnelles, messages écrits et vocaux transcrits, pièces jointes, fiche de besoin, journal des actions.</td></tr>
+      <tr><td><b>Destinataires</b></td><td>Équipe Innovation Digitale & IA (DSI & TD), Direction en lecture, équipes projet des besoins retenus.</td></tr>
+      <tr><td><b>Conservation</b></td><td>${c.conservation_mois} mois après clôture ; brouillons abandonnés ${c.brouillon_jours} jours ; journal d'audit ${c.audit_mois} mois. Appliquée chaque jour par le pilotage automatique.</td></tr>
+      <tr><td><b>Sécurité</b></td><td>Accès par rôle vérifié par le serveur, HTTPS, journal d'audit non réécrit, secrets hors du code.</td></tr>
+    </tbody></table></div>
+    <p><b>Sous-traitants et transferts</b></p>
+    <div class="mx-wrap"><table class="mx-table"><thead><tr><th>Prestataire</th><th>Rôle</th><th>Localisation</th></tr></thead><tbody>
+      <tr><td>Netlify</td><td>Hébergement, fonctions, stockage des fiches</td><td>Hors Maroc (États-Unis / UE)</td></tr>
+      <tr><td>Anthropic (Claude), via Netlify AI Gateway</td><td>Analyse des messages par l'agent</td><td>Hors Maroc (États-Unis)</td></tr>
+      <tr><td>Google (Gemini)</td><td>Transcription des notes vocales</td><td>Hors Maroc</td></tr>
+      <tr><td>Meta (WhatsApp Business), Microsoft (Teams, Entra ID), Resend (e-mail)</td><td>Canaux et connexion, si activés</td><td>Hors Maroc</td></tr>
+    </tbody></table></div>
+    <p><b>Points de conformité</b></p>
+    ${check(true, "Information préalable affichée sur chaque canal (web, e-mail, WhatsApp, Teams), versionnée et horodatée.")}
+    ${check(true, "Droits d'accès et d'effacement en libre-service : « Mes besoins », ou MES DONNÉES et SUPPRIMER MES DONNÉES sur WhatsApp et Teams ; demandes traitées ici par l'administrateur.")}
+    ${check(true, "Minimisation : l'agent ne recopie pas les données personnelles de tiers lues dans les pièces jointes.")}
+    ${check(true, "Durées de conservation appliquées automatiquement ; journal d'audit des actions et des accès aux pièces.")}
+    ${check(!!c.declaration, c.declaration ? `Traitement déclaré à la CNDP : ${esc(c.declaration)}.` : "Déclaration préalable du traitement à la CNDP.")}
+    ${check(false, "Transfert de données hors du Maroc : autorisation de la CNDP pour les prestataires listés, ou hébergement et modèles dans un pays reconnu adéquat ou au Maroc.")}
+    ${check(me.entra, "Connexion par compte professionnel et rôles attribués dans Entra ID.")}`;
+}
+let auditItems = [];
+async function admLoadAudit() {
+  const out = $("#adm-audit");
+  out.innerHTML = `<p class="thinking">Chargement<span class="dots"></span></p>`;
+  try {
+    const r = await fetch(`/api/audit?days=${$("#adm-audit-days").value}`, { headers: apiHeaders() });
+    if (!r.ok) throw new Error();
+    auditItems = (await r.json()).items || [];
+    admRenderAudit();
+  } catch { out.innerHTML = `<p class="muted">Journal indisponible.</p>`; }
+}
+function admRenderAudit() {
+  const q = $("#adm-audit-q").value.trim().toLowerCase();
+  const items = auditItems.filter(x => !q || JSON.stringify(x).toLowerCase().includes(q));
+  $("#adm-audit").innerHTML = items.length ? `<div class="audit-wrap mx-wrap"><table class="mx-table audit-table"><thead><tr><th>Date</th><th>Qui</th><th>Action</th><th>Besoin</th><th>Détails</th></tr></thead><tbody>${items.slice(0, 300).map(x => `<tr><td class="mono">${fmtDateTime(x.at)}</td><td>${esc(x.actor?.name || "?")}<br><span class="muted">${esc(ROLE_LABEL[x.actor?.role] || x.actor?.role || "")}</span></td><td>${esc(x.action)}</td><td>${esc(x.target?.titre || "")}</td><td>${esc(x.details || "")}</td></tr>`).join("")}</tbody></table></div><p class="muted">${items.length} entrée(s)${items.length > 300 ? ", 300 affichées" : ""}.</p>` : `<p class="muted">Aucune entrée sur la période.</p>`;
+}
+$("#adm-audit-days").addEventListener("change", admLoadAudit);
+$("#adm-audit-q").addEventListener("input", admRenderAudit);
+$("#adm-audit-csv").addEventListener("click", async () => {
+  const rows = [["Date", "Personne", "Rôle", "Action", "Besoin", "Identifiant", "Détails", "IP"], ...auditItems.map(x => [x.at, x.actor?.name, x.actor?.role, x.action, x.target?.titre, x.target?.id, x.details, x.ip])];
+  await webDownloads.save({ filename: `Journal_audit_${todayTag()}.csv`, data: new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8" }) });
+});
+async function admSubject(action, btn) {
+  const v = $("#adm-subject").value.trim(), out = $("#adm-subject-out");
+  if (!v) { $("#adm-subject").focus(); return; }
+  if (action === "erase" && !btn.dataset.armed) { btn.dataset.armed = "1"; btn.textContent = "Confirmer l'effacement"; setTimeout(() => { delete btn.dataset.armed; btn.textContent = "Effacer ses données"; }, 5000); return; }
+  delete btn.dataset.armed; btn.textContent = action === "erase" ? "Effacer ses données" : "Exporter ses données";
+  const subject = /@/.test(v) ? { email: v } : /^[+\d\s().-]{8,}$/.test(v) ? { phone: v } : { name: v };
+  btn.disabled = true;
+  try {
+    const r = await fetch("/api/privacy", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ action, subject }) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || "");
+    if (action === "export") {
+      await webDownloads.save({ filename: `Donnees_${fileBase(v)}_${todayTag()}.json`, data: new Blob([JSON.stringify(j, null, 2)], { type: "application/json" }) });
+      out.innerHTML = `<p class="okbox">Export téléchargé : ${j.fiches.length} besoin(s), ${j.conversations.length} conversation(s), ${j.journal_audit.length} entrée(s) du journal.</p>`;
+    } else {
+      out.innerHTML = `<p class="okbox">Effacement fait : ${j.fiches_anonymisees} besoin(s) anonymisé(s), ${j.brouillons_supprimes} brouillon(s) et ${j.conversations_supprimees} conversation(s) supprimés.</p>`;
+      lastQueueSig = ""; refreshWebQueue();
+    }
+    admLoadAudit();
+  } catch (e) { out.innerHTML = `<p class="errbox">La demande n'a pas abouti${e.message ? ` : ${esc(e.message)}` : ""}.</p>`; }
+  finally { btn.disabled = false; }
+}
+$("#adm-subject-export").addEventListener("click", e => admSubject("export", e.currentTarget));
+$("#adm-subject-erase").addEventListener("click", e => admSubject("erase", e.currentTarget));
+document.addEventListener("input", e => { if (String(e.target.id || "").startsWith("adm-c-")) admConfRender(); });
+
 /* ================= Boot ================= */
 function prefillIdentity() {
   if (profileName && !state.fiche.responsable) {
@@ -2657,8 +3339,9 @@ const use = n => (window.claude && typeof window.claude.use === "function") ? wi
 
 if (MODE === "web") {
   agentReady = true; canEditQueue = true; downloads = webDownloads;
-  $("#attach").hidden = false;
+  $("#attach").hidden = false; $("#file").accept = "image/*,.pdf,.xlsx,.xlsm,.docx,.pptx,.csv,.txt";
   $("#tab-mine").hidden = false; $("#tab-chat").hidden = false; $("#tab-admin").hidden = false; $("#dsi-tools").hidden = false;
+  loadMe().then(loadPrivacy);
   loadPublicConfig();
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) for (const m of document.querySelectorAll(".mic")) m.hidden = false;
   $("#demo-clock").value = String(demoOffsetDays);
@@ -2668,7 +3351,7 @@ if (MODE === "web") {
   openFicheFromLink();
   pwaInit();
   const tabParam = new URLSearchParams(location.search).get("tab");
-  if (["capture", "chat", "mine", "dsi"].includes(tabParam)) { history.replaceState(null, "", location.pathname); showTab(tabParam); }
+  if (["capture", "chat", "mine", "dsi", "admin"].includes(tabParam)) { history.replaceState(null, "", location.pathname); showTab(tabParam); }
 } else {
 use("sample").then(async s => {
   sample = s; agentReady = true;

@@ -14,13 +14,15 @@ export function parseLoose(raw) {
 }
 
 // Streams the answer to the browser as NDJSON lines: {"d": text delta} … then {"done": true, "stop": reason} or {"error": code}.
-export function streamAgent({ system, messages, effort = "low" }) {
+// An optional `prelude` object is sent first (e.g. the stored attachments).
+export function streamAgent({ system, messages, effort = "low", prelude = null }) {
   const enc = new TextEncoder();
   const line = (o) => enc.encode(JSON.stringify(o) + "\n");
   let stream;
   const rs = new ReadableStream({
     async start(controller) {
       try {
+        if (prelude) controller.enqueue(line(prelude));
         stream = client.messages.stream({ model: MODEL, max_tokens: 16000, system, output_config: { effort }, messages });
         stream.on("text", (delta) => controller.enqueue(line({ d: delta })));
         const final = await stream.finalMessage();

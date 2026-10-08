@@ -1,4 +1,4 @@
-import { adminAuthorized } from "../lib/admin.mjs";
+import { adminGuard } from "../lib/admin.mjs";
 import { getConfig, intakeSystem } from "../lib/config.mjs";
 import { client, MODEL, parseLoose } from "../lib/claude.mjs";
 import { JUDGE } from "../lib/prompts.mjs";
@@ -10,7 +10,8 @@ const STATUTS = new Set(["déclaré", "déduit", "confirmé"]);
 const textOf = (m) => m.content.filter((b) => b.type === "text").map((b) => b.text).join("");
 
 export default async (req) => {
-  if (!adminAuthorized(req)) return Response.json({ error: "unauthorized" }, { status: 401 });
+  const a = await adminGuard(req);
+  if (a.error) return a.error;
   let b;
   try { b = await req.json(); } catch { return Response.json({ error: "invalid json" }, { status: 400 }); }
   const c = b?.case;

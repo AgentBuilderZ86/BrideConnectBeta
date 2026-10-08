@@ -6,7 +6,7 @@ import { pilotStore } from "./pilot.mjs";
 const F = ["direction", "urgence", "probleme", "processus", "cout", "decision", "resultats", "donnees_existantes", "donnees_manquantes", "contraintes", "budget"];
 
 export async function buildPortfolio() {
-  const all = (await listFiches()).filter((q) => q.statut !== "Brouillon");
+  const all = (await listFiches()).filter((q) => q.statut !== "Brouillon" && q.statut !== "Fusionné");
   const s = pilotStore();
   if (!all.length) throw new Error("Aucun besoin transmis : rien à organiser.");
   const lines = all.map((q) => {

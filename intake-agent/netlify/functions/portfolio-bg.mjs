@@ -1,10 +1,13 @@
-import { authorized } from "../lib/auth.mjs";
+import { guard } from "../lib/session.mjs";
+import { audit } from "../lib/audit.mjs";
 import { buildPortfolio } from "../lib/portfolio.mjs";
 import { pilotStore } from "../lib/pilot.mjs";
 
 // Builds the portfolio in the background (can take more than a minute on a large queue).
 export default async (req) => {
-  if (!authorized(req)) return;
+  const a = await guard(req, "portfolio.build");
+  if (a.error) return;
+  await audit(a, "feuille de route construite", { req });
   const s = pilotStore();
   await s.setJSON("portfolio-running", { since: new Date().toISOString() });
   try { await buildPortfolio(); await s.delete("portfolio-error"); }
