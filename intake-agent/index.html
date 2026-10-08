@@ -993,6 +993,13 @@ function buildInput(text, file) {
 /* ---- Standalone website mode: same page, served with its own API (/api/agent, /api/fiches) ---- */
 const MODE = (window.claude && typeof window.claude.use === "function") ? "claude" : "web";
 const CODE_KEY = "intake-demo-code";
+// One automatic retry when the platform answers with a gateway error (seen on the first call after a deploy).
+async function fetchRetry(url, opts) {
+  const r = await fetch(url, opts);
+  if (![502, 503, 504].includes(r.status) || (opts && opts.signal && opts.signal.aborted)) return r;
+  await new Promise(res => setTimeout(res, 1500));
+  return fetch(url, opts);
+}
 function apiHeaders() {
   const h = { "content-type": "application/json" };
   try { const c = localStorage.getItem(CODE_KEY); if (c) h["x-demo-code"] = c; const a = localStorage.getItem("intake-admin-code"); if (a) h["x-admin-code"] = a; } catch {}
@@ -1029,7 +1036,7 @@ async function webAsk(text, file, signal, onText) {
 const askAgent = (mode, input, onText, signal) => postAgent({ mode, input }, signal, onText || (() => {}));
 async function postAgent(body, signal, onText) {
   let r;
-  try { r = await fetch("/api/agent", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body), signal }); }
+  try { r = await fetchRetry("/api/agent", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body), signal }); }
   catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "upstream_error" }; }
   if (r.status === 401) { showGate(); throw { code: "needs_code" }; }
   if (r.status === 429) throw { code: "rate_limited" };
@@ -2098,7 +2105,7 @@ async function simPost(payload, optimistic) {
   simBusy = true; simMsgs = [...simMsgs, { dir: "in", at: new Date().toISOString(), pending: true, ...optimistic }];
   simRender();
   try {
-    const r = await fetch("/api/channel/simulate", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ channel: simChannel, sender: simSender(), name: PERSONAS[simPersona].name, ...payload }) });
+    const r = await fetchRetry("/api/channel/simulate", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ channel: simChannel, sender: simSender(), name: PERSONAS[simPersona].name, ...payload }) });
     if (r.status === 401) { showGate(); throw new Error("code"); }
     if (r.status === 429) throw new Error("rate");
     if (!r.ok) throw new Error("status " + r.status);
@@ -2343,7 +2350,7 @@ async function admRunEvals(btn) {
   for (const [i, c] of cases.entries()) {
     $("#adm-progress").innerHTML = `Cas ${i + 1} sur ${cases.length} : ${esc(c.nom)}<span class="dots"></span>`;
     try {
-      const r = await fetch("/api/admin/eval", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ case: c, draft: { intake: draft.intake, directions: draft.directions } }) });
+      const r = await fetchRetry("/api/admin/eval", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ case: c, draft: { intake: draft.intake, directions: draft.directions } }) });
       const x = r.ok ? await r.json() : { nom: c.nom, erreur: `Erreur ${r.status}` };
       results.push(x);
       $("#adm-results").insertAdjacentHTML("beforeend", evalResultHTML(x));
@@ -2447,7 +2454,7 @@ function roadmapBodyHTML() {
   if (pf.error && !pf.running) head += `<p class="errbox">Dernière construction en échec : ${esc(pf.error.message)}</p>`;
   if (!p) return head + `<div class="empty-state"><h3>Pas encore de feuille de route</h3><p>Cliquez « Construire la feuille de route » : l'agent analyse tous les besoins transmis.</p></div>`;
   const recus = queue.filter(q => q.statut !== "Brouillon");
-  const changed = recus.filter(q => (q.events || []).some(e => String(e.at) > p.at)).length + Math.max(0, recus.length - (p.besoins_consideres || 0));
+  const changed = recus.filter(q => (q.events || []).some(e => String(e.at) > p.at && toMs(e.at) <= Date.now())).length + Math.max(0, recus.length - (p.besoins_consideres || 0));
   const vagues = [1, 2, 3].map(n => ({ n, meta: (p.vagues || []).find(v => Number(v.numero) === n) || { numero: n }, cas: (p.cas_usage || []).filter(c => Number(c.vague) === n), soc: (p.socles || []).filter(s => Number(s.vague) === n) }));
   return head + `<div class="lv-block digest"><div class="cp-head"><h4>Proposition de feuille de route</h4><span class="tag">Proposition IA à valider en COPIL · v${p.version} · ${fmtDateTime(p.at)}</span>${changed ? `<span class="tag warn">${changed} besoin(s) nouveaux ou modifiés depuis</span>` : ""}</div>
       <p>${esc(p.synthese || "")}</p>
