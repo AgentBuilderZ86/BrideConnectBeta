@@ -1,6 +1,6 @@
 import { authorized } from "../lib/auth.mjs";
 import { askJSON } from "../lib/claude.mjs";
-import { RULES } from "../lib/rules.mjs";
+import { getConfig, intakeSystem } from "../lib/config.mjs";
 import { EMAIL_CHANNEL } from "../lib/prompts.mjs";
 import { store, applyChanges, addEvent, scoreOf } from "../lib/fiche.mjs";
 
@@ -39,7 +39,8 @@ export default async (req, context) => {
   const message = `ÉTAT ACTUEL DE LA FICHE (JSON, null = vide) :\n{}\n\nNOUVEAU MESSAGE DE L'UTILISATEUR (reçu par e-mail) :\n${emailText}`;
   let res;
   try {
-    res = await askJSON({ system: RULES, messages: [{ role: "user", content: `${EMAIL_CHANNEL}\n\nCONTEXTE : date du jour ${new Date().toLocaleDateString("fr-FR")}.${fromName ? ` Expéditeur : ${fromName}.` : ""}\n\n${message}` }] });
+    const cfg = await getConfig();
+    res = await askJSON({ system: intakeSystem(cfg), messages: [{ role: "user", content: `${EMAIL_CHANNEL.replace("L'agent d'intake — DSI & TD", cfg.signature)}\n\nCONTEXTE : date du jour ${new Date().toLocaleDateString("fr-FR")}.${fromName ? ` Expéditeur : ${fromName}.` : ""}\n\n${message}` }] });
   } catch (e) {
     console.error("inbound agent error", e?.message);
     return Response.json({ error: "agent failed" }, { status: 502 });

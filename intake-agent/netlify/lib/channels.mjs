@@ -1,9 +1,10 @@
 import { getStore } from "@netlify/blobs";
-import { RULES } from "./rules.mjs";
 import { MESSAGING_CHANNEL, UPDATE } from "./prompts.mjs";
 import { askJSON } from "./claude.mjs";
 import { buildIntakeMessages } from "./intake.mjs";
 import { transcribeAudio } from "./transcribe.mjs";
+import { getConfig, intakeSystem } from "./config.mjs";
+import { pushForFiche } from "./push.mjs";
 import { sendWhatsApp, sendTeams, sendEmail } from "./adapters.mjs";
 import {
   store as ficheStore, applyChanges, applyMesures, addEvent, scoreOf, FIELD_KEYS, SHORT, hasVal, valText,
@@ -67,7 +68,8 @@ async function handleIntake(conv, text, image, say, at) {
     message: `ÉTAT ACTUEL DE LA FICHE (JSON, null = vide) :\n${JSON.stringify(state)}\n\nNOUVEAU MESSAGE DE L'UTILISATEUR :\n${text || "(photo sans texte)"}${image ? "\n\n(Une image est jointe à ce message.)" : ""}`,
     image,
   });
-  const res = await askJSON({ system: RULES, messages });
+  const cfg = await getConfig();
+  const res = await askJSON({ system: intakeSystem(cfg), messages });
   applyChanges(doc.fiche, res.maj, at, CH_LABEL[conv.channel], { protectConfirmed: true });
   doc.transcript.push({ role: "user", content: (text || "(photo)") + (image ? " [photo jointe]" : "") }, { role: "assistant", content: String(res.message || "") });
   doc.echanges = (doc.echanges || 0) + 1;
@@ -99,7 +101,8 @@ async function handleFollowUp(conv, text, say, at) {
   const question = conv.awaiting.question || "";
   if (!doc) { conv.awaiting = null; return handleIntake(conv, text, null, say, at); }
   const value = valueForAgent(doc);
-  const input = `DATE DU JOUR : ${frDate(at)}\nSOURCE : métier (le porteur du besoin répond sur ${CH_LABEL[conv.channel]})\nQUESTION POSÉE PAR L'AGENT : ${question}\n\nFICHE ACTUELLE « ${doc.titre} » :\n${ficheForAgent(doc.fiche, Date.parse(at))}${value ? `\n\nINDICATEURS DE VALEUR :\n${JSON.stringify(value)}` : ""}\n\nNOUVELLE INFORMATION :\n${text}`;
+  const cfg = await getConfig();
+  const input = `DATE DU JOUR : ${frDate(at)}\nSOURCE : métier (le porteur du besoin répond sur ${CH_LABEL[conv.channel]})\nQUESTION POSÉE PAR L'AGENT : ${question}\n\nFICHE ACTUELLE « ${doc.titre} » :\n${ficheForAgent(doc.fiche, Date.parse(at), cfg.ttl)}${value ? `\n\nINDICATEURS DE VALEUR :\n${JSON.stringify(value)}` : ""}\n\nNOUVELLE INFORMATION :\n${text}`;
   const res = await askJSON({ system: UPDATE, messages: [{ role: "user", content: input }] });
   const props = (Array.isArray(res.propositions) ? res.propositions : []).filter((p) => p && FIELD_KEYS.includes(p.champ));
   const mesures = Array.isArray(res.mesures) ? res.mesures.filter((m) => m && m.indicateurId) : [];
@@ -184,8 +187,15 @@ export async function sendReplies(conv, replies, opts = {}) {
   return ok;
 }
 
-// Delivers a nudge to the fiche owner on the channel the fiche came from. Returns a label of what was done.
+// Delivers a nudge to the fiche owner on the channel the fiche came from, plus a notification on every
+// device that installed the app and follows the fiche. Returns a label of what was done.
 export async function deliverNudge(doc, nudge) {
+  const devices = await pushForFiche(doc.id, { title: `Question sur « ${String(doc.titre || "votre besoin").slice(0, 60)} »`, body: nudge.question }).catch(() => 0);
+  const via = await deliverNudgeOnChannel(doc, nudge);
+  return devices ? `${via} + notification sur ${devices} appareil${devices > 1 ? "s" : ""}` : via;
+}
+
+async function deliverNudgeOnChannel(doc, nudge) {
   const c = doc.contact;
   if (c && (c.channel === "whatsapp" || c.channel === "teams")) {
     const conv = (await getConv(c.channel, c.sender)) || { channel: c.channel, sender: c.sender, name: c.name || "", messages: [], ficheId: null, awaiting: null, createdAt: new Date().toISOString() };
@@ -199,7 +209,7 @@ export async function deliverNudge(doc, nudge) {
     return conv.simulated ? `${CH_LABEL[c.channel]} (simulateur)` : sent ? CH_LABEL[c.channel] : `${CH_LABEL[c.channel]} (non configuré)`;
   }
   if (doc.origine === "e-mail" && doc.demandeur && /@/.test(doc.demandeur)) {
-    const sent = await sendEmail({ to: doc.demandeur, subject: `Votre besoin « ${doc.titre} »`, text: `Bonjour,\n\n${nudge.question}\n\nRépondez simplement à cet e-mail ou mettez à jour votre fiche en ligne.\n\nL'agent d'intake — DSI & TD` });
+    const sent = await sendEmail({ to: doc.demandeur, subject: `Votre besoin « ${doc.titre} »`, text: `Bonjour,\n\n${nudge.question}\n\nRépondez simplement à cet e-mail ou mettez à jour votre fiche en ligne.\n\n${(await getConfig()).signature}` });
     return sent ? "e-mail" : "application (e-mail non configuré)";
   }
   return "application";

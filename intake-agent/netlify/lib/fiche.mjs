@@ -14,7 +14,7 @@ export const hasVal = (v) => Array.isArray(v) ? v.length > 0 : typeof v === "str
 export const valText = (v) => Array.isArray(v) ? v.join(", ") : String(v ?? "");
 const toMs = (v) => typeof v === "number" ? v : (Date.parse(v || "") || null);
 export const ageDays = (e, nowMs) => { const m = toMs(e && e.maj); return m ? Math.max(0, Math.floor((nowMs - m) / 864e5)) : null; };
-export const isStale = (k, e, nowMs) => { const a = ageDays(e, nowMs); return a !== null && a > (TTL[k] || 180); };
+export const isStale = (k, e, nowMs, ttl = TTL) => { const a = ageDays(e, nowMs); return a !== null && a > (ttl[k] || 180); };
 export const frDate = (d) => new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Africa/Casablanca" });
 
 export function scoreOf(fiche) {
@@ -59,11 +59,11 @@ export function applyMesures(doc, mesures, at, source) {
   return n;
 }
 
-export function ficheForAgent(fiche, nowMs) {
+export function ficheForAgent(fiche, nowMs, ttl = TTL) {
   const o = {};
   for (const k of FIELD_KEYS) {
     const e = fiche?.[k];
-    o[k] = e && hasVal(e.valeur) ? { valeur: e.valeur, statut: e.statut, anciennete_jours: ageDays(e, nowMs), perime: isStale(k, e, nowMs) } : null;
+    o[k] = e && hasVal(e.valeur) ? { valeur: e.valeur, statut: e.statut, anciennete_jours: ageDays(e, nowMs), perime: isStale(k, e, nowMs, ttl) } : null;
   }
   return JSON.stringify(o, null, 1);
 }

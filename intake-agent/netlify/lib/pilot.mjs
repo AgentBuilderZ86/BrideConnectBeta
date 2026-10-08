@@ -4,6 +4,7 @@ import { askJSON } from "./claude.mjs";
 import { NUDGE, DIGEST } from "./prompts.mjs";
 import { deliverNudge } from "./channels.mjs";
 import { sendEmail } from "./adapters.mjs";
+import { getConfig } from "./config.mjs";
 
 // Autopilot: a daily round that keeps every fiche true without anyone filling a form,
 // and a weekly digest for the DSI. Both log what they did so the team can audit the agent.
@@ -22,10 +23,12 @@ function bdBetween(a, b) {
 }
 const lastEventMs = (q) => (q.events || []).map((e) => toMs(e.at)).filter(Boolean).sort((a, b) => a - b).pop() || toMs(q.submittedAt);
 
-export function diagnose(q, now) {
-  const stale = FIELD_KEYS.filter((k) => filled(q, k) && isStale(k, q.fiche[k], now));
-  const deduits = FIELD_KEYS.filter((k) => filled(q, k) && q.fiche[k].statut === "déduit" && (ageDays(q.fiche[k], now) ?? 0) >= 7);
-  const pendingOld = (q.pending || []).filter((p) => now - (toMs(p.at) || now) > 3 * DAY).length;
+const DEFAULT_SEUILS = { hypothese_jours: 7, proposition_jours: 3, inactivite_jours: 21, valeur_jours: 30, relance_pause_jours: 7 };
+export function diagnose(q, now, cfg = {}) {
+  const S = { ...DEFAULT_SEUILS, ...(cfg.seuils || {}) };
+  const stale = FIELD_KEYS.filter((k) => filled(q, k) && isStale(k, q.fiche[k], now, cfg.ttl));
+  const deduits = FIELD_KEYS.filter((k) => filled(q, k) && q.fiche[k].statut === "déduit" && (ageDays(q.fiche[k], now) ?? 0) >= S.hypothese_jours);
+  const pendingOld = (q.pending || []).filter((p) => now - (toMs(p.at) || now) > S.proposition_jours * DAY).length;
   const last = lastEventMs(q);
   const inactiveDays = last ? Math.floor((now - last) / DAY) : null;
   const dd = q.echeance ? bdBetween(now, q.echeance) : null;
@@ -33,13 +36,13 @@ export function diagnose(q, now) {
   const inds = q.valeur?.indicateurs || [];
   const lastMeasure = (q.valeur?.mesures || []).map((m) => toMs(m.at)).filter(Boolean).sort((a, b) => a - b).pop();
   const prodDays = q.productionAt ? Math.floor((now - toMs(q.productionAt)) / DAY) : null;
-  const valueDue = q.statut === "En production" && inds.length > 0 && prodDays !== null && prodDays >= 30 && (!lastMeasure || now - lastMeasure > 30 * DAY);
-  const nudgeBlocked = !!(q.nudge && now - (toMs(q.nudge.at) || 0) < 7 * DAY);
+  const valueDue = q.statut === "En production" && inds.length > 0 && prodDays !== null && prodDays >= S.valeur_jours && (!lastMeasure || now - lastMeasure > S.valeur_jours * DAY);
+  const nudgeBlocked = !!(q.nudge && now - (toMs(q.nudge.at) || 0) < S.relance_pause_jours * DAY);
   const reasons = [];
   if (stale.length) reasons.push(`${stale.length} info(s) périmée(s)`);
   if (deduits.length) reasons.push(`${deduits.length} hypothèse(s) non confirmée(s)`);
   if (pendingOld) reasons.push(`${pendingOld} proposition(s) sans réponse`);
-  if (inactiveDays !== null && inactiveDays >= 21) reasons.push(`inactif depuis ${inactiveDays} j`);
+  if (inactiveDays !== null && inactiveDays >= S.inactivite_jours) reasons.push(`inactif depuis ${inactiveDays} j`);
   if (late) reasons.push(`retour DSI en retard de ${-dd} j ouvrés`);
   if (valueDue) reasons.push("valeur à mesurer");
   return { stale, deduits, pendingOld, inactiveDays, dd, late, valueDue, prodDays, nudgeBlocked, reasons };
@@ -60,8 +63,9 @@ export async function getPilotState() {
 
 export async function runDaily({ offsetDays = 0, trigger = "planifié" } = {}) {
   const now = Date.now() + offsetDays * DAY, at = new Date(now).toISOString();
+  const cfg = await getConfig();
   const fiches = (await listFiches()).filter((q) => ACTIVE(q.statut));
-  const cands = fiches.map((q) => ({ q, d: diagnose(q, now) })).filter(({ d }) => !d.nudgeBlocked && d.reasons.length);
+  const cands = fiches.map((q) => ({ q, d: diagnose(q, now, cfg) })).filter(({ d }) => !d.nudgeBlocked && d.reasons.length);
   let relances = [];
   if (cands.length) {
     const lines = cands.map(({ q, d }) => JSON.stringify({
@@ -98,7 +102,7 @@ export async function runDaily({ offsetDays = 0, trigger = "planifié" } = {}) {
   return entry;
 }
 
-export function computeKpis(all, now) {
+export function computeKpis(all, now, cfg = {}) {
   const recus = all.filter((q) => q.statut !== "Brouillon");
   const firstDsi = (q) => (q.events || []).filter((e) => ["statut", "reponse", "qualif"].includes(e.type)).map((e) => toMs(e.at)).filter(Boolean).sort((a, b) => a - b)[0];
   const delays = recus.map((q) => { const f = firstDsi(q), s0 = toMs(q.submittedAt); return f && s0 ? Math.max(0, bdBetween(s0, f)) : null; }).filter((x) => x !== null);
@@ -109,8 +113,8 @@ export function computeKpis(all, now) {
     nouveaux_7j: recus.filter((q) => within7(toMs(q.submittedAt))).length,
     brouillons: all.length - recus.length,
     en_attente_dsi: recus.filter((q) => ["À qualifier", "En qualification"].includes(q.statut)).length,
-    en_retard: recus.filter((q) => diagnose(q, now).late).length,
-    a_jour_pct: recus.length ? Math.round(100 * recus.filter((q) => !diagnose(q, now).stale.length).length / recus.length) : null,
+    en_retard: recus.filter((q) => diagnose(q, now, cfg).late).length,
+    a_jour_pct: recus.length ? Math.round(100 * recus.filter((q) => !diagnose(q, now, cfg).stale.length).length / recus.length) : null,
     delai_premiere_reponse_jours: delays.length ? Math.round(10 * delays.reduce((a, b) => a + b, 0) / delays.length) / 10 : null,
     en_realisation: recus.filter((q) => q.statut === "En réalisation").length,
     en_production: recus.filter((q) => q.statut === "En production").length,
@@ -122,10 +126,11 @@ export function computeKpis(all, now) {
 
 export async function runWeekly({ offsetDays = 0, trigger = "planifié" } = {}) {
   const now = Date.now() + offsetDays * DAY, at = new Date(now).toISOString();
+  const cfg = await getConfig();
   const all = await listFiches();
-  const kpis = computeKpis(all, now);
+  const kpis = computeKpis(all, now, cfg);
   const lines = all.filter((q) => q.statut !== "Brouillon").map((q) => {
-    const d = diagnose(q, now);
+    const d = diagnose(q, now, cfg);
     return JSON.stringify({
       id: q.id, titre: q.titre, statut: q.statut, direction: valText(q.fiche?.direction?.valeur) || null,
       jours_depuis_transmission: q.submittedAt ? Math.floor((now - toMs(q.submittedAt)) / DAY) : null,
