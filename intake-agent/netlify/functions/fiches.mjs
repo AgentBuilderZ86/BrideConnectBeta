@@ -255,6 +255,18 @@ export default async (req, context) => {
     return Response.json(doc);
   }
 
+  // Deletes one fiche and its attachments (administrators: test data, mistaken submissions).
+  if (req.method === "DELETE" && id) {
+    if ((a = await guard(req, "admin")).error) return a.error;
+    const doc = await s.get(id, { type: "json" });
+    if (!doc) return bad("not found", 404);
+    const ps = getStore({ name: "pieces", consistency: "strong" });
+    await Promise.all((doc.pieces || []).map((p) => ps.delete(p.id).catch(() => 0)));
+    await s.delete(id);
+    await audit(a, "fiche supprimée", { target: doc, req });
+    return Response.json({ deleted: id });
+  }
+
   if (req.method === "DELETE" && !id && new URL(req.url).searchParams.get("all") === "1") {
     if ((a = await guard(req, "demo.reset")).error) return a.error;
     const { blobs } = await s.list();
