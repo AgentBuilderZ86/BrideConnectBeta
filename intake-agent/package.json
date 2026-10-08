@@ -1,0 +1,14 @@
+{
+  "name": "intake-agent",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.130.0",
+    "@google/genai": "^2.24.0",
+    "@netlify/blobs": "11.1.4",
+    "jose": "^6.2.12"
+  }
+}

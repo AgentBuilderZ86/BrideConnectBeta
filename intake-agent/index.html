@@ -1,0 +1,2244 @@
+<title>Agent d'Intake Innovation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
+<style>
+/* Layout: two working panes — conversation on the left, the living fiche on the right; a DSI queue as a second view. */
+:root {
+  --bg: #F2F5F6;
+  --surface: #FFFFFF;
+  --surface-2: #E8EDEF;
+  --ink: #13212A;
+  --ink-2: #4B5C66;
+  --ink-3: #7A8A93;
+  --line: #D3DCE1;
+  --accent: #7A1F45;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #F4E5EB;
+  --st-vide: #8A979F;   --st-vide-bg: #EEF1F3;
+  --st-deduit: #9A5B00; --st-deduit-bg: #FBEFD8;
+  --st-declare: #1D5A9E;--st-declare-bg: #E1EBF7;
+  --st-confirme: #1C6E45;--st-confirme-bg: #DDF1E5;
+  --danger: #A8261E;    --danger-bg: #FBE6E4;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-doc: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1418; --surface: #151E24; --surface-2: #1C272E; --ink: #E4EBEE; --ink-2: #A3B4BD; --ink-3: #74868F; --line: #2A3740;
+    --accent: #E67FA8; --accent-ink: #22101A; --accent-soft: #3A1C2A;
+    --st-vide: #8C9AA2; --st-vide-bg: #1F2A31;
+    --st-deduit: #F0B65A; --st-deduit-bg: #3A2B12;
+    --st-declare: #8BB8F0; --st-declare-bg: #172B44;
+    --st-confirme: #7FD3A4; --st-confirme-bg: #143323;
+    --danger: #F2958D; --danger-bg: #3D1916;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1418; --surface: #151E24; --surface-2: #1C272E; --ink: #E4EBEE; --ink-2: #A3B4BD; --ink-3: #74868F; --line: #2A3740;
+  --accent: #E67FA8; --accent-ink: #22101A; --accent-soft: #3A1C2A;
+  --st-vide: #8C9AA2; --st-vide-bg: #1F2A31;
+  --st-deduit: #F0B65A; --st-deduit-bg: #3A2B12;
+  --st-declare: #8BB8F0; --st-declare-bg: #172B44;
+  --st-confirme: #7FD3A4; --st-confirme-bg: #143323;
+  --danger: #F2958D; --danger-bg: #3D1916;
+  color-scheme: dark;
+}
+
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-ui); }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { display: flex; flex-direction: column; height: 100%; }
+
+/* ---------- top bar ---------- */
+.top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mark { font: 500 11px/1 var(--font-mono); letter-spacing: .06em; background: var(--accent); color: var(--accent-ink); padding: 6px 7px; border-radius: 6px; }
+.brand h1 { font: 600 16px/1.2 var(--font-ui); margin: 0; }
+.brand small { display: block; font-size: 12px; color: var(--ink-3); }
+.tabs { display: flex; gap: 4px; margin-left: auto; background: var(--surface-2); padding: 3px; border-radius: 9px; }
+.tabs button { border: 0; background: transparent; padding: 6px 12px; border-radius: 7px; font-weight: 500; font-size: 14px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
+.count { font: 500 11px/1 var(--font-mono); background: var(--accent-soft); color: var(--accent); padding: 3px 6px; border-radius: 20px; }
+
+main { flex: 1; min-height: 0; }
+.view { height: 100%; }
+
+/* ---------- capture view ---------- */
+.panes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 480px); height: 100%; }
+.pane { min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.seg { display: none; gap: 4px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.seg button { flex: 1; border: 1px solid var(--line); background: transparent; padding: 7px 10px; border-radius: 8px; font-weight: 500; font-size: 14px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.chat-head { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+.chat-head .t { min-width: 0; flex: 1; }
+.chat-head .eyebrow { font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.chat-head h2 { margin: 2px 0 0; font: 600 17px/1.3 var(--font-ui); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn-ghost { border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.btn-ghost:hover { border-color: var(--ink-3); }
+.btn-ghost.warn { border-color: var(--danger); color: var(--danger); }
+
+.log { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.msg { max-width: 680px; display: flex; flex-direction: column; gap: 6px; }
+.msg.user { align-self: flex-end; align-items: flex-end; }
+.msg .who { font: 500 11px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.bubble { padding: 10px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); overflow-wrap: anywhere; }
+.msg.user .bubble { background: var(--ink); color: var(--bg); border-color: var(--ink); white-space: pre-wrap; }
+.bubble p { margin: 0 0 6px; } .bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { margin: 4px 0 6px; padding-left: 20px; }
+.bubble li { margin: 2px 0; }
+.msg.err .bubble { background: var(--danger-bg); border-color: transparent; color: var(--danger); }
+.attach-note { font-size: 12px; color: var(--ink-3); }
+.changed { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-3); }
+.changed span.c { background: var(--surface-2); color: var(--ink-2); padding: 2px 8px; border-radius: 20px; }
+.thinking { color: var(--ink-3); font-style: italic; }
+.thinking .dots::after { content: "…"; animation: dots 1.2s steps(4) infinite; display: inline-block; width: 1.2em; overflow: hidden; vertical-align: bottom; }
+@keyframes dots { 0% { width: 0 } 100% { width: 1.2em } }
+
+.examples { display: grid; gap: 8px; margin-top: 4px; }
+.examples .lbl { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.ex { text-align: left; border: 1px dashed var(--line); background: transparent; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: var(--ink-2); }
+.ex:hover { border-color: var(--accent); color: var(--ink); }
+.ex b { display: block; font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 2px; }
+
+.suggest { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 8px; }
+.suggest button { border: 1px solid var(--accent); color: var(--accent); background: var(--surface); padding: 5px 11px; border-radius: 20px; font-size: 13px; text-align: left; }
+.suggest button:hover { background: var(--accent-soft); }
+
+.composer { padding: 10px 20px 16px; border-top: 1px solid var(--line); background: var(--surface); }
+.composer .box { border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.composer .box:focus-within { border-color: var(--accent); }
+.composer textarea { border: 0; outline: 0; background: transparent; resize: none; width: 100%; min-height: 44px; max-height: 180px; line-height: 1.45; }
+.composer .row { display: flex; align-items: center; gap: 8px; }
+.composer .hint { font-size: 12px; color: var(--ink-3); flex: 1; min-width: 0; }
+.btn-primary { border: 0; background: var(--accent); color: var(--accent-ink); padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; }
+.btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+.btn-icon { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
+.file-chip { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; background: var(--surface-2); padding: 3px 8px; border-radius: 20px; align-self: flex-start; }
+.file-chip button { border: 0; background: transparent; padding: 0 2px; font-size: 14px; line-height: 1; color: var(--ink-3); }
+.locked { font-size: 14px; color: var(--ink-2); padding: 6px 0; }
+
+/* ---------- fiche pane ---------- */
+.fiche { background: var(--surface); border-left: 1px solid var(--line); }
+.fiche-scroll { flex: 1; overflow-y: auto; }
+.fiche-head { padding: 16px 20px 14px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+.fiche-head .eyebrow { font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.fiche-head h3 { margin: 0; font: 600 20px/1.25 var(--font-doc); text-wrap: balance; }
+.meter { display: flex; align-items: center; gap: 12px; }
+.meter .bar { flex: 1; height: 8px; background: var(--surface-2); border-radius: 8px; overflow: hidden; }
+.meter .bar i { display: block; height: 100%; background: var(--accent); border-radius: 8px; transition: width .4s ease; }
+.meter b { font: 500 15px/1 var(--font-mono); font-variant-numeric: tabular-nums; min-width: 3.2em; text-align: right; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+.alerts { padding: 12px 20px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+.alerts h4 { margin: 0; font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.alert { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; font-size: 13px; color: var(--ink-2); }
+.alert .k { font: 500 10.5px/1.6 var(--font-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--st-deduit); background: var(--st-deduit-bg); padding: 0 6px; border-radius: 4px; white-space: nowrap; }
+.alert .k.doublon, .alert .k.conformite { color: var(--danger); background: var(--danger-bg); }
+
+.sec { padding: 14px 20px 6px; border-bottom: 1px solid var(--line); }
+.sec-h { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.sec-h .n { font: 500 12px/1 var(--font-mono); color: var(--accent); }
+.sec-h h4 { margin: 0; font: 600 16px/1.3 var(--font-doc); flex: 1; }
+.sec-h .pct { font: 400 12px/1 var(--font-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+.field { padding: 8px 0 10px; border-top: 1px dashed var(--line); display: grid; gap: 4px; }
+.sec-h + .field { border-top: 0; }
+.f-top { display: flex; align-items: flex-start; gap: 8px; }
+.f-label { flex: 1; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.pill { font: 500 10.5px/1.6 var(--font-mono); padding: 0 7px; border-radius: 20px; white-space: nowrap; }
+.st-vide { color: var(--st-vide); background: var(--st-vide-bg); }
+.st-deduit { color: var(--st-deduit); background: var(--st-deduit-bg); }
+.st-declare { color: var(--st-declare); background: var(--st-declare-bg); }
+.st-confirme { color: var(--st-confirme); background: var(--st-confirme-bg); }
+.f-val { font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.f-val.empty { color: var(--ink-3); font-style: italic; font-size: 13px; }
+.f-val .chip { display: inline-block; background: var(--surface-2); padding: 1px 8px; border-radius: 20px; margin: 0 4px 4px 0; font-size: 13px; }
+.f-note { font-size: 12px; color: var(--ink-3); }
+.f-actions { display: flex; gap: 6px; }
+.f-actions button { border: 0; background: transparent; padding: 2px 0; font-size: 12.5px; font-weight: 500; color: var(--accent); }
+.f-actions button + button { margin-left: 8px; }
+.field.flash { animation: flash 1.6s ease; }
+@keyframes flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
+.edit { display: grid; gap: 6px; }
+.edit textarea, .edit select, .edit input[type=text] { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; background: var(--bg); }
+.edit .checks { display: grid; gap: 4px; font-size: 14px; }
+.edit .checks label { display: flex; gap: 8px; align-items: center; }
+
+.fiche-foot { padding: 12px 20px 16px; border-top: 1px solid var(--line); display: grid; gap: 6px; background: var(--surface); }
+.fiche-foot .btn-primary { width: 100%; padding: 10px; }
+.fiche-foot .sub { font-size: 12.5px; color: var(--ink-3); text-align: center; }
+.ready { color: var(--st-confirme); font-weight: 600; }
+
+/* ---------- modal / recap ---------- */
+.modal { position: fixed; inset: 0; background: rgb(8 14 18 / .55); display: flex; align-items: flex-start; justify-content: center; padding: max(24px, env(safe-area-inset-top, 0px)) 16px 24px; overflow-y: auto; z-index: 10; }
+.sheet { background: var(--surface); border-radius: 14px; width: 100%; max-width: 760px; box-shadow: 0 20px 60px rgb(0 0 0 / .3); }
+.sheet-h { display: flex; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--line); }
+.sheet-h h3 { margin: 0; flex: 1; font: 600 18px/1.3 var(--font-doc); }
+.sheet-b { padding: 6px 22px 18px; }
+.sheet-f { padding: 14px 22px 18px; border-top: 1px solid var(--line); display: grid; gap: 12px; }
+.sheet-f .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+.confirm-line { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.confirm-line input { margin-top: 3px; }
+.warnbox { background: var(--st-deduit-bg); color: var(--st-deduit); padding: 10px 12px; border-radius: 8px; font-size: 13.5px; }
+.okbox { background: var(--st-confirme-bg); color: var(--st-confirme); padding: 12px 14px; border-radius: 8px; font-size: 14px; }
+.errbox { background: var(--danger-bg); color: var(--danger); padding: 10px 12px; border-radius: 8px; font-size: 13.5px; }
+
+.doc { font-size: 14px; }
+.doc .doc-title { font: 600 22px/1.25 var(--font-doc); margin: 14px 0 2px; }
+.doc .doc-sub { color: var(--ink-3); font-size: 13px; margin-bottom: 10px; }
+.doc h5 { font: 600 15px/1.3 var(--font-doc); margin: 18px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--line); display: flex; gap: 8px; }
+.doc h5 .n { font: 500 12px/1.6 var(--font-mono); color: var(--accent); }
+.doc .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 18px; }
+.doc .q { margin: 8px 0; min-width: 0; }
+.doc .q .ql { font-size: 12.5px; color: var(--ink-3); font-weight: 600; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.doc .q .qv { white-space: pre-wrap; overflow-wrap: anywhere; }
+.doc .q .qv.empty { color: var(--ink-3); font-style: italic; }
+.boxes { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.boxes span { white-space: nowrap; }
+.boxes span.on { font-weight: 600; color: var(--accent); }
+
+/* ---------- DSI view ---------- */
+.dsi { height: 100%; overflow-y: auto; }
+.dsi-inner { max-width: 1040px; margin: 0 auto; padding-block: 22px 40px; padding-inline: 16px; display: grid; gap: 18px; }
+.dsi-head h2 { margin: 0; font: 600 22px/1.25 var(--font-doc); }
+.dsi-head p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; max-width: 65ch; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.kpi .l { font-size: 12px; color: var(--ink-3); }
+.kpi .v { font: 500 24px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.kpi .v.bad { color: var(--danger); }
+.queue { display: grid; gap: 10px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.card-h { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; padding: 12px 16px; align-items: center; }
+.card-h button.open { all: unset; cursor: pointer; display: grid; gap: 3px; min-width: 0; }
+.card-h button.open:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.card-h .ttl { font-weight: 600; font-size: 15px; }
+.card-h .meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; color: var(--ink-3); }
+.card-h .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.due { font: 500 12px/1.6 var(--font-mono); padding: 0 8px; border-radius: 20px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.due.late { background: var(--danger-bg); color: var(--danger); }
+.due.soon { background: var(--st-deduit-bg); color: var(--st-deduit); }
+.status-sel { border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; background: var(--surface); font-size: 13px; }
+.status-chip { font-size: 12.5px; padding: 2px 9px; border-radius: 20px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.score { font: 500 12px/1.6 var(--font-mono); color: var(--ink-2); }
+.card-b { border-top: 1px solid var(--line); padding: 4px 16px 16px; }
+.card-b details { margin-top: 12px; font-size: 13.5px; }
+.card-b summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+.transcript { display: grid; gap: 6px; margin-top: 8px; }
+.transcript div { padding: 6px 10px; border-radius: 8px; background: var(--surface-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+.transcript div.u { background: transparent; border: 1px solid var(--line); }
+.transcript b { font: 500 10.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); display: block; margin-bottom: 3px; }
+.empty-state { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius); padding: 28px 22px; text-align: center; color: var(--ink-2); }
+.empty-state h3 { margin: 0 0 4px; font: 600 17px/1.3 var(--font-doc); color: var(--ink); }
+.empty-state p { margin: 0 auto; max-width: 52ch; font-size: 14px; }
+
+.gate { max-width: 420px; margin-top: 10vh; }
+.gate input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; background: var(--bg); font: 500 16px/1.3 var(--font-mono); }
+.gate p { margin: 10px 0; font-size: 14px; color: var(--ink-2); }
+.gate .errtxt { color: var(--danger); }
+/* ---- living fiche, DSI tools ---- */
+.muted { color: var(--ink-3); font-size: 13px; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.tag { font: 500 11.5px/1.7 var(--font-ui); padding: 0 8px; border-radius: 20px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.tag.warn { background: var(--st-deduit-bg); color: var(--st-deduit); }
+.tag.accent { background: var(--accent-soft); color: var(--accent); }
+.tag.ok { background: var(--st-confirme-bg); color: var(--st-confirme); }
+.pill.st-stale { color: var(--danger); background: var(--danger-bg); }
+.seg-inline { display: flex; gap: 4px; flex-wrap: wrap; }
+.seg-inline button, .tool-tabs button { border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 500; }
+.seg-inline button[aria-pressed="true"], .tool-tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tools { display: grid; gap: 10px; }
+.tools-row { display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.tool-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.clock { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
+.clock select, .form-grid select, .form-grid input { border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; background: var(--surface); }
+.tool-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.tool-panel textarea, .lv-block textarea, .copilot textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--bg); resize: vertical; }
+.tp-head { display: grid; gap: 4px; justify-items: start; }
+.tp-head h4, .lv-block h4, .cp-head h4 { margin: 0; font: 600 15px/1.3 var(--font-doc); }
+.tp-head p { margin: 0 0 4px; max-width: 75ch; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 12px; }
+.form-grid label { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); font-weight: 600; }
+.form-grid label.wide { grid-column: 1 / -1; }
+.row-end { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.lv-block { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin: 12px 0; display: grid; gap: 6px; background: var(--surface); min-width: 0; }
+.lv-block p { margin: 0; }
+.lv-block.nudge { border-color: var(--accent); background: var(--accent-soft); }
+.lv-block.pending { border-color: var(--st-deduit); }
+.prop { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; font-size: 14px; padding: 4px 0; }
+.prop input { margin-top: 4px; }
+.prop-line { margin: 4px 0; font-size: 14px; }
+.proposal { border-top: 1px dashed var(--line); margin-top: 8px; padding-top: 8px; display: grid; gap: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-btn { border: 1px solid var(--accent); color: var(--accent); background: var(--surface); padding: 5px 11px; border-radius: 20px; font-size: 13px; }
+.chip-btn:hover { background: var(--accent-soft); }
+.chip-static { border: 1px solid var(--line); padding: 3px 10px; border-radius: 20px; font-size: 12.5px; color: var(--ink-2); }
+.jh { font: 600 15px/1.3 var(--font-doc); margin: 18px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ev { display: grid; grid-template-columns: 6.5em 7.5em minmax(0, 1fr); gap: 8px; font-size: 13.5px; align-items: baseline; }
+.ev-d { font: 400 12px/1.5 var(--font-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.ev-k { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.ev-t { overflow-wrap: anywhere; }
+.ev-reponse .ev-k, .ev-qualif .ev-k { color: var(--accent); }
+.ev-observation .ev-k, .ev-relance .ev-k { color: var(--st-deduit); }
+.lf.stale .qv { color: var(--danger); }
+.cp-head { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; }
+.cp-head h4 { flex: 1; min-width: 12em; }
+.cp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.cp-cell { background: var(--bg); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.cp-cell p { margin: 0; font-size: 13.5px; }
+.cp-l { font: 500 11px/1.4 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-top: 6px; }
+.copilot ul, .copilot ol { margin: 2px 0 4px; padding-left: 20px; font-size: 14px; }
+.dots5 { display: inline-flex; gap: 3px; margin-right: 8px; vertical-align: middle; }
+.dots5 i { width: 14px; height: 6px; border-radius: 3px; background: var(--surface-2); }
+.dots5 i.on { background: var(--accent); }
+.traj { font-weight: 600; font-size: 13.5px; }
+.traj-A { color: var(--st-confirme); } .traj-B { color: var(--st-declare); } .traj-C { color: var(--st-deduit); }
+.chain { font-style: italic; color: var(--ink-2); }
+.nudge-item { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 4px; }
+.nudge-item p { margin: 0; }
+.ni-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mail { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.mail-h { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 12px; background: var(--surface-2); font-size: 13px; }
+.mail pre { margin: 0; padding: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.5 var(--font-ui); }
+.mx-wrap { overflow-x: auto; }
+.mx-wrap svg { width: 100%; max-width: 640px; height: auto; display: block; }
+.mx-grid { stroke: var(--line); stroke-width: 1; }
+.mx-mid { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 4 4; }
+.mx-tick { fill: var(--ink-3); font: 11px var(--font-mono); }
+.mx-axis { fill: var(--ink-2); font: 600 12px var(--font-ui); }
+.mx-quad { fill: var(--ink-3); font: 500 12px var(--font-ui); }
+.mx-pt circle { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.mx-pt text { fill: var(--accent-ink); font: 600 11px var(--font-mono); pointer-events: none; }
+.mx-pt:hover circle, .mx-pt:focus circle { stroke: var(--ink); }
+.mx-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.mx-table th { text-align: left; font-weight: 600; color: var(--ink-3); font-size: 12px; border-bottom: 1px solid var(--line); padding: 4px 6px; }
+.mx-table td { border-bottom: 1px solid var(--line); padding: 5px 6px; }
+.mic.rec { background: var(--danger); color: #fff; border-color: var(--danger); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: min(92vw, 560px); z-index: 20; box-shadow: 0 8px 30px rgb(0 0 0 / .25); }
+@media (max-width: 600px) { .ev { grid-template-columns: 1fr; gap: 0; } }
+.row-start { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.sim-controls { display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: center; }
+.sim-layout { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.phone { border: 1px solid var(--line); border-radius: 28px; background: var(--surface); height: min(680px, 78vh); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 12px 40px rgb(0 0 0 / .12); }
+.ph-head { display: flex; gap: 10px; align-items: center; padding: 14px 16px; background: var(--ink); color: var(--bg); }
+.phone.teams .ph-head { background: var(--accent); color: var(--accent-ink); }
+.ph-head small { display: block; font-size: 12px; opacity: .8; }
+.ph-av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 600 11px/1 var(--font-mono); background: var(--bg); color: var(--ink); flex: none; }
+.ph-body { flex: 1; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
+.ph-msg { max-width: 84%; padding: 8px 10px 6px; border-radius: 14px; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; position: relative; }
+.ph-msg.agent { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.ph-msg.me { align-self: flex-end; background: var(--accent-soft); border-bottom-right-radius: 4px; }
+.ph-msg.nudge { border-color: var(--accent); }
+.ph-msg.typing { color: var(--ink-3); font-style: italic; }
+.ph-time { display: block; text-align: right; font: 400 10.5px/1.4 var(--font-mono); color: var(--ink-3); margin-top: 2px; }
+.ph-voice { font-weight: 600; font-size: 13px; }
+.ph-tr { font-style: italic; margin-top: 2px; }
+.ph-meta { font-size: 11.5px; color: var(--ink-3); }
+.ph-empty { display: grid; gap: 8px; color: var(--ink-2); font-size: 14px; }
+.ph-empty p { margin: 0 0 4px; }
+.ph-empty .chip-btn { text-align: left; border-radius: 12px; }
+.ph-quick { display: flex; gap: 6px; flex-wrap: wrap; padding: 6px 10px; background: var(--bg); }
+.ph-quick:empty { display: none; }
+.ph-compose { display: flex; gap: 6px; align-items: center; padding: 8px 10px; border-top: 1px solid var(--line); background: var(--surface); }
+.ph-compose input[type=text] { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 20px; padding: 8px 12px; background: var(--bg); }
+.ph-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 20px; padding: 7px 10px; font-size: 12.5px; font-weight: 500; white-space: nowrap; }
+.ph-btn.send { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.sim-side { display: grid; gap: 0; min-width: 0; }
+.sim-side .lv-block { margin-top: 0; }
+.mini-fields { list-style: none; margin: 4px 0; padding: 0; display: grid; gap: 4px; font-size: 13px; }
+.run { border-top: 1px solid var(--line); padding: 10px 0; display: grid; gap: 4px; }
+.run-h { display: flex; gap: 6px 12px; flex-wrap: wrap; align-items: baseline; }
+.run p { margin: 0; }
+.run-line { font-size: 13.5px; }
+.digest { border-color: var(--accent); }
+.funnel { display: grid; gap: 6px; }
+.fn-row { display: grid; grid-template-columns: minmax(8em, 13em) minmax(0, 1fr) 2.5em; gap: 10px; align-items: center; font-size: 13.5px; }
+.fn-bar { height: 14px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.fn-bar i { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; }
+.fn-n { text-align: right; }
+@media (max-width: 900px) { .sim-layout { grid-template-columns: minmax(0, 1fr); } .phone { height: 72vh; } }
+@media (max-width: 520px) { .fn-row { grid-template-columns: minmax(0, 1fr) 2.5em; } .fn-bar { grid-column: 1 / -1; grid-row: 2; } .ph-btn { padding: 7px 8px; } }
+.notice { margin: 0 20px 10px; font-size: 13px; color: var(--ink-2); background: var(--surface-2); padding: 8px 12px; border-radius: 8px; }
+
+@media (max-width: 900px) {
+  .panes { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .seg { display: flex; }
+  .panes .pane { grid-row: 2; }
+  .panes:not(.show-fiche) .fiche { display: none; }
+  .panes.show-fiche .chat { display: none; }
+  .fiche { border-left: 0; }
+  .log, .composer, .chat-head { padding-left: 16px; padding-right: 16px; }
+  .suggest { padding: 0 16px 8px; }
+  .fiche-head, .alerts, .sec, .fiche-foot { padding-left: 16px; padding-right: 16px; }
+  .brand small { display: none; }
+}
+@media (max-width: 520px) {
+  .top { gap: 8px; }
+  .tabs { margin-left: 0; width: 100%; }
+  .tabs button { flex: 1; justify-content: center; }
+  .card-h { grid-template-columns: minmax(0, 1fr); }
+  .card-h .right { justify-content: flex-start; }
+  .sheet-h, .sheet-b, .sheet-f { padding-left: 16px; padding-right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">DSI&nbsp;TD</span>
+      <div>
+        <h1>Agent d'Intake Innovation</h1>
+        <small>Prototype · Fiche d'Expression de Besoin assistée</small>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Vues">
+      <button id="tab-capture" role="tab" aria-selected="true" aria-controls="view-capture">Exprimer un besoin</button>
+      <button id="tab-chat" role="tab" aria-selected="false" aria-controls="view-chat" hidden>Messagerie</button>
+      <button id="tab-mine" role="tab" aria-selected="false" aria-controls="view-mine" hidden>Mes besoins <span class="count" id="mine-count" hidden>0</span></button>
+      <button id="tab-dsi" role="tab" aria-selected="false" aria-controls="view-dsi">File DSI <span class="count" id="queue-count" hidden>0</span></button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="view-capture" class="view" role="tabpanel" aria-labelledby="tab-capture">
+      <div class="panes" id="panes">
+        <div class="seg" role="group" aria-label="Affichage">
+          <button id="seg-chat" aria-pressed="true">Conversation</button>
+          <button id="seg-fiche" aria-pressed="false">Fiche · <span id="seg-pct">0 %</span></button>
+        </div>
+
+        <div class="pane chat">
+          <div class="chat-head">
+            <div class="t">
+              <div class="eyebrow" id="chat-eyebrow">Nouveau besoin</div>
+              <h2 id="chat-title">Décrivez votre besoin, l'agent s'occupe de la fiche</h2>
+            </div>
+            <button class="btn-ghost" id="reset">Nouveau besoin</button>
+          </div>
+          <div class="log" id="log" aria-live="polite"></div>
+          <div class="notice" id="agent-notice" hidden></div>
+          <div class="suggest" id="suggest"></div>
+          <form class="composer" id="composer">
+            <div class="box">
+              <span class="file-chip" id="file-chip" hidden><span id="file-name"></span><button type="button" id="file-remove" aria-label="Retirer l'image">×</button></span>
+              <textarea id="msg" rows="2" aria-label="Votre message" placeholder="Ex. : on ressaisit à la main les bons de pesée dans SAP pendant la campagne…"></textarea>
+              <div class="row">
+                <button type="button" class="btn-icon" id="attach" hidden title="Joindre une photo (tableau blanc, capture Excel, document)">Joindre une photo</button>
+                <input type="file" id="file" accept="image/*" hidden>
+                <button type="button" class="btn-icon mic" data-mic="msg" hidden>Dicter</button>
+                <span class="hint" id="composer-hint">Entrée pour envoyer · Maj+Entrée pour un retour à la ligne</span>
+                <button type="button" class="btn-ghost" id="stop" hidden>Arrêter</button>
+                <button type="submit" class="btn-primary" id="send">Envoyer</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <aside class="pane fiche" aria-label="Fiche d'expression de besoin">
+          <div class="fiche-scroll">
+            <div class="fiche-head">
+              <div class="eyebrow">Fiche d'Expression de Besoin · en direct</div>
+              <h3 id="fiche-title">Besoin sans titre</h3>
+              <div class="meter" aria-label="Maturité de la fiche">
+                <div class="bar"><i id="meter-bar" style="width:0%"></i></div>
+                <b id="meter-val">0 %</b>
+              </div>
+              <div class="legend">
+                <span><i style="background:var(--st-vide)"></i>À compléter</span>
+                <span><i style="background:var(--st-deduit)"></i>Proposé par l'agent</span>
+                <span><i style="background:var(--st-declare)"></i>Déclaré</span>
+                <span><i style="background:var(--st-confirme)"></i>Confirmé</span>
+              </div>
+            </div>
+            <div class="alerts" id="alerts" hidden></div>
+            <div id="fiche-body"></div>
+          </div>
+          <div class="fiche-foot">
+            <button class="btn-primary" id="review" disabled>Relire et transmettre à la DSI</button>
+            <div class="sub" id="review-sub">Décrivez d'abord le problème rencontré.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="view-chat" class="view dsi" role="tabpanel" aria-labelledby="tab-chat" hidden>
+      <div class="dsi-inner">
+        <div class="dsi-head">
+          <h2>Messagerie</h2>
+          <p>Le même agent, sur WhatsApp ou Teams. Le collaborateur écrit, envoie une note vocale (en darija si besoin) ou une photo ; l'agent construit la fiche, demande « OUI » pour la transmettre, puis revient vers lui sur le même fil quand une information doit être confirmée. Ce téléphone simulé utilise exactement la logique des connecteurs réels.</p>
+        </div>
+        <div class="sim-controls">
+          <div class="seg-inline" id="sim-channel" role="group" aria-label="Canal">
+            <button data-ch="whatsapp" aria-pressed="true">WhatsApp</button>
+            <button data-ch="teams" aria-pressed="false">Teams</button>
+          </div>
+          <label class="clock" for="sim-persona">Interlocuteur
+            <select id="sim-persona">
+              <option value="youssef">Youssef Alami · chef de zone, Amont Agricole</option>
+              <option value="salma">Salma Idrissi · responsable qualité, raffinerie</option>
+              <option value="hamid">Hamid Tazi · chef d'équipe maintenance, sucrerie</option>
+            </select>
+          </label>
+          <button class="btn-ghost" id="sim-reset">Nouvelle conversation</button>
+        </div>
+        <div class="sim-layout">
+          <div class="phone" aria-label="Téléphone simulé">
+            <div class="ph-head"><span class="ph-av">DSI</span><div><b>Agent d'intake DSI & TD</b><small id="ph-sub">WhatsApp Business · simulateur</small></div></div>
+            <div class="ph-body" id="ph-body" aria-live="polite"></div>
+            <div class="ph-quick" id="ph-quick"></div>
+            <form class="ph-compose" id="ph-form">
+              <button type="button" class="ph-btn" id="ph-photo" title="Envoyer une photo">Photo</button>
+              <input type="file" id="ph-file" accept="image/*" hidden>
+              <input type="text" id="ph-text" placeholder="Message" autocomplete="off" aria-label="Message">
+              <button type="button" class="ph-btn mic" data-mic="__sim" title="Note vocale">Vocal</button>
+              <button type="submit" class="ph-btn send">Envoyer</button>
+            </form>
+          </div>
+          <aside class="sim-side" id="sim-side"></aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-mine" class="view dsi" role="tabpanel" aria-labelledby="tab-mine" hidden>
+      <div class="dsi-inner">
+        <div class="dsi-head">
+          <h2>Mes besoins</h2>
+          <p>Vos besoins restent vivants après l'envoi. L'agent vous pose une question quand une information vieillit, vous soumet ce qu'il observe sur le terrain, et vous pouvez donner des nouvelles en une phrase, écrite ou dictée.</p>
+        </div>
+        <div class="seg-inline" id="mine-filter" role="group" aria-label="Filtre">
+          <button data-mine="mine" aria-pressed="true">Mes besoins</button>
+          <button data-mine="all" aria-pressed="false">Tous les besoins (démo)</button>
+        </div>
+        <div class="queue" id="mine-list"></div>
+      </div>
+    </section>
+
+    <section id="view-dsi" class="view dsi" role="tabpanel" aria-labelledby="tab-dsi" hidden>
+      <div class="dsi-inner">
+        <div class="dsi-head">
+          <h2>File de qualification</h2>
+          <p>Les besoins validés par les métiers arrivent ici avec leur niveau de maturité, l'historique de l'échange et l'échéance de retour à 5 jours ouvrables.</p>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="tools" id="dsi-tools" hidden>
+          <div class="tools-row">
+            <div class="tool-tabs" role="group" aria-label="Outils DSI">
+              <button data-tool="matrix" aria-pressed="false">Matrice valeur / faisabilité</button>
+              <button data-tool="nudges" aria-pressed="false">Relances</button>
+              <button data-tool="signal" aria-pressed="false">Signal terrain</button>
+              <button data-tool="email" aria-pressed="false">E-mail entrant</button>
+              <button data-tool="pilot" aria-pressed="false">Pilotage automatique</button>
+              <button data-tool="value" aria-pressed="false">Valeur & indicateurs</button>
+            </div>
+            <label class="clock" for="demo-clock">Horloge de démo
+              <select id="demo-clock"><option value="0">Aujourd'hui</option><option value="7">+7 jours</option><option value="30">+30 jours</option><option value="100">+100 jours</option></select>
+            </label>
+            <button class="btn-ghost" id="demo-reset">Vider la file de démo</button>
+          </div>
+          <div class="tool-panel" id="tool-panel" hidden></div>
+        </div>
+        <div class="queue" id="queue"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="sheet-h">
+      <h3 id="modal-title">Relecture avant transmission</h3>
+      <button class="btn-ghost" id="modal-close">Fermer</button>
+    </div>
+    <div class="sheet-b" id="modal-body"></div>
+    <div class="sheet-f" id="modal-foot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<div class="modal" id="gate" hidden>
+  <form class="sheet gate" id="gate-form" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="sheet-h"><h3 id="gate-title">Accès à la démo</h3></div>
+    <div class="sheet-b">
+      <p>Saisissez le code d'accès communiqué par l'équipe DSI & TD.</p>
+      <input type="text" id="gate-code" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Code d'accès">
+      <p class="errtxt" id="gate-err" hidden>Ce code n'est pas reconnu.</p>
+    </div>
+    <div class="sheet-f"><div class="row"><button type="submit" class="btn-primary">Entrer</button></div></div>
+  </form>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ================= Model of the form ================= */
+const URGENCES = ["Immédiat", "Court terme (< 3 mois)", "Moyen terme (3–12 mois)", "Long terme"];
+const RESULTATS = ["Réduction de coûts", "Gain de temps", "Amélioration qualité", "Aide à la décision"];
+const SECTIONS = [
+  { n: "1", titre: "Identification", fields: [
+    { k: "direction", label: "Direction / Entité", hint: "Ex. : Amont Agricole, Supply Chain…", w: 5 },
+    { k: "responsable", label: "Responsable métier", hint: "Nom et fonction", w: 5 },
+    { k: "urgence", label: "Niveau d'urgence", hint: URGENCES.join(" · "), w: 5, type: "enum" },
+  ]},
+  { n: "2", titre: "Le problème", fields: [
+    { k: "probleme", label: "Quel problème essayez-vous de résoudre ?", hint: "La situation actuelle, pas la solution souhaitée : fréquence, volume, impact terrain.", w: 15 },
+    { k: "processus", label: "Quel processus est impacté ?", hint: "Processus concerné, qui l'exécute, à quelle fréquence.", w: 10 },
+    { k: "cout", label: "Quel est le coût actuel du problème ?", hint: "Temps perdu, erreurs, retards, manque à gagner, risques. Estimé si possible.", w: 15 },
+  ]},
+  { n: "3", titre: "La valeur attendue", fields: [
+    { k: "decision", label: "Quelle décision ou action ce projet améliorerait-il ?", hint: "Meilleure planification, réduction des délais, automatisation, aide à la décision…", w: 10 },
+    { k: "resultats", label: "Quel résultat concret attendez-vous ?", hint: RESULTATS.join(" · ") + " · Autre", w: 5, type: "multi" },
+  ]},
+  { n: "4", titre: "Les données", fields: [
+    { k: "donnees_existantes", label: "Quelles données existent aujourd'hui ?", hint: "Excel, ERP, bases, capteurs, historiques : format et accessibilité.", w: 10 },
+    { k: "donnees_manquantes", label: "Des données sont-elles manquantes ou difficiles d'accès ?", hint: "Cela oriente la faisabilité.", w: 5 },
+  ]},
+  { n: "5", titre: "Contraintes & contexte", fields: [
+    { k: "contraintes", label: "Contraintes connues", hint: "Systèmes existants, réglementation, délais imposés, sensibilité des données, parties prenantes.", w: 5 },
+    { k: "budget", label: "Budget indicatif", hint: "Ordre de grandeur, avant tout chiffrage.", w: 5 },
+    { k: "similaires", label: "Des initiatives similaires existent-elles ?", hint: "En interne ou ailleurs dans le Groupe.", w: 5 },
+  ]},
+];
+const FIELDS = SECTIONS.flatMap(s => s.fields);
+const FMAP = Object.fromEntries(FIELDS.map(f => [f.k, f]));
+const STATUTS = {
+  "vide":     { label: "À compléter", cls: "st-vide", f: 0 },
+  "déduit":   { label: "Proposé par l'agent", cls: "st-deduit", f: 0.5 },
+  "déclaré":  { label: "Déclaré", cls: "st-declare", f: 1 },
+  "confirmé": { label: "Confirmé", cls: "st-confirme", f: 1 },
+};
+const QUEUE_STATUTS = ["À qualifier", "En qualification", "Qualifié — à instruire", "En réalisation", "En production", "Réorienté", "Clos"];
+
+const EXAMPLES = [
+  { who: "Amont Agricole", text: "Pendant la campagne, on ressaisit à la main dans SAP les tickets de pesée et les bons de livraison de betteraves des agriculteurs. Ça prend énormément de temps et les erreurs créent des réclamations sur les paiements." },
+  { who: "Maintenance", text: "On voudrait un outil d'IA pour prédire les pannes des centrifugeuses." },
+  { who: "Commercial", text: "Chaque lundi, l'équipe passe la matinée à consolider dans Excel les ventes de chaque région pour le comité commercial." },
+];
+
+/* ================= Agent instructions ================= */
+const RULES = `Tu es l'agent d'intake de la DSI & TD (démarche Innovation Digitale & IA) d'un groupe agro-industriel sucrier marocain (sucreries, raffinerie, amont agricole betterave et canne, supply chain, commercial, finance, RH, maintenance, qualité). Tu accompagnes un collaborateur métier pour transformer son expression brute en « Fiche d'Expression de Besoin » complète, précise et challengée, prête à être qualifiée par la DSI. Tu ne conçois pas la solution et tu ne promets rien sur la suite.
+
+CHAMPS DE LA FICHE (clés JSON) :
+- direction : Direction / Entité porteuse
+- responsable : nom et fonction du responsable métier
+- urgence : exactement une valeur parmi "Immédiat", "Court terme (< 3 mois)", "Moyen terme (3–12 mois)", "Long terme"
+- probleme : la situation actuelle (pas la solution) : fréquence, volume, impact terrain
+- processus : processus impacté, qui l'exécute, à quelle fréquence, avec quels outils
+- cout : coût actuel du problème (temps perdu, erreurs, retards, manque à gagner, risques), chiffré si possible (heures, MAD, %)
+- decision : décision ou action que le projet améliorerait
+- resultats : tableau de valeurs parmi "Réduction de coûts", "Gain de temps", "Amélioration qualité", "Aide à la décision", "Autre : <précision>"
+- donnees_existantes : données disponibles (Excel, SAP, bases, capteurs, historiques), format, accessibilité, propriétaire
+- donnees_manquantes : données manquantes ou difficiles d'accès
+- contraintes : systèmes existants, réglementation (loi 09-08 / CNDP si données personnelles), délais imposés (campagne sucrière…), sensibilité, parties prenantes
+- budget : ordre de grandeur indicatif
+- similaires : initiatives similaires connues, en interne ou dans le Groupe
+
+STATUTS :
+- "déclaré" : l'utilisateur l'a dit explicitement.
+- "déduit" : ta reformulation, inférence ou estimation, à faire confirmer.
+- "confirmé" : l'utilisateur a validé explicitement ta proposition.
+Ne transforme jamais une supposition en "déclaré". N'invente aucun fait. Ne modifie pas un champ "confirmé" sauf si l'utilisateur le corrige lui-même. Si l'utilisateur dit ne pas savoir, écris "Inconnu à ce stade — à investiguer" avec le statut "déclaré".
+
+COMMENT CHALLENGER :
+1. Solution déguisée : si l'utilisateur décrit une solution (« un chatbot », « une appli », « de l'IA », « un dashboard »), remonte au problème : que se passe-t-il aujourd'hui, pour qui, pourquoi est-ce gênant ? Signale-le dans les alertes.
+2. Quantifier : fréquence, volume, nombre de personnes, durée, taux d'erreur. Propose un ordre de grandeur calculé à partir de ce qui est dit (montre le calcul dans "note") et fais-le confirmer.
+3. Valeur : quelle décision ou action change, et comment on mesurera le résultat (indicateur avant/après).
+4. Données : où elles sont, sous quel format, qui y a accès, ce qui manque.
+5. Contexte : contraintes, saisonnalité, parties prenantes, données personnelles.
+6. Doublons : compare avec les besoins déjà transmis listés dans le message ; si l'un est proche, mentionne-le (champ similaires + alerte "doublon").
+
+ÉCONOMIE D'EFFORT POUR L'UTILISATEUR :
+- Au premier échange, commence par « Si je résume : … » (1 à 2 phrases), puis pose tes questions.
+- 3 questions au maximum par tour, les plus utiles à la qualification d'abord ; numérote-les s'il y en a plusieurs.
+- Préfère une hypothèse à confirmer à une question ouverte (« Je comprends environ 200 bons par semaine, c'est bien ça ? »).
+- Ne cite jamais les noms techniques des champs ; parle naturellement.
+- Propose 2 à 4 "suggestions" : réponses courtes que l'utilisateur pourrait cliquer (moins de 60 caractères, à la première personne, ex. « Oui, environ 200 par semaine »).
+- Vouvoiement, ton professionnel et direct, en français. L'utilisateur peut écrire en darija, en arabe ou en anglais : comprends-le et réponds en français.
+- Message court : 2 à 6 phrases ou une courte liste. Mise en forme autorisée : **gras** et listes « - » ou « 1. ».
+- Si une image est jointe (tableau blanc, capture Excel, document), extrais-en les informations utiles (volumes, colonnes, étapes) et dis ce que tu en as retenu.
+
+PRÊT POUR QUALIFICATION ("pret": true) quand le problème, le processus, le coût (au moins un ordre de grandeur), la décision ou valeur attendue et les données existantes sont renseignés de façon précise. Dis-le alors et invite l'utilisateur à relire la fiche (panneau « Fiche »), à confirmer tes propositions puis à la transmettre. Ne bloque jamais : s'il veut transmettre plus tôt, c'est possible.
+
+FORMAT DE RÉPONSE : uniquement un objet JSON, avec "message" en premier :
+{"message":"…","titre":"intitulé court du besoin (6 mots max)","maj":{"<clé>":{"valeur":"…","statut":"déclaré|déduit|confirmé","note":"facultatif : source ou calcul"}},"alertes":[{"type":"solution|quantification|valeur|donnees|contexte|doublon|conformite","texte":"…"}],"suggestions":["…"],"pret":false}
+- "maj" contient uniquement les champs nouveaux ou modifiés à ce tour ("resultats" est un tableau de chaînes).
+- "alertes" est la liste complète des faiblesses encore ouvertes (elle remplace la précédente) ; [] s'il n'y en a plus.`;
+
+/* ================= State ================= */
+const KEY = "intake-draft-v1";
+const fresh = () => ({ fiche: {}, turns: [], alertes: [], suggestions: [], pret: false, titre: "", submitted: null, remoteId: null });
+function loadState() {
+  try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); return s && s.fiche && Array.isArray(s.turns) ? s : null; } catch { return null; }
+}
+function saveState() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+let state = loadState() || fresh();
+
+let sample = null, db = null, user = null, downloads = null;
+let agentReady = false, agentOff = false, canEditQueue = false, uid = null, profileName = "";
+let busy = false, ctl = null, pendingFile = null, editing = null, flashKeys = new Set();
+let queue = [], openCards = new Set();
+
+/* ================= Helpers ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const inline = s => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+function md(src) {
+  const lines = esc(src).split("\n"); let html = "", list = null;
+  for (const l of lines) {
+    const m = l.match(/^\s*(?:[-•*]|(\d+)[.)])\s+(.*)$/);
+    if (m) {
+      const t = m[1] ? "ol" : "ul";
+      if (list !== t) { if (list) html += `</${list}>`; html += `<${t}>`; list = t; }
+      html += `<li>${inline(m[2])}</li>`;
+    } else {
+      if (list) { html += `</${list}>`; list = null; }
+      if (l.trim()) html += `<p>${inline(l)}</p>`;
+    }
+  }
+  if (list) html += `</${list}>`;
+  return html;
+}
+const hasVal = v => Array.isArray(v) ? v.length > 0 : typeof v === "string" && v.trim().length > 0;
+const valText = v => Array.isArray(v) ? v.join(", ") : String(v ?? "");
+const statutOf = k => (state.fiche[k] && hasVal(state.fiche[k].valeur)) ? (state.fiche[k].statut || "déclaré") : "vide";
+const fmtDate = d => new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+let demoOffsetDays = 0;
+try { demoOffsetDays = +localStorage.getItem("intake-demo-offset") || 0; } catch {}
+const nowMs = () => Date.now() + demoOffsetDays * 864e5;
+const nowIso = () => new Date(nowMs()).toISOString();
+function addBusinessDays(date, n) {
+  const r = new Date(date); let added = 0;
+  while (added < n) { r.setDate(r.getDate() + 1); const w = r.getDay(); if (w !== 0 && w !== 6) added++; }
+  return r;
+}
+function businessDaysBetween(a, b) {
+  const d = new Date(a); d.setHours(0, 0, 0, 0);
+  const e = new Date(b); e.setHours(0, 0, 0, 0);
+  const sign = d <= e ? 1 : -1; let n = 0, guard = 0;
+  while (d.getTime() !== e.getTime() && guard++ < 2000) { d.setDate(d.getDate() + sign); const w = d.getDay(); if (w !== 0 && w !== 6) n += sign; }
+  return n;
+}
+function scoreOf(fiche) {
+  let s = 0;
+  for (const f of FIELDS) {
+    const e = fiche[f.k];
+    if (e && hasVal(e.valeur)) s += f.w * (STATUTS[e.statut]?.f ?? 1);
+  }
+  return Math.round(s);
+}
+function sectionPct(sec, fiche) {
+  const tot = sec.fields.reduce((a, f) => a + f.w, 0);
+  const got = sec.fields.reduce((a, f) => { const e = fiche[f.k]; return a + (e && hasVal(e.valeur) ? f.w * (STATUTS[e.statut]?.f ?? 1) : 0); }, 0);
+  return Math.round(100 * got / tot);
+}
+
+/* ================= Fiche pane ================= */
+function renderFiche() {
+  const score = scoreOf(state.fiche);
+  $("#meter-bar").style.width = score + "%";
+  $("#meter-val").textContent = score + " %";
+  $("#seg-pct").textContent = score + " %";
+  $("#fiche-title").textContent = state.titre || "Besoin sans titre";
+
+  const al = $("#alerts");
+  if (state.alertes.length) {
+    al.hidden = false;
+    al.innerHTML = `<h4>Points à renforcer · ${state.alertes.length}</h4>` + state.alertes.map(a =>
+      `<div class="alert"><span class="k ${esc(a.type)}">${esc(a.type || "point")}</span><span>${esc(a.texte)}</span></div>`).join("");
+  } else al.hidden = true;
+
+  $("#fiche-body").innerHTML = SECTIONS.map(sec => `
+    <section class="sec">
+      <div class="sec-h"><span class="n">${sec.n}</span><h4>${esc(sec.titre)}</h4><span class="pct">${sectionPct(sec, state.fiche)} %</span></div>
+      ${sec.fields.map(fieldHTML).join("")}
+    </section>`).join("");
+
+  const locked = !!state.submitted;
+  const deduits = FIELDS.filter(f => statutOf(f.k) === "déduit").length;
+  const btn = $("#review"), sub = $("#review-sub");
+  if (locked) {
+    btn.disabled = false; btn.textContent = "Voir la fiche transmise";
+    sub.innerHTML = `Transmise le ${fmtDate(state.submitted.at)} · retour attendu avant le ${fmtDate(state.submitted.echeance)}`;
+  } else {
+    btn.textContent = "Relire et transmettre à la DSI";
+    btn.disabled = !hasVal(state.fiche.probleme?.valeur);
+    if (btn.disabled) sub.textContent = "Décrivez d'abord le problème rencontré.";
+    else if (state.pret && score >= 70) sub.innerHTML = `<span class="ready">Prête pour qualification</span>${deduits ? ` · ${deduits} proposition${deduits > 1 ? "s" : ""} à confirmer` : ""}`;
+    else sub.textContent = `${state.alertes.length ? state.alertes.length + " point" + (state.alertes.length > 1 ? "s" : "") + " à renforcer · " : ""}transmission possible à tout moment`;
+  }
+  flashKeys.clear();
+}
+function fieldHTML(f) {
+  const e = state.fiche[f.k], st = statutOf(f.k), S = STATUTS[st];
+  const locked = !!state.submitted;
+  if (editing === f.k && !locked) return `<div class="field" data-k="${f.k}">
+      <div class="f-top"><span class="f-label">${esc(f.label)}</span></div>
+      <div class="edit">${editorHTML(f, e)}
+        <div class="f-actions"><button data-act="save" data-k="${f.k}">Enregistrer</button><button data-act="cancel">Annuler</button></div>
+      </div></div>`;
+  let val;
+  if (st === "vide") val = `<div class="f-val empty">${esc(f.hint)}</div>`;
+  else if (Array.isArray(e.valeur)) val = `<div class="f-val">${e.valeur.map(v => `<span class="chip">${esc(v)}</span>`).join("")}</div>`;
+  else val = `<div class="f-val">${esc(e.valeur)}</div>`;
+  const note = e?.note && st !== "vide" ? `<div class="f-note">${esc(e.note)}</div>` : "";
+  const acts = locked ? "" : `<div class="f-actions">${st === "déduit" ? `<button data-act="confirm" data-k="${f.k}">Confirmer</button>` : ""}<button data-act="edit" data-k="${f.k}">${st === "vide" ? "Renseigner" : "Modifier"}</button></div>`;
+  return `<div class="field${flashKeys.has(f.k) ? " flash" : ""}" data-k="${f.k}">
+    <div class="f-top"><span class="f-label">${esc(f.label)}</span><span class="pill ${S.cls}">${S.label}</span></div>
+    ${val}${note}${acts}</div>`;
+}
+function editorHTML(f, e) {
+  const v = e?.valeur;
+  if (f.type === "enum") return `<select id="edit-${f.k}" aria-label="${esc(f.label)}"><option value="">—</option>${URGENCES.map(u => `<option${v === u ? " selected" : ""}>${esc(u)}</option>`).join("")}</select>`;
+  if (f.type === "multi") {
+    const arr = Array.isArray(v) ? v : [];
+    const autre = arr.find(x => /^autre/i.test(x)) || "";
+    return `<div class="checks">${RESULTATS.map((r, i) => `<label><input type="checkbox" id="edit-res-${i}" value="${esc(r)}"${arr.includes(r) ? " checked" : ""}> ${esc(r)}</label>`).join("")}
+      <input type="text" id="edit-res-autre" placeholder="Autre : précisez" value="${esc(autre.replace(/^autre\s*:?\s*/i, ""))}"></div>`;
+  }
+  return `<textarea id="edit-${f.k}" rows="3" aria-label="${esc(f.label)}">${esc(valText(v))}</textarea>`;
+}
+$("#fiche-body").addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-act]"); if (!b) return;
+  const k = b.dataset.k, act = b.dataset.act;
+  if (act === "confirm") { state.fiche[k] = { ...state.fiche[k], statut: "confirmé", maj: nowIso() }; flashKeys.add(k); }
+  else if (act === "edit") { editing = k; renderFiche(); const el = document.getElementById("edit-" + k) || document.getElementById("edit-res-0"); el?.focus(); return; }
+  else if (act === "cancel") { editing = null; }
+  else if (act === "save") {
+    const f = FMAP[k]; let v;
+    if (f.type === "multi") {
+      v = RESULTATS.filter((_, i) => document.getElementById("edit-res-" + i).checked);
+      const a = document.getElementById("edit-res-autre").value.trim(); if (a) v.push("Autre : " + a);
+    } else v = document.getElementById("edit-" + k).value.trim();
+    if (hasVal(v)) state.fiche[k] = { valeur: v, statut: "confirmé", note: "Saisi par vous", maj: nowIso() };
+    else delete state.fiche[k];
+    editing = null; flashKeys.add(k);
+  }
+  saveState(); renderFiche();
+});
+
+/* ================= Chat pane ================= */
+function welcomeHTML() {
+  return `<div class="msg agent"><span class="who">Agent</span><div class="bubble">
+    <p>Bonjour. Décrivez votre besoin comme vous le raconteriez à un collègue : quelques phrases suffisent, sans vous soucier de la forme.</p>
+    <p>Je remplis la fiche pour vous, puis je vous pose quelques questions pour la rendre solide avant qu'elle parte en qualification à la DSI. Vous gardez la main : chaque information affiche son statut et vous validez tout avant l'envoi.</p>
+  </div>${state.turns.length ? "" : `<div class="examples"><span class="lbl">Exemples pour essayer</span>${EXAMPLES.map((e, i) => `<button type="button" class="ex" data-ex="${i}"><b>${esc(e.who)}</b>${esc(e.text)}</button>`).join("")}</div>`}</div>`;
+}
+function turnHTML(t, i) {
+  if (t.role === "user") return `<div class="msg user"><span class="who">Vous</span><div class="bubble">${esc(t.content)}</div>${t.image ? `<span class="attach-note">Photo jointe : ${esc(t.image)}</span>` : ""}</div>`;
+  if (t.error) return `<div class="msg agent err"><span class="who">Agent</span><div class="bubble">${esc(t.content)}${t.retry ? ` <button type="button" class="btn-ghost" data-retry="${i}">Renvoyer le message</button>` : ""}</div></div>`;
+  const ch = t.changed?.length ? `<div class="changed">Fiche mise à jour : ${t.changed.map(c => `<span class="c">${esc(c)}</span>`).join("")}</div>` : "";
+  return `<div class="msg agent"><span class="who">Agent</span><div class="bubble">${md(t.content)}</div>${ch}</div>`;
+}
+function renderChat() {
+  const log = $("#log");
+  log.innerHTML = welcomeHTML() + state.turns.map(turnHTML).join("");
+  renderSuggestions(); renderComposer(); renderHead();
+  log.scrollTop = log.scrollHeight;
+}
+function renderHead() {
+  $("#chat-eyebrow").textContent = state.submitted ? "Transmis à la DSI" : state.turns.length ? "Besoin en cours de définition" : "Nouveau besoin";
+  $("#chat-title").textContent = state.titre || "Décrivez votre besoin, l'agent s'occupe de la fiche";
+}
+function renderSuggestions() {
+  const el = $("#suggest");
+  const last = state.turns[state.turns.length - 1];
+  const show = !busy && !state.submitted && agentReady && last && last.role === "assistant" && !last.error && state.suggestions.length;
+  el.innerHTML = show ? state.suggestions.map(s => `<button type="button" data-sug="${esc(s)}">${esc(s)}</button>`).join("") : "";
+}
+function renderComposer() {
+  const locked = !!state.submitted;
+  const form = $("#composer");
+  if (locked) {
+    form.innerHTML = `<div class="locked">Cette fiche a été transmise à la DSI. Pour exprimer un autre besoin, cliquez sur « Nouveau besoin ».</div>`;
+    return;
+  }
+  $("#send").hidden = busy; $("#stop").hidden = !busy;
+  $("#send").disabled = !agentReady || agentOff;
+  $("#msg").disabled = !agentReady || agentOff;
+  $("#composer-hint").textContent = !agentReady ? "Connexion à l'agent…" : agentOff ? "Agent indisponible : remplissez la fiche directement." : "Entrée pour envoyer · Maj+Entrée pour un retour à la ligne";
+}
+$("#log").addEventListener("click", ev => {
+  const ex = ev.target.closest("[data-ex]");
+  if (ex && agentReady && !agentOff && !busy) { send(EXAMPLES[+ex.dataset.ex].text); return; }
+  const r = ev.target.closest("[data-retry]");
+  if (r && !busy) {
+    const i = +r.dataset.retry; const u = state.turns[i - 1];
+    state.turns.splice(i - 1, 2);
+    if (u && u.role === "user") send(u.content);
+  }
+});
+$("#suggest").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-sug]"); if (b && !busy) send(b.dataset.sug);
+});
+
+/* ================= Composer ================= */
+const msgEl = $("#msg");
+function autosize() { msgEl.style.height = "auto"; msgEl.style.height = Math.min(msgEl.scrollHeight, 180) + "px"; }
+msgEl.addEventListener("input", () => { autosize(); try { localStorage.setItem(KEY + "-msg", msgEl.value); } catch {} });
+msgEl.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("#composer").requestSubmit(); } });
+$("#composer").addEventListener("submit", e => {
+  e.preventDefault();
+  const t = msgEl.value.trim(); if (!t || busy || !agentReady || agentOff) return;
+  msgEl.value = ""; autosize(); try { localStorage.removeItem(KEY + "-msg"); } catch {}
+  send(t, pendingFile);
+  setFile(null);
+});
+$("#stop").addEventListener("click", () => ctl?.abort());
+$("#attach").addEventListener("click", () => $("#file").click());
+$("#file").addEventListener("change", e => { setFile(e.target.files[0] || null); e.target.value = ""; });
+$("#file-remove").addEventListener("click", () => setFile(null));
+function setFile(f) { pendingFile = f; $("#file-chip").hidden = !f; $("#file-name").textContent = f ? "Photo : " + f.name : ""; }
+try { const d = localStorage.getItem(KEY + "-msg"); if (d) { msgEl.value = d; } } catch {}
+
+/* ================= Agent call ================= */
+function existingNeeds() {
+  if (!queue.length) return "(aucun pour l'instant)";
+  return queue.slice(0, 30).map(q => `- « ${q.titre || "Sans titre"} » (${valText(q.fiche?.direction?.valeur) || "direction non précisée"}) : ${valText(q.fiche?.probleme?.valeur).slice(0, 220)}`).join("\n");
+}
+function compactFiche() {
+  const o = {};
+  for (const f of FIELDS) { const e = state.fiche[f.k]; o[f.k] = e && hasVal(e.valeur) ? { valeur: e.valeur, statut: e.statut } : null; }
+  return JSON.stringify(o, null, 1);
+}
+const contextLine = () => `CONTEXTE : date du jour ${fmtDate(nowMs())}.${profileName ? ` Nom de l'utilisateur d'après son profil : ${profileName}.` : ""}`;
+function historyTurns() {
+  const history = state.turns.slice(0, -1).filter(t => !t.error).slice(-16).map(t => ({
+    role: t.role, content: t.role === "user" ? t.content + (t.image ? `\n[Photo jointe : ${t.image}]` : "") : t.content,
+  }));
+  while (history.length && history[0].role === "assistant") history.shift();
+  return history;
+}
+const nowContent = (text, file) => `ÉTAT ACTUEL DE LA FICHE (JSON, null = vide) :\n${compactFiche()}\n\nBESOINS DÉJÀ TRANSMIS À LA DSI (pour détecter les doublons) :\n${existingNeeds()}\n\nNOUVEAU MESSAGE DE L'UTILISATEUR :\n${text}${file ? "\n\n(Une image est jointe à ce message.)" : ""}`;
+function buildInput(text, file) {
+  return [{ role: "user", content: `${RULES}\n\n${contextLine()}` }, ...historyTurns(), { role: "user", content: nowContent(text, file) }];
+}
+
+/* ---- Standalone website mode: same page, served with its own API (/api/agent, /api/fiches) ---- */
+const MODE = (window.claude && typeof window.claude.use === "function") ? "claude" : "web";
+const CODE_KEY = "intake-demo-code";
+function apiHeaders() {
+  const h = { "content-type": "application/json" };
+  try { const c = localStorage.getItem(CODE_KEY); if (c) h["x-demo-code"] = c; } catch {}
+  return h;
+}
+function parseLoose(raw) {
+  try { return JSON.parse(raw); } catch {}
+  const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) { try { return JSON.parse(fence[1]); } catch {} }
+  const a = raw.indexOf("{"), b = raw.lastIndexOf("}");
+  if (a >= 0 && b > a) { try { return JSON.parse(raw.slice(a, b + 1)); } catch {} }
+  return null;
+}
+function fileToJpeg(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1568 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve({ media_type: "image/jpeg", data: c.toDataURL("image/jpeg", 0.85).split(",")[1] });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject({ code: "image_rejected" }); };
+    img.src = url;
+  });
+}
+async function webAsk(text, file, signal, onText) {
+  const body = { context: contextLine(), history: historyTurns(), message: nowContent(text, file) };
+  if (file) body.image = await fileToJpeg(file);
+  return postAgent(body, signal, onText);
+}
+const askAgent = (mode, input, onText, signal) => postAgent({ mode, input }, signal, onText || (() => {}));
+async function postAgent(body, signal, onText) {
+  let r;
+  try { r = await fetch("/api/agent", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body), signal }); }
+  catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "upstream_error" }; }
+  if (r.status === 401) { showGate(); throw { code: "needs_code" }; }
+  if (r.status === 429) throw { code: "rate_limited" };
+  if (!r.ok || !r.body) throw { code: "upstream_error" };
+  const reader = r.body.getReader(), dec = new TextDecoder();
+  let buf = "", out = "", stop = null, err = null;
+  try {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, i); buf = buf.slice(i + 1);
+        if (!line.trim()) continue;
+        let ev; try { ev = JSON.parse(line); } catch { continue; }
+        if (typeof ev.d === "string") { out += ev.d; onText({ text: out }); }
+        else if (ev.done) stop = ev.stop;
+        else if (ev.error) err = ev.error;
+      }
+    }
+  } catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "upstream_error" }; }
+  if (err) throw { code: err };
+  if (stop === "refusal") throw { code: "refused" };
+  const obj = parseLoose(out);
+  if (!obj || typeof obj !== "object") throw { code: "invalid_json" };
+  return obj;
+}
+const webDownloads = {
+  save: async ({ filename, data }) => {
+    const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data]));
+    const a = document.createElement("a"); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return { status: "saved" };
+  },
+};
+let webQueueTimer = null, webQueueOk = false, lastQueueSig = "";
+async function refreshWebQueue() {
+  try {
+    const r = await fetch("/api/fiches", { headers: apiHeaders() });
+    if (r.status === 401) { showGate(); return; }
+    if (!r.ok) return;
+    const j = await r.json();
+    const items = Array.isArray(j.items) ? j.items : [];
+    const sig = JSON.stringify(items);
+    if (webQueueOk && sig === lastQueueSig) return;
+    lastQueueSig = sig;
+    queue = items;
+    webQueueOk = true;
+    renderQueue();
+  } catch {}
+}
+function startWebQueue() {
+  refreshWebQueue();
+  if (!webQueueTimer) webQueueTimer = setInterval(() => { if (!document.hidden) refreshWebQueue(); }, 15000);
+}
+function showGate() {
+  const g = $("#gate"); if (!g.hidden) return;
+  g.hidden = false; $("#gate-code").focus();
+}
+$("#gate-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const v = $("#gate-code").value.trim(); if (!v) return;
+  try { localStorage.setItem(CODE_KEY, v); } catch {}
+  $("#gate").hidden = true; $("#gate-err").hidden = true;
+  fetch("/api/fiches", { headers: apiHeaders() }).then(r => {
+    if (r.status === 401) { $("#gate").hidden = false; $("#gate-err").hidden = false; return; }
+    startWebQueue();
+  }).catch(() => {});
+});
+function extractMessage(raw) {
+  const i = raw.indexOf('"message"'); if (i < 0) return null;
+  const c = raw.indexOf(":", i + 9); if (c < 0) return null;
+  const q = raw.indexOf('"', c + 1); if (q < 0) return null;
+  let out = "", k = q + 1;
+  while (k < raw.length) {
+    const ch = raw[k];
+    if (ch === "\\") {
+      const n = raw[k + 1]; if (n === undefined) break;
+      if (n === "n") out += "\n"; else if (n === "t") out += " ";
+      else if (n === "u") { const h = raw.slice(k + 2, k + 6); if (h.length < 4) break; out += String.fromCharCode(parseInt(h, 16)); k += 6; continue; }
+      else out += n;
+      k += 2; continue;
+    }
+    if (ch === '"') break;
+    out += ch; k++;
+  }
+  return out;
+}
+const ERR_COPY = {
+  rate_limited: "Trop de demandes en peu de temps. Patientez un instant puis renvoyez votre message.",
+  session_expired: "Votre session a expiré. Reconnectez-vous, puis renvoyez votre message.",
+  image_rejected: "La photo n'a pas pu être lue. Essayez une image JPEG ou PNG plus légère.",
+  refused: "L'agent n'a pas pu traiter ce message. Reformulez-le autrement.",
+  invalid_json: "La réponse de l'agent était incomplète. Renvoyez votre message.",
+  empty_completion: "L'agent n'a rien répondu. Renvoyez votre message, éventuellement plus court.",
+  prompt_too_large: "L'échange est devenu trop long. Raccourcissez votre message ou commencez un nouveau besoin.",
+  upstream_error: "La connexion à l'agent a été interrompue. Renvoyez votre message.",
+};
+const OFF_CODES = new Set(["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"]);
+
+async function send(text, file) {
+  if (busy || (!sample && MODE !== "web")) return;
+  busy = true;
+  state.turns.push({ role: "user", content: text, image: file ? file.name : null, ts: Date.now() });
+  saveState(); renderChat();
+  const log = $("#log");
+  const pend = document.createElement("div");
+  pend.className = "msg agent";
+  pend.innerHTML = `<span class="who">Agent</span><div class="bubble"><span class="thinking">L'agent analyse votre besoin<span class="dots"></span> <span class="secs"></span></span></div>`;
+  log.appendChild(pend); log.scrollTop = log.scrollHeight;
+  const t0 = Date.now();
+  const timer = setInterval(() => { const s = pend.querySelector(".secs"); if (s) s.textContent = Math.round((Date.now() - t0) / 1000) + " s"; }, 1000);
+  ctl = new AbortController();
+  try {
+    const opts = {
+      signal: ctl.signal, cache: false,
+      onText: ({ text: raw }) => {
+        const m = extractMessage(raw);
+        if (m && m.trim()) { pend.querySelector(".bubble").innerHTML = md(m); log.scrollTop = log.scrollHeight; }
+      },
+    };
+    let res;
+    if (MODE === "web") res = await webAsk(text, file, ctl.signal, opts.onText);
+    else {
+      if (file) opts.images = [file];
+      res = await sample.json(buildInput(text, file), opts);
+    }
+    applyAgent(res);
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "needs_code") {
+      state.turns.push({ role: "assistant", error: true, retry: true, content: "Saisissez le code d'accès de la démo, puis renvoyez votre message." });
+    } else if (code === "cancelled") {
+      state.turns.push({ role: "assistant", error: true, content: "Réponse interrompue." });
+    } else if (OFF_CODES.has(code)) {
+      agentOff = true;
+      state.turns.push({ role: "assistant", error: true, content: "L'agent n'est pas autorisé dans cette vue. Vous pouvez remplir la fiche directement dans le panneau « Fiche »." });
+      showNotice("Agent indisponible dans cette vue. La fiche reste modifiable à la main.");
+    } else {
+      state.turns.push({ role: "assistant", error: true, retry: true, content: ERR_COPY[code] || ERR_COPY.upstream_error });
+    }
+  } finally {
+    clearInterval(timer); busy = false; ctl = null;
+    saveState(); renderChat(); renderFiche();
+  }
+}
+function applyAgent(res) {
+  if (!res || typeof res !== "object") throw { code: "invalid_json" };
+  const changed = [];
+  const maj = res.maj && typeof res.maj === "object" ? res.maj : {};
+  for (const [k, u] of Object.entries(maj)) {
+    const f = FMAP[k]; if (!f || !u || typeof u !== "object") continue;
+    let v = u.valeur;
+    if (f.type === "multi") v = (Array.isArray(v) ? v : [v]).filter(x => typeof x === "string" && x.trim()).map(x => x.trim());
+    else if (Array.isArray(v)) v = v.join(", ");
+    if (!hasVal(v)) continue;
+    if (f.type === "enum") { const m = URGENCES.find(x => x.toLowerCase().startsWith(String(v).toLowerCase().slice(0, 5))); if (m) v = m; }
+    const st = ["déclaré", "déduit", "confirmé"].includes(u.statut) ? u.statut : "déduit";
+    const cur = state.fiche[k];
+    if (cur && cur.statut === "confirmé" && st === "déduit") continue; // never overwrite what the user validated with a guess
+    if (cur && valText(cur.valeur) === valText(v) && cur.statut === st) continue;
+    state.fiche[k] = { valeur: v, statut: st, note: typeof u.note === "string" ? u.note : "", maj: nowIso() };
+    changed.push(SHORT[k]);
+    flashKeys.add(k);
+  }
+  const message = typeof res.message === "string" && res.message.trim() ? res.message.trim() : "J'ai mis à jour la fiche.";
+  state.turns.push({ role: "assistant", content: message, changed, ts: Date.now() });
+  if (typeof res.titre === "string" && res.titre.trim()) state.titre = res.titre.trim().slice(0, 80);
+  if (Array.isArray(res.alertes)) state.alertes = res.alertes.filter(a => a && a.texte).slice(0, 8).map(a => ({ type: String(a.type || "point"), texte: String(a.texte) }));
+  state.suggestions = Array.isArray(res.suggestions) ? res.suggestions.filter(s => typeof s === "string" && s.trim()).slice(0, 4).map(s => s.slice(0, 80)) : [];
+  state.pret = res.pret === true;
+}
+const SHORT = { direction: "Direction", responsable: "Responsable", urgence: "Urgence", probleme: "Problème", processus: "Processus", cout: "Coût actuel", decision: "Décision améliorée", resultats: "Résultats attendus", donnees_existantes: "Données existantes", donnees_manquantes: "Données manquantes", contraintes: "Contraintes", budget: "Budget", similaires: "Initiatives similaires" };
+function showNotice(t) { const n = $("#agent-notice"); n.textContent = t; n.hidden = false; }
+
+/* ================= Recap / submission ================= */
+function recapHTML(fiche, meta) {
+  const q = (k, extra = "") => {
+    const f = FMAP[k], e = fiche[k], st = e && hasVal(e.valeur) ? (e.statut || "déclaré") : "vide", S = STATUTS[st];
+    let v;
+    if (k === "urgence") v = `<div class="boxes">${URGENCES.map(u => `<span class="${e?.valeur === u ? "on" : ""}">${e?.valeur === u ? "☒" : "☐"} ${esc(u)}</span>`).join("")}</div>`;
+    else if (k === "resultats") {
+      const arr = Array.isArray(e?.valeur) ? e.valeur : [];
+      const autre = arr.find(x => /^autre/i.test(x));
+      v = `<div class="boxes">${RESULTATS.map(r => `<span class="${arr.includes(r) ? "on" : ""}">${arr.includes(r) ? "☒" : "☐"} ${esc(r)}</span>`).join("")}<span class="${autre ? "on" : ""}">${autre ? "☒ " + esc(autre) : "☐ Autre"}</span></div>`;
+    } else v = st === "vide" ? `<div class="qv empty">Non renseigné</div>` : `<div class="qv">${esc(valText(e.valeur))}</div>`;
+    return `<div class="q${extra}"><div class="ql">${esc(f.label)} <span class="pill ${S.cls}">${S.label}</span></div>${v}</div>`;
+  };
+  return `<div class="doc">
+    <div class="doc-title">${esc(meta.titre || "Besoin sans titre")}</div>
+    <div class="doc-sub">Fiche d'Expression de Besoin · Innovation Digitale & IA · maturité ${scoreOf(fiche)} %</div>
+    <h5><span class="n">1</span>Identification</h5>
+    <div class="grid2">${q("direction")}${q("responsable")}
+      <div class="q"><div class="ql">Référence Intake</div><div class="qv ${meta.ref ? "" : "empty"}">${meta.ref ? esc(meta.ref) : "Attribuée par la DSI & TD"}</div></div>
+      <div class="q"><div class="ql">Date de soumission</div><div class="qv">${meta.at ? fmtDate(meta.at) : fmtDate(Date.now()) + " (à l'envoi)"}</div></div>
+    </div>${q("urgence")}
+    <h5><span class="n">2</span>Le problème</h5>${q("probleme")}${q("processus")}${q("cout")}
+    <h5><span class="n">3</span>La valeur attendue</h5>${q("decision")}${q("resultats")}
+    <h5><span class="n">4</span>Les données</h5>${q("donnees_existantes")}${q("donnees_manquantes")}
+    <h5><span class="n">5</span>Contraintes & contexte</h5>${q("contraintes")}<div class="grid2">${q("budget")}${q("similaires")}</div>
+    <h5><span class="n">6</span>Validation métier</h5>
+    <div class="grid2">
+      <div class="q"><div class="ql">Responsable métier</div><div class="qv">${esc(valText(fiche.responsable?.valeur)) || "—"}${meta.at ? `<br>Validé en ligne le ${fmtDate(meta.at)}` : ""}</div></div>
+      <div class="q"><div class="ql">Reçu par</div><div class="qv">Responsable Innovation Digitale et IA<br>Retour attendu ${meta.echeance ? "avant le " + fmtDate(meta.echeance) : "sous 5 jours ouvrables"}</div></div>
+    </div>
+  </div>`;
+}
+function docFileHTML(fiche, meta) {
+  const row = (label, v) => `<tr><td style="width:34%;vertical-align:top;color:#555;padding:6px;border:1px solid #ccc"><b>${esc(label)}</b></td><td style="padding:6px;border:1px solid #ccc;white-space:pre-wrap">${esc(v) || "<i>Non renseigné</i>"}</td></tr>`;
+  const st = k => { const e = fiche[k]; return e && hasVal(e.valeur) ? ` [${STATUTS[e.statut]?.label || "Déclaré"}]` : ""; };
+  let body = `<h1 style="font-family:Georgia,serif">Fiche d'Expression de Besoin — Innovation Digitale & IA</h1><p><b>${esc(meta.titre || "Besoin sans titre")}</b> · maturité ${scoreOf(fiche)} %</p>`;
+  for (const sec of SECTIONS) {
+    body += `<h2 style="font-family:Georgia,serif">${sec.n}. ${esc(sec.titre)}</h2><table style="border-collapse:collapse;width:100%">`;
+    for (const f of sec.fields) body += row(f.label + st(f.k), valText(fiche[f.k]?.valeur));
+    if (sec.n === "1") { body += row("Référence Intake", meta.ref || "Attribuée par la DSI & TD"); body += row("Date de soumission", meta.at ? fmtDate(meta.at) : ""); }
+    body += `</table>`;
+  }
+  body += `<h2 style="font-family:Georgia,serif">6. Validation métier</h2><p>Responsable métier : ${esc(valText(fiche.responsable?.valeur))}${meta.at ? " — validé en ligne le " + fmtDate(meta.at) : ""}<br>Reçu par : Responsable Innovation Digitale et IA</p>`;
+  return `<html><head><meta charset="utf-8"><title>${esc(meta.titre || "Fiche besoin")}</title></head><body style="font-family:Calibri,Arial,sans-serif;font-size:11pt">${body}</body></html>`;
+}
+async function downloadFiche(fiche, meta, statusEl) {
+  if (!downloads) return;
+  const base = "Fiche_Besoin_" + (meta.titre || "sans_titre").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "_").slice(0, 50);
+  const html = docFileHTML(fiche, meta);
+  try {
+    await downloads.save({ filename: base + ".doc", data: new Blob([html], { type: "application/msword" }) });
+  } catch (e) {
+    if (e?.code === "rejected_extension") {
+      try { await downloads.save({ filename: base + ".html", data: new Blob([html], { type: "text/html" }) }); } catch {}
+    } else if (e?.code !== "declined" && statusEl) statusEl.textContent = "Le téléchargement n'a pas abouti.";
+  }
+}
+
+const modal = $("#modal");
+function openModal() { modal.hidden = false; document.body.style.overflow = "hidden"; $("#modal-close").focus(); }
+function closeModal() { modal.hidden = true; document.body.style.overflow = ""; }
+$("#modal-close").addEventListener("click", closeModal);
+modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !modal.hidden) closeModal(); });
+
+$("#review").addEventListener("click", () => {
+  const meta = { titre: state.titre, at: state.submitted?.at, echeance: state.submitted?.echeance, ref: "" };
+  $("#modal-title").textContent = state.submitted ? "Fiche transmise" : "Relecture avant transmission";
+  $("#modal-body").innerHTML = recapHTML(state.fiche, meta);
+  const foot = $("#modal-foot");
+  const dlBtn = downloads ? `<button class="btn-ghost" id="dl">Télécharger (Word)</button>` : "";
+  if (state.submitted) {
+    foot.innerHTML = `<div class="okbox">Fiche transmise le ${fmtDate(state.submitted.at)}. La DSI & TD vous répondra avant le ${fmtDate(state.submitted.echeance)}.</div><div class="row"><span id="dl-status" class="attach-note"></span>${dlBtn}</div>`;
+  } else {
+    const deduits = FIELDS.filter(f => statutOf(f.k) === "déduit").length;
+    const vides = FIELDS.filter(f => statutOf(f.k) === "vide").length;
+    const warn = deduits || vides || state.alertes.length
+      ? `<div class="warnbox">${[deduits ? `${deduits} information${deduits > 1 ? "s sont des propositions" : " est une proposition"} de l'agent non confirmée${deduits > 1 ? "s" : ""}` : "", vides ? `${vides} champ${vides > 1 ? "s restent" : " reste"} vide${vides > 1 ? "s" : ""}` : "", state.alertes.length ? `${state.alertes.length} point${state.alertes.length > 1 ? "s" : ""} à renforcer` : ""].filter(Boolean).join(" · ")}. Vous pouvez transmettre tel quel : la DSI verra le statut de chaque information.</div>` : "";
+    foot.innerHTML = `${warn}
+      <label class="confirm-line"><input type="checkbox" id="valid"> <span>Je valide que cette fiche décrit fidèlement mon besoin. Cette validation tient lieu de signature du responsable métier.</span></label>
+      <div id="submit-msg"></div>
+      <div class="row"><span id="dl-status" class="attach-note"></span>${dlBtn}<button class="btn-ghost" id="back">Continuer à compléter</button><button class="btn-primary" id="submit" disabled>Transmettre à la DSI</button></div>`;
+    $("#valid").addEventListener("change", e => { $("#submit").disabled = !e.target.checked; });
+    $("#back").addEventListener("click", closeModal);
+    $("#submit").addEventListener("click", submitFiche);
+  }
+  $("#dl")?.addEventListener("click", () => downloadFiche(state.fiche, meta, $("#dl-status")));
+  openModal();
+});
+
+async function submitFiche() {
+  const btn = $("#submit"), box = $("#submit-msg");
+  if (!db && MODE !== "web") { box.innerHTML = `<div class="errbox">La transmission n'est pas disponible dans cette vue. Téléchargez la fiche et envoyez-la à la DSI & TD.</div>`; return; }
+  btn.disabled = true; btn.textContent = "Transmission…";
+  const at = new Date(nowMs());
+  const echeance = addBusinessDays(at, 5);
+  const fiche = {};
+  for (const f of FIELDS) { const e = state.fiche[f.k]; if (e && hasVal(e.valeur)) fiche[f.k] = { valeur: e.valeur, statut: e.statut, note: e.note || "", maj: e.maj || nowIso() }; }
+  const doc = {
+    titre: state.titre || "Besoin sans titre",
+    fiche, score: scoreOf(state.fiche), pret: state.pret, alertes: state.alertes,
+    statut: "À qualifier", submittedAt: at.toISOString(), echeance: echeance.toISOString(),
+    submitter: uid || null, echanges: state.turns.filter(t => t.role === "user").length, origine: state.remoteId ? "e-mail" : "web",
+    transcript: state.turns.filter(t => !t.error).slice(-40).map(t => ({ role: t.role, content: String(t.content).slice(0, 2000) })),
+  };
+  try {
+    let id;
+    if (MODE === "web") {
+      const r = state.remoteId
+        ? await fetch("/api/fiches/" + encodeURIComponent(state.remoteId), { method: "PATCH", headers: apiHeaders(), body: JSON.stringify({ op: "submit", doc, at: doc.submittedAt }) })
+        : await fetch("/api/fiches", { method: "POST", headers: apiHeaders(), body: JSON.stringify(doc) });
+      if (r.status === 401) { showGate(); throw { code: "needs_code" }; }
+      if (!r.ok) throw { code: "unavailable" };
+      id = state.remoteId || (await r.json()).id;
+      addMine(id);
+      refreshWebQueue();
+    } else id = (await db.collection("fiches").add(doc)).id;
+    state.submitted = { id, at: doc.submittedAt, echeance: doc.echeance };
+    state.turns.push({ role: "assistant", content: `**Fiche transmise à la DSI & TD.** Vous recevrez un retour avant le **${fmtDate(echeance)}** (5 jours ouvrables). Elle apparaît dans la file de qualification avec l'historique de notre échange.`, ts: Date.now() });
+    saveState(); renderChat(); renderFiche();
+    $("#review").click();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "Transmettre à la DSI";
+    const msg = e?.code === "needs_code" ? "Saisissez le code d'accès de la démo, puis transmettez à nouveau."
+      : e?.code === "invalid_argument" ? "Vous n'avez pas les droits pour transmettre depuis cette vue. Demandez un accès Contributeur, ou téléchargez la fiche."
+      : e?.code === "quota_exceeded" ? "La file DSI est pleine. Prévenez l'équipe DSI & TD."
+      : "La transmission a échoué. Réessayez dans un instant.";
+    box.innerHTML = `<div class="errbox">${msg}</div>`;
+  }
+}
+
+/* ================= Reset ================= */
+let resetArmed = null;
+$("#reset").addEventListener("click", () => {
+  const b = $("#reset");
+  if (!state.turns.length && !Object.keys(state.fiche).length) return;
+  if (!resetArmed) {
+    b.textContent = "Confirmer : effacer le brouillon"; b.classList.add("warn");
+    resetArmed = setTimeout(() => { resetArmed = null; b.textContent = "Nouveau besoin"; b.classList.remove("warn"); }, 4000);
+    return;
+  }
+  clearTimeout(resetArmed); resetArmed = null; b.textContent = "Nouveau besoin"; b.classList.remove("warn");
+  ctl?.abort();
+  state = fresh(); editing = null; prefillIdentity();
+  saveState();
+  location.reload();
+});
+
+/* ================= Tabs & mobile panes ================= */
+function showTab(which) {
+  for (const t of ["capture", "chat", "mine", "dsi"]) {
+    $("#tab-" + t).setAttribute("aria-selected", t === which);
+    $("#view-" + t).hidden = t !== which;
+  }
+  if (which === "dsi") renderQueue();
+  if (which === "mine") renderMine();
+  if (which === "chat") simOpen();
+  if (which !== "chat") simClose();
+}
+$("#tab-capture").addEventListener("click", () => showTab("capture"));
+$("#tab-mine").addEventListener("click", () => showTab("mine"));
+$("#tab-chat").addEventListener("click", () => showTab("chat"));
+$("#tab-dsi").addEventListener("click", () => showTab("dsi"));
+function showPane(p) {
+  $("#panes").classList.toggle("show-fiche", p === "fiche");
+  $("#seg-chat").setAttribute("aria-pressed", p !== "fiche"); $("#seg-fiche").setAttribute("aria-pressed", p === "fiche");
+}
+$("#seg-chat").addEventListener("click", () => showPane("chat"));
+$("#seg-fiche").addEventListener("click", () => showPane("fiche"));
+
+/* ================= DSI queue ================= */
+function renderQueue() {
+  const el = $("#queue"), k = $("#kpis");
+  const cnt = $("#queue-count");
+  const recus = queue.filter(q => q.statut !== "Brouillon");
+  const open = recus.filter(q => ["À qualifier", "En qualification"].includes(q.statut));
+  cnt.hidden = !open.length; cnt.textContent = open.length;
+  renderMineCount();
+  if (!$("#view-mine").hidden) renderMine();
+  if ($("#view-dsi").hidden) return;
+  const now = nowMs();
+  const late = open.filter(q => q.echeance && new Date(q.echeance).getTime() < now).length;
+  const avg = recus.length ? Math.round(recus.reduce((a, q) => a + (q.score || 0), 0) / recus.length) : 0;
+  const ready = recus.filter(q => q.pret).length;
+  const pend = queue.reduce((a, q) => a + (q.pending || []).length, 0);
+  const stale = recus.filter(q => staleFields(q).length).length;
+  k.innerHTML = [
+    ["Besoins reçus", recus.length, ""],
+    ["En attente de retour", open.length, ""],
+    ["Délai de 5 jours dépassé", late, late ? "bad" : ""],
+    ["Maturité moyenne", recus.length ? avg + " %" : "—", ""],
+    ...(MODE === "web" ? [
+      ["Fiches avec infos à revalider", stale, stale ? "bad" : ""],
+      ["Mises à jour en attente du métier", pend, ""],
+    ] : [["Jugés prêts par l'agent", ready, ""]]),
+  ].map(([l, v, c]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${c}">${v}</div></div>`).join("");
+
+  if (!db && MODE !== "web") { el.innerHTML = `<div class="empty-state"><h3>File indisponible dans cette vue</h3><p>Ouvrez cette page dans claude.ai, connecté, pour voir les besoins transmis.</p></div>`; return; }
+  if (MODE === "web" && !webQueueOk) { el.innerHTML = `<div class="empty-state"><h3>Chargement de la file…</h3><p>Si rien n'apparaît, vérifiez le code d'accès de la démo.</p></div>`; return; }
+  if (!queue.length) { el.innerHTML = `<div class="empty-state"><h3>Aucun besoin transmis pour l'instant</h3><p>Dès qu'un collaborateur valide sa fiche dans l'onglet « Exprimer un besoin », elle arrive ici avec son niveau de maturité et l'échéance de retour.</p></div>`; return; }
+
+  preserveInputs(el, () => { el.innerHTML = queue.map(q => {
+    const d = q.echeance ? businessDaysBetween(now, q.echeance) : null;
+    const draft = q.statut === "Brouillon";
+    const closed = !draft && !open.includes(q);
+    const dueCls = closed ? "" : d < 0 ? "late" : d <= 1 ? "soon" : "";
+    const dueTxt = draft ? "Brouillon e-mail : attend le métier" : closed ? "Traité" : d === null ? "—" : d < 0 ? `En retard de ${-d} j ouvré${-d > 1 ? "s" : ""}` : d === 0 ? "Échéance aujourd'hui" : `J-${d} ouvré${d > 1 ? "s" : ""}`;
+    const f = q.fiche || {};
+    const statusCtl = canEditQueue
+      ? `<select class="status-sel" data-status="${esc(q.id)}" aria-label="Statut">${(draft ? ["Brouillon", ...QUEUE_STATUTS] : QUEUE_STATUTS).map(s => `<option${s === q.statut ? " selected" : ""}>${esc(s)}</option>`).join("")}</select>`
+      : `<span class="status-chip">${esc(q.statut || "À qualifier")}</span>`;
+    const isOpen = openCards.has(q.id);
+    return `<article class="card">
+      <div class="card-h">
+        <button class="open" data-open="${esc(q.id)}" aria-expanded="${isOpen}">
+          <span class="ttl">${esc(q.titre || "Besoin sans titre")}</span>
+          <span class="meta">${q.origine && q.origine !== "web" ? `<span class="tag">${esc({ "e-mail": "e-mail", whatsapp: "WhatsApp", teams: "Teams" }[q.origine] || q.origine)}</span>` : ""}${q.qualif ? `<span class="tag">V${q.qualif.valeur?.note ?? "?"} · F${q.qualif.faisabilite?.note ?? "?"} · ${esc(q.qualif.trajectoire?.code || "?")}</span>` : ""}${(q.pending || []).length ? `<span class="tag warn">${q.pending.length} màj en attente</span>` : ""}${staleFields(q).length ? `<span class="tag warn">${staleFields(q).length} à revalider</span>` : ""}<span>${esc(valText(f.direction?.valeur) || "Direction non précisée")}</span><span>${esc(valText(f.urgence?.valeur) || "Urgence non précisée")}</span><span>Reçu le ${q.submittedAt ? fmtDate(q.submittedAt) : "—"}</span><span>${q.echanges || 0} échange${(q.echanges || 0) > 1 ? "s" : ""}</span></span>
+        </button>
+        <div class="right"><span class="score">${q.score ?? 0} %</span><span class="due ${dueCls}">${dueTxt}</span>${statusCtl}</div>
+      </div>
+      ${isOpen ? `<div class="card-b">${recapHTML(f, { titre: q.titre, at: q.submittedAt, echeance: q.echeance, ref: "" })}
+        ${(q.alertes || []).length ? `<details open><summary>Points signalés par l'agent (${q.alertes.length})</summary><ul>${q.alertes.map(a => `<li><b>${esc(a.type)}</b> : ${esc(a.texte)}</li>`).join("")}</ul></details>` : ""}
+        <details><summary>Historique de l'échange (${(q.transcript || []).length} messages)</summary><div class="transcript">${(q.transcript || []).map(t => `<div class="${t.role === "user" ? "u" : ""}"><b>${t.role === "user" ? "Métier" : "Agent"}</b>${esc(t.content)}</div>`).join("")}</div></details>
+        ${downloads ? `<p><button class="btn-ghost" data-dl="${esc(q.id)}">Télécharger la fiche (Word)</button></p>` : ""}
+        ${MODE === "web" ? dsiLivingHTML(q) : ""}
+      </div>` : ""}
+    </article>`;
+  }).join(""); });
+}
+$("#queue").addEventListener("click", ev => {
+  const o = ev.target.closest("[data-open]");
+  if (o) { const id = o.dataset.open; openCards.has(id) ? openCards.delete(id) : openCards.add(id); renderQueue(); return; }
+  const d = ev.target.closest("[data-dl]");
+  if (d) { const q = queue.find(x => x.id === d.dataset.dl); if (q) downloadFiche(q.fiche || {}, { titre: q.titre, at: q.submittedAt, echeance: q.echeance }); }
+});
+$("#queue").addEventListener("change", async ev => {
+  const s = ev.target.closest("[data-status]"); if (!s || (!db && MODE !== "web")) return;
+  s.disabled = true;
+  try {
+    if (MODE === "web") {
+      const r = await fetch("/api/fiches/" + encodeURIComponent(s.dataset.status), { method: "PATCH", headers: apiHeaders(), body: JSON.stringify({ op: "statut", statut: s.value, at: nowIso() }) });
+      if (!r.ok) throw new Error("status " + r.status);
+      refreshWebQueue();
+    } else await db.doc("fiches/" + s.dataset.status).update({ statut: s.value, statutMaj: new Date().toISOString() });
+  }
+  catch { s.value = queue.find(x => x.id === s.dataset.status)?.statut || QUEUE_STATUTS[0]; }
+  finally { s.disabled = false; }
+});
+
+/* ================= Living fiche, DSI copilot, voice, e-mail (website mode) ================= */
+function preserveInputs(container, render) {
+  const vals = {};
+  container.querySelectorAll("textarea[id], input[id]").forEach(e => { vals[e.id] = e.type === "checkbox" ? e.checked : e.value; });
+  const active = document.activeElement && document.activeElement.id;
+  render();
+  for (const [id, v] of Object.entries(vals)) {
+    const e = document.getElementById(id); if (!e) continue;
+    if (e.type === "checkbox") e.checked = v; else if (e.value !== v) e.value = v;
+  }
+  if (active) { const e = document.getElementById(active); if (e && container.contains(e)) e.focus(); }
+}
+const TTL = { direction: 365, responsable: 365, urgence: 60, probleme: 240, processus: 180, cout: 90, decision: 240, resultats: 240, donnees_existantes: 180, donnees_manquantes: 180, contraintes: 180, budget: 120, similaires: 120 };
+const toMs = v => typeof v === "number" ? v : (Date.parse(v || "") || null);
+const ageDays = e => { const m = toMs(e && e.maj); return m ? Math.max(0, Math.floor((nowMs() - m) / 864e5)) : null; };
+const isStale = (k, e) => { const a = ageDays(e); return a !== null && a > (TTL[k] || 180); };
+const agoTxt = d => d === null ? "" : d === 0 ? "aujourd'hui" : d === 1 ? "hier" : `il y a ${d} j`;
+const fmtDateTime = d => { const t = toMs(d); return t ? new Date(t).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }) + " " + new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "—"; };
+const filled = (q, k) => q.fiche && q.fiche[k] && hasVal(q.fiche[k].valeur);
+function staleFields(q) { return FIELDS.filter(f => filled(q, f.k) && isStale(f.k, q.fiche[f.k])).map(f => f.k); }
+function deduitFields(q) { return FIELDS.filter(f => filled(q, f.k) && q.fiche[f.k].statut === "déduit").map(f => f.k); }
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 4500); }
+async function patchFiche(id, body) {
+  const r = await fetch("/api/fiches/" + encodeURIComponent(id), { method: "PATCH", headers: apiHeaders(), body: JSON.stringify({ at: nowIso(), ...body }) });
+  if (r.status === 401) { showGate(); throw new Error("code"); }
+  if (!r.ok) throw new Error("status " + r.status);
+  const doc = await r.json();
+  const i = queue.findIndex(q => q.id === id);
+  if (i >= 0) queue[i] = doc; else queue.unshift(doc);
+  renderQueue();
+  return doc;
+}
+function ficheForAgent(q) {
+  const o = {};
+  for (const f of FIELDS) {
+    const e = q.fiche && q.fiche[f.k];
+    o[f.k] = e && hasVal(e.valeur) ? { valeur: e.valeur, statut: e.statut, anciennete_jours: ageDays(e), perime: isStale(f.k, e) } : null;
+  }
+  return JSON.stringify(o, null, 1);
+}
+const shortSummary = q => `- id ${q.id} · « ${q.titre || "Sans titre"} » (${valText(q.fiche?.direction?.valeur) || "direction ?"}, statut ${q.statut}) : ${valText(q.fiche?.probleme?.valeur).slice(0, 260)}${q.fiche?.processus ? " | Processus : " + valText(q.fiche.processus.valeur).slice(0, 160) : ""}`;
+
+/* ---- mine ---- */
+const MINE_KEY = "intake-mine";
+let mineFilter = "mine";
+const openMine = new Set();
+function mineIds() { try { const a = JSON.parse(localStorage.getItem(MINE_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch { return []; } }
+function addMine(id) { const a = mineIds().filter(x => x !== id); a.unshift(id); try { localStorage.setItem(MINE_KEY, JSON.stringify(a.slice(0, 50))); } catch {} }
+function mineItems() {
+  if (mineFilter === "all") return queue;
+  const ids = mineIds();
+  return ids.map(id => queue.find(q => q.id === id)).filter(Boolean);
+}
+const needsAction = q => !!q.nudge || (q.pending || []).length > 0 || q.statut === "Brouillon" || staleFields(q).length > 0;
+function renderMineCount() {
+  if (MODE !== "web") return;
+  const n = mineIds().map(id => queue.find(q => q.id === id)).filter(q => q && needsAction(q)).length;
+  const c = $("#mine-count"); c.hidden = !n; c.textContent = n;
+}
+$("#mine-filter").addEventListener("click", e => {
+  const b = e.target.closest("[data-mine]"); if (!b) return;
+  mineFilter = b.dataset.mine;
+  for (const x of $("#mine-filter").querySelectorAll("button")) x.setAttribute("aria-pressed", x === b);
+  renderMine();
+});
+function renderMine() {
+  if (MODE !== "web") return;
+  const el = $("#mine-list");
+  if (!webQueueOk) { el.innerHTML = `<div class="empty-state"><h3>Chargement…</h3><p>Si rien n'apparaît, vérifiez le code d'accès de la démo.</p></div>`; return; }
+  const items = mineItems();
+  if (!items.length) {
+    el.innerHTML = `<div class="empty-state"><h3>Aucun besoin suivi depuis ce navigateur</h3><p>Les besoins que vous transmettez apparaissent ici. Pour la démo, affichez « Tous les besoins ».</p></div>`;
+    return;
+  }
+  preserveInputs(el, () => { el.innerHTML = items.map(q => {
+    const st = staleFields(q).length, pd = (q.pending || []).length, draft = q.statut === "Brouillon";
+    const badges = [
+      draft ? `<span class="tag warn">Brouillon à compléter</span>` : "",
+      q.nudge ? `<span class="tag accent">1 question de l'agent</span>` : "",
+      pd ? `<span class="tag warn">${pd} mise${pd > 1 ? "s" : ""} à jour à valider</span>` : "",
+      st ? `<span class="tag warn">${st} info${st > 1 ? "s" : ""} à revalider</span>` : "",
+      (q.events || []).some(e => e.type === "reponse") ? `<span class="tag ok">Réponse de la DSI</span>` : "",
+    ].join("");
+    const isOpen = openMine.has(q.id);
+    return `<article class="card">
+      <div class="card-h">
+        <button class="open" data-mopen="${esc(q.id)}" aria-expanded="${isOpen}">
+          <span class="ttl">${esc(q.titre || "Besoin sans titre")}</span>
+          <span class="meta">${badges}<span>Statut DSI : ${esc(q.statut)}</span><span>Maturité ${q.score ?? 0} %</span></span>
+        </button>
+      </div>
+      ${isOpen ? `<div class="card-b">${metierLivingHTML(q)}</div>` : ""}
+    </article>`;
+  }).join(""); });
+}
+function livingFieldsHTML(q) {
+  return SECTIONS.map(sec => `<h5><span class="n">${sec.n}</span>${esc(sec.titre)}</h5>` + sec.fields.map(f => {
+    const e = q.fiche && q.fiche[f.k];
+    const st = e && hasVal(e.valeur) ? (e.statut || "déclaré") : "vide", S = STATUTS[st];
+    const stale = st !== "vide" && isStale(f.k, e);
+    return `<div class="q lf${stale ? " stale" : ""}"><div class="ql">${esc(f.label)} <span class="pill ${S.cls}">${S.label}</span>${stale ? `<span class="pill st-stale">À revalider</span>` : ""}</div>
+      <div class="qv${st === "vide" ? " empty" : ""}">${st === "vide" ? "Non renseigné" : esc(valText(e.valeur))}</div>
+      ${st !== "vide" ? `<div class="f-note">Mis à jour ${agoTxt(ageDays(e))}${e.source ? ` · source : ${esc(e.source)}` : ""}</div>` : ""}</div>`;
+  }).join("")).join("");
+}
+const EV_LABEL = { valeur: "Valeur", transmise: "Transmission", capture: "Capture", agent: "Agent", statut: "Statut DSI", maj: "Mise à jour", observation: "Observation", refus: "Refus", qualif: "Copilote", relance: "Relance", reponse: "Réponse DSI", note: "Note" };
+function journalHTML(q) {
+  const ev = (q.events || []).slice().reverse();
+  if (!ev.length) return `<p class="muted">Aucun événement pour l'instant.</p>`;
+  return `<ol class="timeline">${ev.map(e => `<li class="ev ev-${esc(e.type)}"><span class="ev-d">${fmtDateTime(e.at)}</span><span class="ev-k">${esc(EV_LABEL[e.type] || e.type)}</span><span class="ev-t">${esc(e.text)}${(e.fields || []).length ? ` <span class="muted">(${e.fields.map(k => SHORT[k] || k).join(", ")})</span>` : ""}</span></li>`).join("")}</ol>`;
+}
+function pendingHTML(q, role) {
+  const p = q.pending || [];
+  if (!p.length) return "";
+  return `<section class="lv-block pending"><h4>Mises à jour observées sur le terrain · ${p.length}</h4>
+    ${p.map(x => `<label class="prop"><input type="checkbox" data-pend="${esc(x.id)}" ${role === "metier" ? "checked" : "disabled"}><span><b>${esc(SHORT[x.champ] || x.champ)}</b> → ${esc(valText(x.valeur))}<br><span class="muted">${esc(x.raison)}${x.source ? " · " + esc(x.source) : ""}</span></span></label>`).join("")}
+    ${role === "metier" ? `<div class="row-end"><button class="btn-ghost" data-act="pend-dismiss" data-id="${esc(q.id)}">Écarter la sélection</button><button class="btn-primary" data-act="pend-apply" data-id="${esc(q.id)}">Valider la sélection</button></div>` : `<p class="muted">En attente de validation par le porteur du besoin.</p>`}
+  </section>`;
+}
+function nudgeHTML(q, role) {
+  if (!q.nudge) return "";
+  if (role !== "metier") return `<section class="lv-block nudge"><h4>Relance en attente de réponse</h4><p>${esc(q.nudge.question)}</p></section>`;
+  return `<section class="lv-block nudge"><h4>L'agent a une question</h4><p>${esc(q.nudge.question)}</p>
+    <div class="chips">${(q.nudge.suggestions || []).map(s => `<button type="button" class="chip-btn" data-act="nudge-reply" data-id="${esc(q.id)}" data-text="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+    <p class="muted">Ou répondez avec vos mots dans « Donner des nouvelles » ci-dessous.</p></section>`;
+}
+function metierLivingHTML(q) {
+  const id = esc(q.id);
+  if (q.statut === "Brouillon") {
+    return `<div class="lv-block nudge"><h4>Brouillon créé à partir de votre e-mail</h4><p>L'agent a commencé la fiche à partir de votre message. Complétez-la avec lui en quelques échanges, puis transmettez-la.</p><div class="row-end"><button class="btn-primary" data-act="load-draft" data-id="${id}">Compléter avec l'agent</button></div></div>
+      ${livingFieldsHTML(q)}<h5>Journal</h5>${journalHTML(q)}`;
+  }
+  return `${nudgeHTML(q, "metier")}${pendingHTML(q, "metier")}
+    <section class="lv-block news"><h4>Donner des nouvelles</h4>
+      <p class="muted">Écrivez ou dictez ce qui a changé : volumes, organisation, délais, données, priorité… L'agent prépare la mise à jour, vous validez.</p>
+      <textarea id="news-${id}" rows="3" aria-label="Vos nouvelles"></textarea>
+      <div class="row-end"><button type="button" class="btn-icon mic" data-mic="news-${id}">Dicter</button><button class="btn-primary" data-act="news" data-id="${id}">Mettre à jour ma fiche</button></div>
+      <div id="upd-${id}">${updating.has(q.id) ? `<p class="thinking">L'agent analyse vos nouvelles<span class="dots"></span></p>` : updateProposalHTML(q.id)}</div>
+    </section>
+    ${valueHTML(q, "metier")}
+    <div class="doc">${livingFieldsHTML(q)}</div>
+    <h5 class="jh">Journal du besoin</h5>${journalHTML(q)}`;
+}
+
+/* ---- update flow (métier news / nudge answer) ---- */
+const pendingUpdates = new Map(), updating = new Set();
+async function runUpdate(q, text, opts = {}) {
+  updating.add(q.id);
+  const box = document.getElementById("upd-" + q.id);
+  if (box) box.innerHTML = `<p class="thinking">L'agent analyse vos nouvelles<span class="dots"></span></p>`;
+  try { await runUpdateInner(q, text, opts); } finally { updating.delete(q.id); }
+}
+async function runUpdateInner(q, text, opts) {
+  const inds = indicatorsForAgent(q);
+  const input = `DATE DU JOUR : ${fmtDate(nowMs())}\nSOURCE : métier (le porteur du besoin parle)\n${q.nudge && opts.answeredNudge ? `QUESTION POSÉE PAR L'AGENT : ${q.nudge.question}\n` : ""}\nFICHE ACTUELLE « ${q.titre} » :\n${ficheForAgent(q)}${inds ? `\n\nINDICATEURS DE VALEUR :\n${JSON.stringify(inds)}` : ""}\n\nNOUVELLE INFORMATION :\n${text}`;
+  try {
+    const res = await askAgent("update", input);
+    const props = (Array.isArray(res.propositions) ? res.propositions : []).filter(p => p && FMAP[p.champ]);
+    const mesures = (Array.isArray(res.mesures) ? res.mesures : []).filter(m => m && (q.valeur?.indicateurs || []).some(i => i.id === m.indicateurId));
+    if (!props.length && !mesures.length) {
+      await patchFiche(q.id, { op: "note", by: "métier", text: `${opts.answeredNudge ? "Réponse à la relance : " : "Nouvelles : "}${text}` });
+      if (opts.answeredNudge) await patchFiche(q.id, { op: "apply", changes: {}, answeredNudge: true, text: "Relance traitée.", source: "métier" });
+      toast(res.resume ? "Noté au journal : " + res.resume : "Noté au journal. Rien à changer dans la fiche.");
+      return;
+    }
+    pendingUpdates.set(q.id, { props, mesures, resume: res.resume || "Mise à jour par le porteur", text, answeredNudge: !!opts.answeredNudge });
+    const ta = document.getElementById("news-" + q.id); if (ta && !opts.answeredNudge) ta.value = "";
+    const b = document.getElementById("upd-" + q.id);
+    if (b) b.innerHTML = updateProposalHTML(q.id);
+    else toast("Propositions prêtes : ouvrez le besoin pour les valider.");
+  } catch (e) {
+    const b = document.getElementById("upd-" + q.id);
+    if (b) b.innerHTML = `<p class="errbox">${esc(ERR_COPY[e?.code] || "La mise à jour n'a pas abouti. Réessayez.")}</p>`;
+  }
+}
+function updateProposalHTML(id) {
+  const u = pendingUpdates.get(id); if (!u) return "";
+  return `<div class="proposal"><p><b>L'agent propose :</b> ${esc(u.resume)}</p>
+    ${(u.mesures || []).map((m, i) => { const ind = (queue.find(x => x.id === id)?.valeur?.indicateurs || []).find(k => k.id === m.indicateurId); return `<label class="prop"><input type="checkbox" data-mes="${i}" checked><span><b>Mesure · ${esc(ind ? ind.nom : "indicateur")}</b> → ${esc(String(m.valeur))}<br><span class="muted">${esc(m.commentaire || "")}</span></span></label>`; }).join("")}
+    ${u.props.map((p, i) => `<label class="prop"><input type="checkbox" data-upd="${i}" checked><span><b>${esc(SHORT[p.champ] || p.champ)}</b> → ${esc(valText(p.valeur))} <span class="pill ${STATUTS[p.statut]?.cls || "st-declare"}">${esc(STATUTS[p.statut]?.label || "Déclaré")}</span><br><span class="muted">${esc(p.raison || "")}</span></span></label>`).join("")}
+    <div class="row-end"><button class="btn-ghost" data-act="upd-cancel" data-id="${esc(id)}">Annuler</button><button class="btn-primary" data-act="upd-apply" data-id="${esc(id)}">Appliquer à ma fiche</button></div></div>`;
+}
+
+/* ---- DSI living view + copilot ---- */
+const copilotRunning = new Map();
+function dsiLivingHTML(q) {
+  return `${nudgeHTML(q, "dsi")}${pendingHTML(q, "dsi")}${valueHTML(q, "dsi")}${copilotHTML(q)}<h5 class="jh">Journal du besoin</h5>${journalHTML(q)}`;
+}
+function scoreBar(n) {
+  if (n === null || n === undefined) return `<span class="muted">Non noté</span>`;
+  return `<span class="dots5" aria-label="${n} sur 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span><b class="mono">${n}/5</b>`;
+}
+function copilotHTML(q) {
+  const c = q.qualif, id = esc(q.id), run = copilotRunning.get(q.id);
+  const head = `<div class="cp-head"><h4>Copilote de qualification</h4><span class="tag">Proposition IA — à valider par la DSI</span>
+    <button class="btn-ghost" data-act="qualify" data-id="${id}" ${run ? "disabled" : ""}>${c ? "Relancer l'analyse" : "Analyser avec le copilote"}</button></div>`;
+  if (run) return `<section class="lv-block copilot">${head}<p class="thinking">Analyse en cours : valeur, faisabilité, bottleneck shift, besoins proches<span class="dots"></span></p></section>`;
+  if (!c) return `<section class="lv-block copilot">${head}<p class="muted">Le copilote propose un score Valeur / Faisabilité argumenté, une lecture « bottleneck shift », une trajectoire, les questions d'atelier, les besoins proches et un brouillon de réponse au porteur.</p></section>`;
+  const near = (c.besoins_proches || []).map(b => { const o = queue.find(x => x.id === b.id); return o ? `<li><b>${esc(o.titre)}</b> : ${esc(b.raison)}</li>` : ""; }).join("");
+  const traj = c.trajectoire || {};
+  return `<section class="lv-block copilot">${head}
+    <div class="cp-grid">
+      <div class="cp-cell"><div class="cp-l">Valeur</div>${scoreBar(c.valeur?.note)}<p>${esc(c.valeur?.justification || "")}</p></div>
+      <div class="cp-cell"><div class="cp-l">Faisabilité</div>${scoreBar(c.faisabilite?.note)}<p>${esc(c.faisabilite?.justification || "")}</p></div>
+      <div class="cp-cell"><div class="cp-l">Trajectoire proposée</div><span class="traj traj-${esc(traj.code || "x")}">${esc(traj.code || "?")} · ${esc(traj.libelle || "")}</span><p>${esc(traj.critere || "")}</p></div>
+      <div class="cp-cell"><div class="cp-l">Bottleneck shift</div><p><b>Aujourd'hui</b> (${esc(c.bottleneck_actuel?.categorie || "?")}) : ${esc(c.bottleneck_actuel?.description || "")}</p><p><b>Demain</b> (${esc(c.bottleneck_potentiel?.categorie || "?")}) : ${esc(c.bottleneck_potentiel?.description || "")}</p><p class="chain">${esc(c.chaine_second_ordre || "")}</p></div>
+    </div>
+    ${(c.prerequis || []).length ? `<div class="cp-l">Prérequis et risques</div><ul>${c.prerequis.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${(c.questions_atelier || []).length ? `<div class="cp-l">Questions pour l'atelier</div><ol>${c.questions_atelier.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
+    ${near ? `<div class="cp-l">Besoins proches (regroupement possible)</div><ul>${near}</ul>` : ""}
+    <div class="cp-l">Brouillon de réponse au porteur</div>
+    <textarea id="rep-${id}" rows="7" aria-label="Réponse au porteur">${esc(c.reponse_metier || "")}</textarea>
+    <div class="row-end"><button class="btn-primary" data-act="send-rep" data-id="${id}">Envoyer au porteur</button></div>
+  </section>`;
+}
+async function runQualify(q) {
+  copilotRunning.set(q.id, true); renderQueue();
+  const others = queue.filter(x => x.id !== q.id && x.statut !== "Brouillon").slice(0, 30).map(shortSummary).join("\n") || "(aucun)";
+  const tr = (q.transcript || []).slice(-8).map(t => `${t.role === "user" ? "Métier" : "Agent"} : ${String(t.content).slice(0, 600)}`).join("\n");
+  const input = `DATE DU JOUR : ${fmtDate(nowMs())}\n\nFICHE À QUALIFIER (id ${q.id}) — « ${q.titre} » :\n${ficheForAgent(q)}\n\nPOINTS SIGNALÉS PAR L'AGENT D'INTAKE :\n${(q.alertes || []).map(a => "- " + a.texte).join("\n") || "(aucun)"}\n\nEXTRAITS DE L'ÉCHANGE AVEC LE MÉTIER :\n${tr || "(aucun)"}\n\nJOURNAL :\n${(q.events || []).slice(-10).map(e => `- ${fmtDate(e.at)} ${e.text}`).join("\n")}\n\nAUTRES BESOINS DU PORTEFEUILLE :\n${others}`;
+  try {
+    const res = await askAgent("qualify", input);
+    if (!res || typeof res !== "object" || !res.valeur) throw { code: "invalid_json" };
+    copilotRunning.delete(q.id);
+    await patchFiche(q.id, { op: "qualif", qualif: res });
+  } catch (e) {
+    copilotRunning.delete(q.id); renderQueue();
+    toast(ERR_COPY[e?.code] || "L'analyse n'a pas abouti. Relancez-la.");
+  }
+}
+
+/* ---- delegated actions (Mes besoins + File DSI) ---- */
+async function onLivingClick(ev) {
+  const mo = ev.target.closest("[data-mopen]");
+  if (mo) { const id = mo.dataset.mopen; openMine.has(id) ? openMine.delete(id) : openMine.add(id); renderMine(); return; }
+  const b = ev.target.closest("[data-act]"); if (!b || !b.dataset.id) return;
+  const q = queue.find(x => x.id === b.dataset.id); if (!q) return;
+  const act = b.dataset.act;
+  try {
+    if (act === "news") {
+      const ta = document.getElementById("news-" + q.id); const t = ta.value.trim(); if (!t) { ta.focus(); return; }
+      b.disabled = true; await runUpdate(q, t); b.disabled = false;
+    } else if (act === "nudge-reply") {
+      openMine.add(q.id); await runUpdate(q, b.dataset.text, { answeredNudge: true });
+    } else if (act === "upd-cancel") {
+      pendingUpdates.delete(q.id); renderMine();
+    } else if (act === "upd-apply") {
+      const u = pendingUpdates.get(q.id); if (!u) return;
+      const box = document.getElementById("upd-" + q.id);
+      const keep = [...box.querySelectorAll("[data-upd]")].filter(x => x.checked).map(x => u.props[+x.dataset.upd]);
+      const changes = Object.fromEntries(keep.map(p => [p.champ, { valeur: p.valeur, statut: p.statut, note: p.raison }]));
+      const mesures = [...box.querySelectorAll("[data-mes]")].filter(x => x.checked).map(x => u.mesures[+x.dataset.mes]);
+      b.disabled = true;
+      await patchFiche(q.id, { op: "apply", changes, mesures, text: `${u.answeredNudge ? "Réponse à la relance" : "Nouvelles du porteur"} : ${u.resume}`, source: "métier", answeredNudge: u.answeredNudge });
+      pendingUpdates.delete(q.id); renderMine(); toast("Fiche mise à jour.");
+    } else if (act === "pend-apply" || act === "pend-dismiss") {
+      const card = b.closest(".card");
+      const ids = [...card.querySelectorAll("[data-pend]")].filter(x => x.checked).map(x => x.dataset.pend);
+      if (!ids.length) return;
+      b.disabled = true;
+      if (act === "pend-apply") {
+        const changes = Object.fromEntries((q.pending || []).filter(p => ids.includes(p.id)).map(p => [p.champ, { valeur: p.valeur, statut: "confirmé", note: p.raison }]));
+        await patchFiche(q.id, { op: "apply", changes, pendingIds: ids, text: "Mises à jour observées validées par le porteur.", source: q.pending.find(p => ids.includes(p.id))?.source || "observation" });
+        toast("Mises à jour validées.");
+      } else { await patchFiche(q.id, { op: "dismiss", pendingIds: ids }); toast("Propositions écartées."); }
+    } else if (act === "load-draft") {
+      loadDraft(q);
+    } else if (act === "qualify") {
+      await runQualify(q);
+    } else if (act === "ind-propose") {
+      await runIndicators(q);
+    } else if (act === "ind-save") {
+      const prop = valueProposals.get(q.id) || [];
+      const card = b.closest(".card");
+      const keep = [...card.querySelectorAll("[data-ind]")].filter(x => x.checked).map(x => prop[+x.dataset.ind]);
+      if (!keep.length) return;
+      b.disabled = true;
+      await patchFiche(q.id, { op: "valeur_def", indicateurs: keep });
+      valueProposals.delete(q.id); renderQueue(); toast("Indicateurs de valeur enregistrés.");
+    } else if (act === "mes-save") {
+      const v = document.getElementById("mes-val-" + q.id).value.trim(); if (!v) return;
+      b.disabled = true;
+      await patchFiche(q.id, { op: "mesure", mesures: [{ indicateurId: document.getElementById("mes-ind-" + q.id).value, valeur: v }], source: "DSI" });
+      document.getElementById("mes-val-" + q.id).value = ""; toast("Mesure enregistrée.");
+    } else if (act === "send-rep") {
+      const t = document.getElementById("rep-" + q.id).value.trim(); if (!t) return;
+      b.disabled = true; await patchFiche(q.id, { op: "reponse", text: t }); toast("Réponse ajoutée au journal du besoin, visible par le porteur.");
+    }
+  } catch { b.disabled = false; toast("L'opération n'a pas abouti. Réessayez."); }
+}
+$("#mine-list").addEventListener("click", onLivingClick);
+$("#queue").addEventListener("click", ev => { if (ev.target.closest("[data-act]")) onLivingClick(ev); });
+
+function loadDraft(q) {
+  state = fresh();
+  state.remoteId = q.id;
+  state.titre = q.titre || "";
+  for (const f of FIELDS) if (filled(q, f.k)) state.fiche[f.k] = { ...q.fiche[f.k] };
+  state.turns = (q.transcript || []).map(t => ({ role: t.role, content: t.content, ts: Date.now() }));
+  state.alertes = Array.isArray(q.alertes) ? q.alertes : [];
+  state.pret = !!q.pret;
+  addMine(q.id); saveState();
+  showTab("capture"); renderChat(); renderFiche();
+  toast("Brouillon chargé : poursuivez avec l'agent puis transmettez.");
+}
+
+/* ---- DSI tools ---- */
+let currentTool = null;
+$("#dsi-tools").addEventListener("click", e => {
+  const b = e.target.closest("[data-tool]"); if (!b) return;
+  currentTool = currentTool === b.dataset.tool ? null : b.dataset.tool;
+  for (const x of $("#dsi-tools").querySelectorAll("[data-tool]")) x.setAttribute("aria-pressed", x.dataset.tool === currentTool);
+  renderTool();
+});
+$("#demo-clock").addEventListener("change", e => {
+  demoOffsetDays = +e.target.value || 0;
+  try { localStorage.setItem("intake-demo-offset", String(demoOffsetDays)); } catch {}
+  toast(demoOffsetDays ? `Horloge de démo : ${fmtDate(nowMs())} (+${demoOffsetDays} j)` : "Horloge de démo : aujourd'hui");
+  renderQueue(); renderMine();
+  if (currentTool === "pilot" || currentTool === "value") renderTool();
+});
+let resetTimer = null;
+$("#demo-reset").addEventListener("click", async e => {
+  const b = e.currentTarget;
+  if (!resetTimer) {
+    b.textContent = "Confirmer : supprimer toutes les fiches"; b.classList.add("warn");
+    resetTimer = setTimeout(() => { resetTimer = null; b.textContent = "Vider la file de démo"; b.classList.remove("warn"); }, 4000);
+    return;
+  }
+  clearTimeout(resetTimer); resetTimer = null; b.disabled = true;
+  try {
+    const r = await fetch("/api/fiches?all=1", { method: "DELETE", headers: apiHeaders() });
+    if (!r.ok) throw new Error("status " + r.status);
+    try { localStorage.removeItem(MINE_KEY); } catch {}
+    openCards.clear(); openMine.clear(); currentTool = null; renderTool();
+    for (const x of $("#dsi-tools").querySelectorAll("[data-tool]")) x.setAttribute("aria-pressed", "false");
+    await refreshWebQueue(); toast("File de démo vidée.");
+  } catch { toast("La remise à zéro n'a pas abouti."); }
+  finally { b.disabled = false; b.textContent = "Vider la file de démo"; b.classList.remove("warn"); }
+});
+function renderTool() {
+  const p = $("#tool-panel");
+  p.hidden = !currentTool;
+  if (!currentTool) { p.innerHTML = ""; return; }
+  if (currentTool === "matrix") p.innerHTML = matrixHTML();
+  if (currentTool === "pilot") { p.innerHTML = pilotHTML(); loadPilot(); }
+  if (currentTool === "value") { p.innerHTML = valueDashHTML(); loadPilot(); }
+  if (currentTool === "nudges") p.innerHTML = `<div class="tp-head"><h4>Relances ciblées</h4><p class="muted">L'agent repère les informations non confirmées ou périmées, les propositions sans réponse et les délais DSI, puis rédige une question précise pour la bonne personne. Avancez l'horloge de démo pour voir les informations vieillir.</p><button class="btn-primary" id="run-nudges">Préparer les relances</button></div><div id="nudge-out"></div>`;
+  if (currentTool === "signal") p.innerHTML = `<div class="tp-head"><h4>Signal terrain</h4><p class="muted">Collez ce que la réalité dit : compte rendu de comité, ticket, mise à jour de projet, extrait de données. L'agent le rattache aux besoins concernés et propose les mises à jour, que chaque porteur valide.</p></div>
+    <div class="form-grid"><label>Type de source<select id="sig-type"><option>Compte rendu de réunion</option><option>Ticket ITSM</option><option>Mise à jour de projet (Planner)</option><option>Extrait de données SAP / BI</option><option>Note terrain</option></select></label></div>
+    <textarea id="sig-text" rows="6" aria-label="Signal"></textarea>
+    <div class="row-end"><button class="btn-ghost" id="sig-ex">Exemple</button><button type="button" class="btn-icon mic" data-mic="sig-text">Dicter</button><button class="btn-primary" id="sig-run">Analyser le signal</button></div><div id="sig-out"></div>`;
+  if (currentTool === "email") p.innerHTML = `<div class="tp-head"><h4>E-mail entrant</h4><p class="muted">En production, une adresse dédiée (par exemple besoins@votre-domaine) est reliée à un service d'e-mail entrant qui appelle <code>/api/inbound-email</code>. L'agent crée un brouillon de fiche et répond à l'expéditeur avec ses questions et un lien pour compléter. Ici, simulez la réception.</p></div>
+    <div class="form-grid"><label>De<input type="text" id="em-from" value=""></label><label>Nom<input type="text" id="em-name" value=""></label><label class="wide">Objet<input type="text" id="em-subject" value=""></label></div>
+    <textarea id="em-body" rows="7" aria-label="Corps de l'e-mail"></textarea>
+    <div class="row-end"><button class="btn-ghost" id="em-ex">Exemple</button><button class="btn-primary" id="em-run">Simuler la réception</button></div><div id="em-out"></div>`;
+}
+$("#tool-panel").addEventListener("click", async e => {
+  const t = e.target;
+  if (t.id === "sig-ex") {
+    $("#sig-type").value = "Compte rendu de réunion";
+    $("#sig-text").value = "Comité de préparation de campagne — 07/10\n- Amont Agricole : la campagne betteravière démarre le 15/04 ; volume attendu en hausse d'environ 20 % par rapport à l'an dernier.\n- Les pointeurs des centres de collecte saisissent toujours les tickets de pesée sur papier ; 2 saisisseurs intérimaires seront recrutés pour la campagne.\n- Maintenance sucrerie : 3 arrêts non planifiés des centrifugeuses en septembre, environ 6 h chacun ; l'historique d'interventions est dans SAP PM depuis 2021.\n- DSI : la migration SAP S/4HANA est confirmée pour mars, gel des développements SAP de février à avril.";
+    return;
+  }
+  if (t.id === "em-ex") {
+    $("#em-from").value = "k.benali@exemple.ma"; $("#em-name").value = "Karim Benali";
+    $("#em-subject").value = "Suivi des tournées de collecte";
+    $("#em-body").value = "Bonjour,\n\nPendant la campagne, nos chefs de zone appellent chaque matin les transporteurs pour savoir quels camions passent dans quels points de collecte. Tout est noté sur un tableau Excel partagé qui n'est jamais à jour, et on découvre trop tard les points saturés, ce qui fait attendre les agriculteurs plusieurs heures. Est-ce qu'un outil pourrait nous aider ?\n\nCordialement,\nKarim Benali\nChef de service Logistique amont";
+    return;
+  }
+  if (t.id === "run-nudges") return runNudges(t);
+  if (t.id === "sig-run") return runSignal(t);
+  if (t.id === "em-run") return runEmail(t);
+  const sn = t.closest("[data-send-nudge]");
+  if (sn) {
+    const n = lastNudges[+sn.dataset.sendNudge]; if (!n) return;
+    sn.disabled = true;
+    try {
+      if (n.destinataire === "DSI") await patchFiche(n.id, { op: "note", by: "agent", text: `Rappel DSI : ${n.question}` });
+      else await patchFiche(n.id, { op: "nudge", nudge: n });
+      sn.textContent = "Envoyé"; n.sent = true;
+    } catch { sn.disabled = false; toast("Envoi impossible. Réessayez."); }
+    return;
+  }
+  if (t.id === "send-all-nudges") {
+    t.disabled = true;
+    for (const [i, n] of lastNudges.entries()) { if (!n.sent) { const btn = document.querySelector(`[data-send-nudge="${i}"]`); if (btn) btn.click(); await new Promise(r => setTimeout(r, 250)); } }
+    return;
+  }
+  const sp = t.closest("[data-send-props]");
+  if (sp) {
+    const m = lastSignal[+sp.dataset.sendProps]; if (!m) return;
+    sp.disabled = true;
+    try { await patchFiche(m.id, { op: "propose", proposals: m.propositions, source: `observation : ${m.sourceType}`, text: `Signal « ${m.sourceType} » : ${m.resume}` }); sp.textContent = "Envoyé au porteur"; }
+    catch { sp.disabled = false; toast("Envoi impossible. Réessayez."); }
+    return;
+  }
+  const od = t.closest("[data-open-draft]");
+  if (od) { const q = queue.find(x => x.id === od.dataset.openDraft); if (q) loadDraft(q); }
+});
+let lastNudges = [], lastSignal = [];
+async function runNudges(btn) {
+  const out = $("#nudge-out");
+  const active = queue.filter(q => !["Clos", "Réorienté", "Brouillon"].includes(q.statut));
+  if (!active.length) { out.innerHTML = `<p class="muted">Aucun besoin actif.</p>`; return; }
+  btn.disabled = true; out.innerHTML = `<p class="thinking">L'agent passe en revue ${active.length} besoin${active.length > 1 ? "s" : ""}<span class="dots"></span></p>`;
+  const lines = active.map(q => {
+    const lastEv = (q.events || []).map(e => toMs(e.at)).filter(Boolean).sort().pop();
+    const dd = q.echeance ? businessDaysBetween(nowMs(), q.echeance) : null;
+    return JSON.stringify({
+      id: q.id, titre: q.titre, statut: q.statut, porteur: valText(q.fiche?.responsable?.valeur) || null,
+      jours_depuis_transmission: q.submittedAt ? Math.floor((nowMs() - toMs(q.submittedAt)) / 864e5) : null,
+      jours_depuis_dernier_evenement: lastEv ? Math.floor((nowMs() - lastEv) / 864e5) : null,
+      jours_ouvres_avant_echeance_dsi: dd,
+      hypotheses_non_confirmees: deduitFields(q).map(k => ({ champ: SHORT[k], valeur: valText(q.fiche[k].valeur) })),
+      informations_perimees: staleFields(q).map(k => ({ champ: SHORT[k], valeur: valText(q.fiche[k].valeur), anciennete_jours: ageDays(q.fiche[k]) })),
+      propositions_en_attente: (q.pending || []).length,
+      relance_en_attente: q.nudge ? q.nudge.question : null,
+      qualification: q.qualif ? `trajectoire ${q.qualif.trajectoire?.code || "?"}` : null,
+    });
+  }).join("\n");
+  try {
+    const res = await askAgent("nudge", `DATE DU JOUR : ${fmtDate(nowMs())}\n\nBESOINS SUIVIS (un JSON par ligne) :\n${lines}`);
+    lastNudges = (Array.isArray(res.relances) ? res.relances : []).filter(n => n && n.question && queue.find(q => q.id === n.id));
+    if (!lastNudges.length) { out.innerHTML = `<p class="okbox">Rien à relancer aujourd'hui : les informations sont confirmées et récentes.</p>`; return; }
+    out.innerHTML = `<div class="row-end"><button class="btn-ghost" id="send-all-nudges">Tout envoyer</button></div>` + lastNudges.map((n, i) => {
+      const q = queue.find(x => x.id === n.id);
+      return `<div class="nudge-item"><div class="ni-top"><span class="tag ${n.destinataire === "DSI" ? "warn" : "accent"}">Pour : ${esc(n.destinataire || "métier")}</span><b>${esc(q.titre)}</b></div>
+        <p class="muted">${esc(n.motif || "")}</p><p>${esc(n.question)}</p>
+        ${(n.suggestions || []).length ? `<div class="chips">${n.suggestions.map(s => `<span class="chip-static">${esc(s)}</span>`).join("")}</div>` : ""}
+        <div class="row-end"><button class="btn-primary" data-send-nudge="${i}">${n.destinataire === "DSI" ? "Noter au journal" : "Envoyer au porteur"}</button></div></div>`;
+    }).join("");
+  } catch (e) { out.innerHTML = `<p class="errbox">${esc(ERR_COPY[e?.code] || "La préparation des relances n'a pas abouti.")}</p>`; }
+  finally { btn.disabled = false; }
+}
+async function runSignal(btn) {
+  const text = $("#sig-text").value.trim(), type = $("#sig-type").value, out = $("#sig-out");
+  if (!text) { $("#sig-text").focus(); return; }
+  const active = queue.filter(q => !["Clos", "Réorienté"].includes(q.statut));
+  if (!active.length) { out.innerHTML = `<p class="muted">Aucun besoin suivi auquel rattacher ce signal.</p>`; return; }
+  btn.disabled = true; out.innerHTML = `<p class="thinking">L'agent rapproche le signal des besoins suivis<span class="dots"></span></p>`;
+  const list = active.map(q => `### id ${q.id} — « ${q.titre} »\n${ficheForAgent(q)}`).join("\n\n");
+  try {
+    const res = await askAgent("observe", `DATE DU JOUR : ${fmtDate(nowMs())}\nTYPE DE SOURCE : ${type}\n\nSIGNAL :\n${text}\n\nBESOINS SUIVIS :\n${list}`);
+    lastSignal = (Array.isArray(res.correspondances) ? res.correspondances : []).filter(m => m && queue.find(q => q.id === m.id)).map(m => ({ ...m, sourceType: type, propositions: (m.propositions || []).filter(p => p && FMAP[p.champ]) }));
+    out.innerHTML = (lastSignal.length ? lastSignal.map((m, i) => {
+      const q = queue.find(x => x.id === m.id);
+      return `<div class="nudge-item"><div class="ni-top"><span class="tag ${m.confiance === "forte" ? "ok" : "warn"}">Lien ${esc(m.confiance || "?")}</span><b>${esc(q.titre)}</b></div><p>${esc(m.resume || "")}</p>
+        ${m.propositions.map(p => `<p class="prop-line"><b>${esc(SHORT[p.champ] || p.champ)}</b> → ${esc(valText(p.valeur))}<br><span class="muted">${esc(p.raison || "")}</span></p>`).join("")}
+        ${m.propositions.length ? `<div class="row-end"><button class="btn-primary" data-send-props="${i}">Soumettre au porteur pour validation</button></div>` : ""}</div>`;
+    }).join("") : `<p class="muted">Aucun besoin suivi n'est clairement concerné par ce signal.</p>`)
+      + (res.non_rattache ? `<p class="muted">Non rattaché : ${esc(res.non_rattache)}</p>` : "");
+  } catch (e) { out.innerHTML = `<p class="errbox">${esc(ERR_COPY[e?.code] || "L'analyse du signal n'a pas abouti.")}</p>`; }
+  finally { btn.disabled = false; }
+}
+async function runEmail(btn) {
+  const out = $("#em-out");
+  const body = { from: $("#em-from").value.trim(), fromName: $("#em-name").value.trim(), subject: $("#em-subject").value.trim(), text: $("#em-body").value.trim() };
+  if (!body.from || !body.text) { out.innerHTML = `<p class="errbox">Renseignez au moins l'expéditeur et le corps de l'e-mail.</p>`; return; }
+  btn.disabled = true; out.innerHTML = `<p class="thinking">Réception, analyse par l'agent et préparation de la réponse<span class="dots"></span></p>`;
+  try {
+    const r = await fetch("/api/inbound-email", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body) });
+    if (r.status === 401) { showGate(); throw new Error("code"); }
+    if (!r.ok) throw new Error("status " + r.status);
+    const j = await r.json();
+    await refreshWebQueue();
+    out.innerHTML = `<div class="okbox">Brouillon créé : <b>${esc(j.titre)}</b> · maturité ${j.score} %.</div>
+      <div class="mail"><div class="mail-h"><span>À : ${esc(j.reply.to)}</span><span>Objet : ${esc(j.reply.subject)}</span><span class="muted">${j.reply.sent ? "Envoyé" : "Non envoyé : service d'envoi non configuré pour la démo"}</span></div><pre>${esc(j.reply.body)}</pre></div>
+      <div class="row-end"><button class="btn-primary" data-open-draft="${esc(j.id)}">Ouvrir le lien côté métier</button></div>`;
+  } catch { out.innerHTML = `<p class="errbox">La réception simulée n'a pas abouti. Réessayez.</p>`; }
+  finally { btn.disabled = false; }
+}
+
+/* ---- matrix (inline SVG) ---- */
+function matrixHTML() {
+  const pts = queue.filter(q => q.qualif && q.qualif.valeur?.note && q.qualif.faisabilite?.note);
+  const unplaced = queue.filter(q => q.qualif && !(q.qualif.valeur?.note && q.qualif.faisabilite?.note));
+  if (!pts.length) return `<div class="tp-head"><h4>Matrice valeur / faisabilité</h4><p class="muted">Aucun besoin positionné pour l'instant. Ouvrez une fiche dans la file et lancez « Analyser avec le copilote ».</p></div>`;
+  const W = 560, H = 380, L = 56, R = 16, T = 16, B = 48;
+  const x = f => L + (f - 0.5) / 5 * (W - L - R), y = v => T + (5.5 - v) / 5 * (H - T - B);
+  const groups = {};
+  pts.forEach((q, i) => { const key = q.qualif.valeur.note + "-" + q.qualif.faisabilite.note; (groups[key] = groups[key] || []).push(i); });
+  const pos = pts.map((q, i) => {
+    const key = q.qualif.valeur.note + "-" + q.qualif.faisabilite.note, g = groups[key], j = g.indexOf(i), n = g.length;
+    const a = n > 1 ? (j / n) * 2 * Math.PI : 0, rr = n > 1 ? 16 : 0;
+    return [x(q.qualif.faisabilite.note) + rr * Math.cos(a), y(q.qualif.valeur.note) + rr * Math.sin(a)];
+  });
+  const grid = [1, 2, 3, 4, 5].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" class="mx-grid"/><text x="${L - 10}" y="${y(v) + 4}" class="mx-tick" text-anchor="end">${v}</text><line y1="${T}" y2="${H - B}" x1="${x(v)}" x2="${x(v)}" class="mx-grid"/><text x="${x(v)}" y="${H - B + 18}" class="mx-tick" text-anchor="middle">${v}</text>`).join("");
+  const mid = `<line x1="${x(3)}" x2="${x(3)}" y1="${T}" y2="${H - B}" class="mx-mid"/><line x1="${L}" x2="${W - R}" y1="${y(3)}" y2="${y(3)}" class="mx-mid"/>`;
+  const quad = [[x(4.25), y(5.2), "Quick wins"], [x(1.75), y(5.2), "À rendre faisable"], [x(4.25), y(0.85), "Faciles, valeur faible"], [x(1.75), y(0.85), "À approfondir"]].map(([a, b, t]) => `<text x="${a}" y="${b}" class="mx-quad" text-anchor="middle">${t}</text>`).join("");
+  const dots = pts.map((q, i) => `<g class="mx-pt" tabindex="0"><title>${esc(q.titre)} — Valeur ${q.qualif.valeur.note}/5, Faisabilité ${q.qualif.faisabilite.note}/5, trajectoire ${esc(q.qualif.trajectoire?.code || "?")}</title><circle cx="${pos[i][0]}" cy="${pos[i][1]}" r="11"/><text x="${pos[i][0]}" y="${pos[i][1] + 4}" text-anchor="middle">${i + 1}</text></g>`).join("");
+  return `<div class="tp-head"><h4>Matrice valeur / faisabilité</h4><p class="muted">Positions proposées par le copilote, à valider en comité. Survolez un point pour le détail.</p></div>
+    <div class="mx-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Matrice valeur faisabilité des besoins qualifiés">${grid}${mid}${quad}${dots}
+      <text x="${(L + W - R) / 2}" y="${H - 8}" class="mx-axis" text-anchor="middle">Faisabilité</text><text x="14" y="${(T + H - B) / 2}" class="mx-axis" text-anchor="middle" transform="rotate(-90 14 ${(T + H - B) / 2})">Valeur</text></svg></div>
+    <table class="mx-table"><thead><tr><th>N°</th><th>Besoin</th><th>Valeur</th><th>Faisabilité</th><th>Trajectoire</th></tr></thead><tbody>
+      ${pts.map((q, i) => `<tr><td class="mono">${i + 1}</td><td>${esc(q.titre)}</td><td class="mono">${q.qualif.valeur.note}</td><td class="mono">${q.qualif.faisabilite.note}</td><td>${esc((q.qualif.trajectoire?.code || "?") + " · " + (q.qualif.trajectoire?.libelle || ""))}</td></tr>`).join("")}
+      ${unplaced.map(q => `<tr><td>—</td><td>${esc(q.titre)}</td><td colspan="3" class="muted">Information insuffisante pour positionner</td></tr>`).join("")}
+    </tbody></table>`;
+}
+
+/* ---- voice dictation: records PCM, encodes 16 kHz WAV, transcribes server-side ---- */
+const Voice = { rec: null };
+function encodeWav(samples, rate) {
+  const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + samples.length * 2, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) { const s = Math.max(-1, Math.min(1, samples[i])); v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true); }
+  return buf;
+}
+function b64(buf) { const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+async function startVoice(btn) {
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch { toast("Accès au micro refusé. Autorisez le micro dans votre navigateur."); return; }
+  const AC = window.AudioContext || window.webkitAudioContext, ctx = new AC();
+  const src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), chunks = [];
+  proc.onaudioprocess = e => chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+  src.connect(proc); proc.connect(ctx.destination);
+  const t0 = Date.now();
+  const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000); btn.textContent = `${btn.dataset.mic === "__sim" ? "Stop" : "Arrêter"} · ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; if (s >= 90) stopVoice(); }, 250);
+  btn.classList.add("rec"); btn.textContent = btn.dataset.mic === "__sim" ? "Stop" : "Arrêter · 0:00";
+  Voice.rec = { btn, stream, ctx, src, proc, chunks, tick, rate: ctx.sampleRate, target: btn.dataset.mic };
+}
+async function stopVoice() {
+  const r = Voice.rec; if (!r) return; Voice.rec = null;
+  clearInterval(r.tick); r.src.disconnect(); r.proc.disconnect(); r.stream.getTracks().forEach(t => t.stop()); r.ctx.close();
+  r.btn.classList.remove("rec"); r.btn.textContent = "Transcription…"; r.btn.disabled = true;
+  try {
+    const len = r.chunks.reduce((a, c) => a + c.length, 0);
+    if (len < r.rate * 0.6) throw new Error("short");
+    const all = new Float32Array(len); let o = 0; for (const c of r.chunks) { all.set(c, o); o += c.length; }
+    const ratio = r.rate / 16000, out = new Float32Array(Math.floor(len / ratio));
+    for (let i = 0; i < out.length; i++) { const a = Math.floor(i * ratio), b = Math.min(len, Math.floor((i + 1) * ratio)); let s = 0; for (let j = a; j < b; j++) s += all[j]; out[i] = s / Math.max(1, b - a); }
+    if (r.target === "__sim") { await simSendAudio(b64(encodeWav(out, 16000)), Math.round(len / r.rate)); return; }
+    const res = await fetch("/api/transcribe", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ audio: b64(encodeWav(out, 16000)) }) });
+    if (res.status === 401) { showGate(); throw new Error("code"); }
+    if (!res.ok) throw new Error("status " + res.status);
+    const j = await res.json();
+    const ta = document.getElementById(r.target);
+    if (ta) { ta.value = (ta.value.trim() ? ta.value.trim() + " " : "") + j.francais; ta.dispatchEvent(new Event("input")); ta.focus(); }
+    if (j.langue && j.langue !== "fr") toast(`Dicté en ${j.langue === "darija" ? "darija" : j.langue}, traduit en français. Original : « ${j.transcription.slice(0, 140)}${j.transcription.length > 140 ? "…" : ""} »`);
+  } catch (e) { toast(e && e.message === "short" ? "Enregistrement trop court." : "La transcription n'a pas abouti. Réessayez."); }
+  finally { r.btn.disabled = false; r.btn.textContent = r.target === "__sim" ? "Vocal" : "Dicter"; }
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-mic]"); if (!b) return;
+  e.preventDefault();
+  if (Voice.rec && Voice.rec.btn === b) stopVoice();
+  else if (!Voice.rec) startVoice(b);
+});
+
+async function openFicheFromLink() {
+  const id = new URLSearchParams(location.search).get("fiche"); if (!id) return;
+  history.replaceState(null, "", location.pathname);
+  try {
+    const r = await fetch("/api/fiches/" + encodeURIComponent(id), { headers: apiHeaders() });
+    if (!r.ok) return;
+    const q = await r.json();
+    if (!queue.find(x => x.id === q.id)) queue.unshift(q);
+    addMine(q.id);
+    if (q.statut === "Brouillon") loadDraft(q);
+    else { openMine.add(q.id); showTab("mine"); }
+  } catch {}
+}
+
+/* ================= Messaging simulator ================= */
+const PERSONAS = {
+  youssef: { name: "Youssef Alami", phone: "212661234567", ex: ["Salam, pendant la campagne les camions attendent des heures au centre de collecte, on ne sait jamais combien vont arriver.", "Les agriculteurs m'appellent tout le temps pour savoir quand ils seront payés."] },
+  salma: { name: "Salma Idrissi", phone: "212662345678", ex: ["On perd beaucoup de temps à compiler les résultats du labo dans Excel pour les certificats qualité des clients.", "Les non-conformités sont notées sur papier, on n'arrive pas à voir les tendances."] },
+  hamid: { name: "Hamid Tazi", phone: "212663456789", ex: ["Les pièces de rechange des centrifugeuses ne sont jamais en stock quand on en a besoin.", "On découvre les pannes trop tard, souvent la nuit."] },
+};
+let simChannel = "whatsapp", simPersona = "youssef", simMsgs = [], simFicheId = null, simTimer = null, simBusy = false, simSig = "";
+try { simChannel = localStorage.getItem("intake-sim-ch") || "whatsapp"; simPersona = localStorage.getItem("intake-sim-p") || "youssef"; } catch {}
+if (!PERSONAS[simPersona]) simPersona = "youssef";
+const simSender = () => PERSONAS[simPersona].phone;
+const hhmm = d => { const t = toMs(d); return t ? new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : ""; };
+function simSyncControls() {
+  for (const b of $("#sim-channel").querySelectorAll("button")) b.setAttribute("aria-pressed", b.dataset.ch === simChannel);
+  $("#sim-persona").value = simPersona;
+  $("#ph-sub").textContent = (simChannel === "teams" ? "Microsoft Teams" : "WhatsApp Business") + " · simulateur";
+  document.querySelector(".phone").classList.toggle("teams", simChannel === "teams");
+}
+function simOpen() {
+  if (MODE !== "web") return;
+  simSyncControls(); simLoad();
+  if (!simTimer) simTimer = setInterval(() => { if (!document.hidden && !simBusy) simLoad(); }, 5000);
+}
+function simClose() { if (simTimer) { clearInterval(simTimer); simTimer = null; } }
+function simApply(view) {
+  const sig = JSON.stringify([view.messages, view.ficheId]);
+  if (sig === simSig) return;
+  simSig = sig; simMsgs = view.messages || []; simFicheId = view.ficheId || null;
+  simRender(); simSide();
+}
+async function simLoad() {
+  try {
+    const r = await fetch(`/api/channel/simulate?channel=${simChannel}&sender=${simSender()}`, { headers: apiHeaders() });
+    if (r.status === 401) { showGate(); return; }
+    if (r.ok) simApply(await r.json());
+  } catch {}
+}
+function bubbleHTML(m) {
+  const t = `<span class="ph-time">${hhmm(m.at)}</span>`;
+  let inner;
+  if (m.kind === "audio") inner = `<div class="ph-voice">Note vocale${m.duree ? ` · 0:${String(m.duree).padStart(2, "0")}` : ""}</div>${m.transcription ? `<div class="ph-tr">« ${esc(m.transcription)} »</div><div class="ph-meta">Transcrit${m.langue && m.langue !== "fr" ? ` (${esc(m.langue)}) et traduit` : ""} par l'agent</div>` : m.pending ? `<div class="ph-meta">Envoi…</div>` : ""}`;
+  else if (m.kind === "image") inner = `<div class="ph-voice">Photo</div>${m.text ? `<div>${esc(m.text)}</div>` : ""}`;
+  else inner = esc(m.text).replace(/\n/g, "<br>");
+  return `<div class="ph-msg ${m.dir === "in" ? "me" : "agent"}${m.nudge ? " nudge" : ""}">${m.nudge ? `<div class="ph-meta">Relance de suivi</div>` : ""}${inner}${t}</div>`;
+}
+function simRender() {
+  const body = $("#ph-body");
+  if (!simMsgs.length) {
+    body.innerHTML = `<div class="ph-empty"><p>Écrivez votre besoin comme à un collègue, ou envoyez une note vocale.</p>${PERSONAS[simPersona].ex.map((x, i) => `<button type="button" class="chip-btn" data-simex="${i}">${esc(x)}</button>`).join("")}</div>`;
+  } else body.innerHTML = simMsgs.map(bubbleHTML).join("") + (simBusy ? `<div class="ph-msg agent typing">L'agent écrit<span class="dots"></span></div>` : "");
+  const last = simMsgs[simMsgs.length - 1];
+  $("#ph-quick").innerHTML = !simBusy && last && last.dir === "out" && (last.quick || []).length ? last.quick.map(q => `<button type="button" class="chip-btn" data-simq="${esc(q)}">${esc(q)}</button>`).join("") : "";
+  body.scrollTop = body.scrollHeight;
+}
+function simSide() {
+  const q = simFicheId && queue.find(x => x.id === simFicheId);
+  const info = `<div class="lv-block"><h4>Brancher les vrais canaux</h4>
+    <p class="muted"><b>WhatsApp Business</b> : webhook <code>/api/channel/whatsapp</code>, variables <code>WHATSAPP_TOKEN</code>, <code>WHATSAPP_PHONE_NUMBER_ID</code>, <code>WHATSAPP_APP_SECRET</code>, <code>WHATSAPP_VERIFY_TOKEN</code>. Les relances hors fenêtre de 24 h passent par un modèle approuvé (<code>WHATSAPP_NUDGE_TEMPLATE</code>).</p>
+    <p class="muted"><b>Teams</b> : bot Azure dont le point de terminaison est <code>/api/channel/teams</code>, variables <code>TEAMS_APP_ID</code>, <code>TEAMS_APP_PASSWORD</code>, <code>TEAMS_TENANT_ID</code>.</p></div>`;
+  if (!q) { $("#sim-side").innerHTML = `<div class="lv-block"><h4>Fiche en construction</h4><p class="muted">Dès le premier message, l'agent ouvre un brouillon de fiche relié à cette conversation. Il apparaît ici et dans la File DSI.</p></div>${info}`; return; }
+  const filledF = FIELDS.filter(f => filled(q, f.k));
+  $("#sim-side").innerHTML = `<div class="lv-block"><h4>${esc(q.titre || "Besoin en cours")}</h4>
+    <div class="meter"><div class="bar"><i style="width:${q.score || 0}%"></i></div><b>${q.score || 0} %</b></div>
+    <p class="muted">Statut DSI : ${esc(q.statut)} · ${filledF.length} champ${filledF.length > 1 ? "s" : ""} renseigné${filledF.length > 1 ? "s" : ""} · source ${esc({ whatsapp: "WhatsApp", teams: "Teams" }[q.origine] || q.origine || "")}</p>
+    <ul class="mini-fields">${filledF.map(f => `<li><span class="pill ${STATUTS[q.fiche[f.k].statut]?.cls || "st-declare"}">${esc(STATUTS[q.fiche[f.k].statut]?.label || "Déclaré")}</span> <b>${esc(SHORT[f.k])}</b> : ${esc(valText(q.fiche[f.k].valeur).slice(0, 140))}</li>`).join("")}</ul>
+    <div class="row-end"><button class="btn-ghost" id="sim-open-dsi">Voir dans la File DSI</button>${q.statut !== "Brouillon" ? `<button class="btn-primary" id="sim-pilot">Lancer la tournée automatique à +30 j</button>` : ""}</div>
+    ${q.statut !== "Brouillon" ? `<p class="muted">La tournée repère les hypothèses non confirmées depuis plus de 7 jours et relance le porteur ici même.</p>` : ""}</div>${info}`;
+}
+async function simPost(payload, optimistic) {
+  if (simBusy) return;
+  simBusy = true; simMsgs = [...simMsgs, { dir: "in", at: new Date().toISOString(), pending: true, ...optimistic }];
+  simRender();
+  try {
+    const r = await fetch("/api/channel/simulate", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ channel: simChannel, sender: simSender(), name: PERSONAS[simPersona].name, ...payload }) });
+    if (r.status === 401) { showGate(); throw new Error("code"); }
+    if (r.status === 429) throw new Error("rate");
+    if (!r.ok) throw new Error("status " + r.status);
+    const view = await r.json();
+    simBusy = false; simSig = ""; simApply(view);
+    await refreshWebQueue(); simSide();
+  } catch (e) {
+    simBusy = false; simMsgs = simMsgs.filter(m => !m.pending); simRender();
+    toast(e.message === "rate" ? "Trop de messages en peu de temps. Patientez un instant." : "Le message n'a pas pu être envoyé. Réessayez.");
+  }
+}
+const simSendText = t => { t = String(t || "").trim(); if (t) simPost({ text: t }, { kind: "text", text: t }); };
+async function simSendAudio(b64wav, duree) { await simPost({ audio: b64wav, duree }, { kind: "audio", duree }); }
+$("#ph-form").addEventListener("submit", e => { e.preventDefault(); const i = $("#ph-text"); const t = i.value; i.value = ""; simSendText(t); });
+$("#ph-photo").addEventListener("click", () => $("#ph-file").click());
+$("#ph-file").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try { const img = await fileToJpeg(f); const cap = $("#ph-text").value.trim(); $("#ph-text").value = ""; simPost({ image: img, text: cap }, { kind: "image", text: cap }); }
+  catch { toast("Cette image n'a pas pu être lue."); }
+});
+$("#view-chat").addEventListener("click", async e => {
+  const ex = e.target.closest("[data-simex]"); if (ex) { simSendText(PERSONAS[simPersona].ex[+ex.dataset.simex]); return; }
+  const qb = e.target.closest("[data-simq]"); if (qb) { simSendText(qb.dataset.simq); return; }
+  const ch = e.target.closest("[data-ch]");
+  if (ch) { simChannel = ch.dataset.ch; try { localStorage.setItem("intake-sim-ch", simChannel); } catch {} simSig = ""; simMsgs = []; simFicheId = null; simSyncControls(); simRender(); simSide(); simLoad(); return; }
+  if (e.target.id === "sim-reset") {
+    try { await fetch(`/api/channel/simulate?channel=${simChannel}&sender=${simSender()}`, { method: "DELETE", headers: apiHeaders() }); } catch {}
+    simSig = ""; simMsgs = []; simFicheId = null; simRender(); simSide(); toast("Nouvelle conversation."); return;
+  }
+  if (e.target.id === "sim-open-dsi") { openCards.add(simFicheId); showTab("dsi"); return; }
+  if (e.target.id === "sim-pilot") { await runPilot("daily", e.target, 30); simLoad(); }
+});
+$("#sim-persona").addEventListener("change", e => { simPersona = e.target.value; try { localStorage.setItem("intake-sim-p", simPersona); } catch {} simSig = ""; simMsgs = []; simFicheId = null; simRender(); simSide(); simLoad(); });
+
+/* ================= Autopilot & value ================= */
+let pilotData = null;
+async function loadPilot() {
+  try {
+    const r = await fetch(`/api/pilot?offsetDays=${demoOffsetDays}`, { headers: apiHeaders() });
+    if (r.status === 401) { showGate(); return; }
+    if (!r.ok) return;
+    pilotData = await r.json();
+    if (currentTool === "pilot" && $("#pilot-body")) $("#pilot-body").innerHTML = pilotBodyHTML();
+    if (currentTool === "value" && $("#value-body")) $("#value-body").innerHTML = valueBodyHTML();
+  } catch {}
+}
+async function runPilot(job, btn, offsetOverride) {
+  const offsetDays = offsetOverride ?? demoOffsetDays;
+  const before = job === "weekly" ? (pilotData?.digests?.[0]?.realAt || "") : (pilotData?.runs?.find(x => x.job === "daily")?.realAt || "");
+  if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = job === "weekly" ? "Bilan en cours…" : "Tournée en cours…"; }
+  try {
+    const r = await fetch("/api/pilot-bg", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ job, offsetDays }) });
+    if (r.status === 401) { showGate(); return; }
+    const t0 = Date.now();
+    for (;;) {
+      await new Promise(res => setTimeout(res, 3000));
+      await loadPilot();
+      const latest = job === "weekly" ? (pilotData?.digests?.[0]?.realAt || "") : (pilotData?.runs?.find(x => x.job === "daily")?.realAt || "");
+      const err = pilotData?.runs?.[0]?.erreur && !pilotData.running;
+      if ((latest && latest !== before && !pilotData.running) || err || Date.now() - t0 > 150000) break;
+    }
+    await refreshWebQueue();
+    const run = pilotData?.runs?.[0];
+    toast(run?.erreur ? "La tournée a rencontré une erreur." : job === "weekly" ? "Bilan hebdomadaire prêt." : `Tournée terminée : ${(run?.relances || []).length} relance(s) envoyée(s).`);
+  } catch { toast("Le lancement n'a pas abouti."); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label || btn.textContent; } }
+}
+function pilotHTML() {
+  return `<div class="tp-head"><h4>Pilotage automatique</h4>
+    <p class="muted">Chaque jour à 7 h, l'agent passe en revue les besoins actifs : informations périmées, hypothèses non confirmées, propositions sans réponse, retards DSI, valeur à mesurer. Il envoie lui-même les relances sur le canal d'origine du besoin (WhatsApp, Teams, e-mail ou application) et consigne tout. Chaque lundi à 7 h, il rédige le bilan de la semaine pour la DSI. Les boutons lancent ces tournées tout de suite, à la date de l'horloge de démo.</p>
+    <div class="row-start"><button class="btn-primary" data-pilot="daily">Lancer la tournée quotidienne</button><button class="btn-ghost" data-pilot="weekly">Générer le bilan hebdomadaire</button></div></div>
+    <div id="pilot-body"><p class="thinking">Chargement<span class="dots"></span></p></div>`;
+}
+function digestHTML(d) {
+  return `<div class="lv-block digest"><div class="cp-head"><h4>${esc(d.titre)}</h4><span class="tag">${fmtDate(d.at)}${d.offsetDays ? ` · horloge +${d.offsetDays} j` : ""}</span></div>
+    <p>${esc(d.synthese)}</p>
+    ${(d.decisions || []).length ? `<div class="cp-l">Décisions à prendre</div><ul>${d.decisions.map(x => `<li><b>${esc(x.titre || "")}</b> : ${esc(x.decision || "")}</li>`).join("")}</ul>` : ""}
+    ${(d.alertes || []).length ? `<div class="cp-l">Alertes</div><ul>${d.alertes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${(d.bonnes_nouvelles || []).length ? `<div class="cp-l">Bonnes nouvelles</div><ul>${d.bonnes_nouvelles.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}</div>`;
+}
+function pilotBodyHTML() {
+  if (!pilotData) return `<p class="muted">Données indisponibles.</p>`;
+  const runs = pilotData.runs || [], dg = pilotData.digests || [];
+  return `${pilotData.running ? `<p class="thinking">Tournée en cours<span class="dots"></span></p>` : ""}
+    ${dg[0] ? digestHTML(dg[0]) : `<p class="muted">Aucun bilan hebdomadaire pour l'instant.</p>`}
+    <h5 class="jh">Historique des tournées</h5>
+    ${runs.length ? runs.map(x => `<div class="run"><div class="run-h"><b>${x.job === "weekly" ? "Bilan hebdomadaire" : "Tournée quotidienne"}</b><span class="muted">${fmtDateTime(x.at)} · ${esc(x.trigger || "")}${x.offsetDays ? ` · horloge +${x.offsetDays} j` : ""}</span></div>
+      ${x.erreur ? `<p class="errbox">Erreur : ${esc(x.erreur)}</p>` : x.job === "weekly" ? `<p class="muted">${esc(x.titre || "")} · ${x.decisions || 0} décision(s) proposée(s)${x.envoye ? ` · envoyé à ${esc(x.envoye)}` : ""}</p>` : `
+      <p class="muted">${x.examines} besoin(s) examiné(s) · ${(x.candidats || []).length} avec un signal · ${(x.relances || []).length} relance(s)</p>
+      ${(x.relances || []).map(n => `<p class="run-line"><span class="tag ${n.destinataire === "DSI" ? "warn" : "accent"}">${esc(n.destinataire)}</span> <b>${esc(n.titre)}</b> · via ${esc(n.via)}<br>${esc(n.question)}</p>`).join("")}
+      ${(x.candidats || []).filter(c => !(x.relances || []).some(n => n.id === c.id)).map(c => `<p class="run-line muted">${esc(c.titre)} : ${esc((c.raisons || []).join(", "))} (pas de relance jugée utile)</p>`).join("")}`}</div>`).join("") : `<p class="muted">Aucune tournée pour l'instant. La première aura lieu demain à 7 h, ou lancez-la maintenant.</p>`}`;
+}
+function valueDashHTML() {
+  return `<div class="tp-head"><h4>Valeur & indicateurs</h4><p class="muted">Le tableau de bord de la démarche : délais de la DSI, fraîcheur des fiches, passage en production et valeur réellement mesurée par rapport à la promesse de départ.</p></div><div id="value-body"><p class="thinking">Chargement<span class="dots"></span></p></div>`;
+}
+const parseNum = s => { if (s === null || s === undefined) return null; const m = String(s).replace(/[\s  ]/g, "").replace(",", ".").match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; };
+function evolution(avant, apres) {
+  const a = parseNum(avant), b = parseNum(apres);
+  if (a === null || b === null || a === 0) return "—";
+  const p = Math.round((b - a) / Math.abs(a) * 100);
+  return `${p > 0 ? "+" : p < 0 ? "−" : ""}${Math.abs(p)} %`;
+}
+const lastMeasure = (q, id) => (q.valeur?.mesures || []).filter(m => m.indicateurId === id).sort((a, b) => String(a.at).localeCompare(String(b.at))).pop();
+function valueBodyHTML() {
+  const k = pilotData?.kpis || {};
+  const tiles = [
+    ["1re réponse DSI (jours ouvrés, moyenne)", k.delai_premiere_reponse_jours === null || k.delai_premiere_reponse_jours === undefined ? "—" : `${k.delai_premiere_reponse_jours} j`],
+    ["Fiches à jour", k.a_jour_pct === null || k.a_jour_pct === undefined ? "—" : `${k.a_jour_pct} %`],
+    ["En réalisation", k.en_realisation ?? 0], ["En production", k.en_production ?? 0],
+    ["Valeur mesurée", `${k.valeur_mesuree ?? 0} / ${k.en_production ?? 0}`],
+    ["Relances / mises à jour métier (7 j)", `${k.relances_7j ?? 0} / ${k.maj_metier_7j ?? 0}`],
+  ].map(([l, v]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div></div>`).join("");
+  const order = ["Brouillon", "À qualifier", "En qualification", "Qualifié — à instruire", "En réalisation", "En production", "Réorienté", "Clos"];
+  const counts = order.map(s => [s, queue.filter(q => q.statut === s).length]);
+  const max = Math.max(1, ...counts.map(c => c[1]));
+  const funnel = `<div class="funnel" role="table" aria-label="Besoins par statut">${counts.map(([s, n]) => `<div class="fn-row" role="row"><span class="fn-l" role="cell">${esc(s)}</span><span class="fn-bar" role="cell"><i style="width:${n ? Math.max(2, n / max * 100) : 0}%"></i></span><span class="fn-n mono" role="cell">${n}</span></div>`).join("")}</div>`;
+  const rows = queue.filter(q => (q.valeur?.indicateurs || []).length).flatMap(q => q.valeur.indicateurs.map(i => { const m = lastMeasure(q, i.id); return `<tr><td>${esc(q.titre)}<br><span class="muted">${esc(q.statut)}</span></td><td>${esc(i.nom)}${i.unite ? ` <span class="muted">(${esc(i.unite)})</span>` : ""}</td><td class="mono">${esc(i.avant ?? "à mesurer")}</td><td class="mono">${esc(i.cible ?? "à définir")}</td><td class="mono">${m ? esc(String(m.valeur)) + `<br><span class="muted">${fmtDate(m.at)}</span>` : "—"}</td><td class="mono">${m ? evolution(i.avant, m.valeur) : "—"}</td></tr>`; }));
+  return `<div class="kpis">${tiles}</div>
+    <h5 class="jh">Besoins par statut</h5>${funnel}
+    <h5 class="jh">Valeur attendue et valeur mesurée</h5>
+    ${rows.length ? `<div class="mx-wrap"><table class="mx-table"><thead><tr><th>Besoin</th><th>Indicateur</th><th>Avant</th><th>Cible</th><th>Dernière mesure</th><th>Évolution</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>` : `<p class="muted">Aucun indicateur défini. Passez un besoin « En réalisation » ou « En production » dans la file, ouvrez-le et cliquez « Proposer les indicateurs ».</p>`}`;
+}
+$("#tool-panel").addEventListener("click", e => { const pb = e.target.closest("[data-pilot]"); if (pb) runPilot(pb.dataset.pilot, pb); });
+
+/* ---- value block inside a fiche ---- */
+const valueRunning = new Set(), valueProposals = new Map();
+function indicatorsForAgent(q) {
+  const inds = q.valeur?.indicateurs || [];
+  if (!inds.length) return null;
+  return inds.map(i => { const m = lastMeasure(q, i.id); return { id: i.id, nom: i.nom, unite: i.unite || "", avant: i.avant ?? null, cible: i.cible ?? null, derniere_mesure: m ? { valeur: m.valeur, date: m.at } : null }; });
+}
+function valueHTML(q, role) {
+  const inds = q.valeur?.indicateurs || [], id = esc(q.id);
+  const eligible = ["Qualifié — à instruire", "En réalisation", "En production"].includes(q.statut);
+  if (!inds.length) {
+    if (role !== "dsi" || !eligible) return "";
+    const prop = valueProposals.get(q.id), run = valueRunning.has(q.id);
+    return `<section class="lv-block value"><div class="cp-head"><h4>Indicateurs de valeur</h4><button class="btn-ghost" data-act="ind-propose" data-id="${id}" ${run ? "disabled" : ""}>${prop ? "Proposer à nouveau" : "Proposer les indicateurs"}</button></div>
+      ${run ? `<p class="thinking">L'agent tire les indicateurs de la fiche<span class="dots"></span></p>` : prop ? `${prop.map((i, n) => `<label class="prop"><input type="checkbox" data-ind="${n}" checked><span><b>${esc(i.nom)}</b>${i.unite ? ` (${esc(i.unite)})` : ""} · avant : ${esc(i.avant ?? "à mesurer")} · cible : ${esc(i.cible ?? "à définir")}<br><span class="muted">${esc(i.comment_mesurer || "")} ${esc(i.justification || "")}</span></span></label>`).join("")}<div class="row-end"><button class="btn-primary" data-act="ind-save" data-id="${id}">Valider ces indicateurs</button></div>` : `<p class="muted">Avant la mise en production, définissez comment la valeur sera mesurée : l'agent propose 1 à 3 indicateurs tirés de la fiche, avec leur valeur « avant ».</p>`}
+    </section>`;
+  }
+  const rows = inds.map(i => { const m = lastMeasure(q, i.id); return `<tr><td>${esc(i.nom)}${i.unite ? ` <span class="muted">(${esc(i.unite)})</span>` : ""}</td><td class="mono">${esc(i.avant ?? "à mesurer")}</td><td class="mono">${esc(i.cible ?? "à définir")}</td><td class="mono">${m ? esc(String(m.valeur)) + `<br><span class="muted">${fmtDate(m.at)}${m.source ? " · " + esc(m.source) : ""}</span>` : "—"}</td><td class="mono">${m ? evolution(i.avant, m.valeur) : "—"}</td></tr>`; }).join("");
+  return `<section class="lv-block value"><div class="cp-head"><h4>Valeur du projet</h4>${q.productionAt ? `<span class="tag ok">En production depuis le ${fmtDate(q.productionAt)}</span>` : ""}</div>
+    <div class="mx-wrap"><table class="mx-table"><thead><tr><th>Indicateur</th><th>Avant</th><th>Cible</th><th>Dernière mesure</th><th>Évolution</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${role === "dsi" ? `<div class="form-grid"><label>Indicateur<select id="mes-ind-${id}">${inds.map(i => `<option value="${esc(i.id)}">${esc(i.nom)}</option>`).join("")}</select></label><label>Valeur mesurée<input type="text" id="mes-val-${id}"></label></div><div class="row-end"><button class="btn-ghost" data-act="mes-save" data-id="${id}">Enregistrer la mesure</button></div>`
+      : `<p class="muted">Donnez la valeur actuelle dans « Donner des nouvelles » : l'agent l'enregistre en face du bon indicateur.</p>`}
+  </section>`;
+}
+async function runIndicators(q) {
+  valueRunning.add(q.id); renderQueue();
+  try {
+    const res = await askAgent("indicateurs", `FICHE « ${q.titre} » :\n${ficheForAgent(q)}\n\nPOINTS SIGNALÉS :\n${(q.alertes || []).map(a => "- " + a.texte).join("\n") || "(aucun)"}`);
+    const inds = (Array.isArray(res.indicateurs) ? res.indicateurs : []).filter(i => i && i.nom).slice(0, 3).map(i => ({ ...i, avant: i.avant === "null" ? null : i.avant, cible: i.cible === "null" ? null : i.cible }));
+    if (!inds.length) throw { code: "empty_completion" };
+    valueProposals.set(q.id, inds);
+  } catch (e) { toast(ERR_COPY[e?.code] || "La proposition d'indicateurs n'a pas abouti."); }
+  finally { valueRunning.delete(q.id); renderQueue(); }
+}
+
+/* ================= Boot ================= */
+function prefillIdentity() {
+  if (profileName && !state.fiche.responsable) {
+    state.fiche.responsable = { valeur: profileName, statut: "déduit", note: "D'après votre profil : précisez votre fonction.", maj: nowIso() };
+  }
+}
+renderChat(); renderFiche(); autosize();
+
+const use = n => (window.claude && typeof window.claude.use === "function") ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
+
+if (MODE === "web") {
+  agentReady = true; canEditQueue = true; downloads = webDownloads;
+  $("#attach").hidden = false;
+  $("#tab-mine").hidden = false; $("#tab-chat").hidden = false; $("#dsi-tools").hidden = false;
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) for (const m of document.querySelectorAll(".mic")) m.hidden = false;
+  $("#demo-clock").value = String(demoOffsetDays);
+  if (![0, 7, 30, 100].includes(demoOffsetDays)) { demoOffsetDays = 0; $("#demo-clock").value = "0"; }
+  renderChat();
+  startWebQueue();
+  openFicheFromLink();
+} else {
+use("sample").then(async s => {
+  sample = s; agentReady = true;
+  if (!s) { agentOff = true; showNotice("Agent indisponible dans cette vue : ouvrez la page dans claude.ai pour converser. La fiche reste modifiable à la main."); }
+  else {
+    try { const lim = await s.limits(); if (lim && lim.images) { $("#attach").hidden = false; $("#file").accept = lim.images.mediaTypes.join(","); } } catch {}
+  }
+  renderChat();
+});
+use("user").then(async u => {
+  user = u; if (!u) return;
+  try { uid = await u.id(); } catch {}
+  try { profileName = (await u.name()) || ""; } catch {}
+  try { canEditQueue = !!(await u.canEdit()); } catch {}
+  if (!state.submitted) { prefillIdentity(); saveState(); renderFiche(); }
+  renderQueue();
+});
+use("downloads").then(d => { downloads = d; });
+use("db").then(d => {
+  db = d;
+  if (!d) { renderQueue(); return; }
+  d.collection("fiches").orderBy("submittedAt", "desc").limit(200).onSnapshot(
+    snap => { queue = snap.docs.map(x => ({ id: x.id, ...x.data() })); renderQueue(); },
+    () => { renderQueue(); }
+  );
+});
+}
+})();
+</script>

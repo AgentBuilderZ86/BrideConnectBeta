@@ -1,0 +1,4 @@
+node_modules/
+.netlify/
+public/
+netlify/lib/rules.mjs
