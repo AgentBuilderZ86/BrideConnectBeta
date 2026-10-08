@@ -1,5 +1,7 @@
+import { getStore } from "@netlify/blobs";
 import { authorized } from "../lib/auth.mjs";
-import { store, QUEUE_STATUTS, applyChanges, addEvent, isoOr, scoreOf } from "../lib/fiche.mjs";
+import { store, listFiches, QUEUE_STATUTS, applyChanges, applyMesures, addEvent, isoOr, scoreOf } from "../lib/fiche.mjs";
+import { deliverNudge } from "../lib/channels.mjs";
 
 const bad = (msg, status = 400) => Response.json({ error: msg }, { status });
 const rid = () => crypto.randomUUID().slice(0, 8);
@@ -10,8 +12,7 @@ export default async (req, context) => {
   const id = context.params?.id;
 
   if (req.method === "GET" && !id) {
-    const { blobs } = await s.list();
-    const items = (await Promise.all(blobs.map((b) => s.get(b.key, { type: "json" })))).filter(Boolean);
+    const items = await listFiches();
     items.sort((a, b) => String(b.submittedAt || b.receivedAt).localeCompare(String(a.submittedAt || a.receivedAt)));
     return Response.json({ items });
   }
@@ -49,6 +50,8 @@ export default async (req, context) => {
         if (!QUEUE_STATUTS.includes(b.statut)) return bad("invalid statut");
         const prev = doc.statut;
         doc.statut = b.statut; doc.statutMaj = at;
+        if (b.statut === "En production" && !doc.productionAt) doc.productionAt = at;
+        if (b.statut === "En réalisation" && !doc.realisationAt) doc.realisationAt = at;
         addEvent(doc, { at, type: "statut", by: "DSI", text: `Statut : ${prev || "—"} → ${b.statut}${b.note ? ` (${String(b.note).slice(0, 500)})` : ""}` });
         break;
       }
@@ -67,9 +70,10 @@ export default async (req, context) => {
         const changed = applyChanges(doc.fiche, b.changes, at, b.source);
         const ids = new Set(Array.isArray(b.pendingIds) ? b.pendingIds : []);
         doc.pending = doc.pending.filter((p) => !ids.has(p.id));
+        const nm = applyMesures(doc, b.mesures, at, b.source || "métier");
         doc.score = scoreOf(doc.fiche);
         if (b.answeredNudge) doc.nudge = null;
-        addEvent(doc, { at, type: "maj", by: b.by || "métier", text: String(b.text || "Fiche mise à jour").slice(0, 1000), fields: changed, source: b.source || "" });
+        addEvent(doc, { at, type: "maj", by: b.by || "métier", text: String(b.text || "Fiche mise à jour").slice(0, 1000) + (nm ? ` (${nm} mesure${nm > 1 ? "s" : ""} de valeur)` : ""), fields: changed, source: b.source || "" });
         break;
       }
       case "propose": {
@@ -100,7 +104,26 @@ export default async (req, context) => {
         const n = b.nudge || {};
         if (!n.question) return bad("invalid nudge");
         doc.nudge = { question: String(n.question).slice(0, 600), motif: String(n.motif || "").slice(0, 300), suggestions: (n.suggestions || []).slice(0, 3).map(String), at };
-        addEvent(doc, { at, type: "relance", by: "agent", text: `Relance envoyée au porteur : « ${doc.nudge.question} »` });
+        const via = await deliverNudge(doc, doc.nudge).catch(() => "application");
+        addEvent(doc, { at, type: "relance", by: "agent", text: `Relance envoyée au porteur (${via}) : « ${doc.nudge.question} »` });
+        break;
+      }
+      case "valeur_def": {
+        const inds = (Array.isArray(b.indicateurs) ? b.indicateurs : []).slice(0, 5).map((i, n) => ({
+          id: "k" + (n + 1), nom: String(i.nom || "").slice(0, 160), unite: String(i.unite || "").slice(0, 40),
+          avant: i.avant === null || i.avant === undefined || i.avant === "null" ? null : String(i.avant).slice(0, 80),
+          cible: i.cible === null || i.cible === undefined || i.cible === "null" ? null : String(i.cible).slice(0, 80),
+          comment_mesurer: String(i.comment_mesurer || "").slice(0, 300),
+        })).filter((i) => i.nom);
+        if (!inds.length) return bad("no indicators");
+        doc.valeur = { indicateurs: inds, mesures: doc.valeur?.mesures || [], definedAt: at };
+        addEvent(doc, { at, type: "valeur", by: "DSI", text: `Indicateurs de valeur définis : ${inds.map((i) => i.nom).join(" ; ")}.` });
+        break;
+      }
+      case "mesure": {
+        const nm = applyMesures(doc, b.mesures, at, String(b.source || "DSI").slice(0, 60));
+        if (!nm) return bad("no valid measure");
+        addEvent(doc, { at, type: "valeur", by: String(b.by || "DSI").slice(0, 40), text: `${nm} mesure${nm > 1 ? "s" : ""} de valeur enregistrée${nm > 1 ? "s" : ""}.` });
         break;
       }
       case "reponse": {
@@ -125,6 +148,12 @@ export default async (req, context) => {
   if (req.method === "DELETE" && !id && new URL(req.url).searchParams.get("all") === "1") {
     const { blobs } = await s.list();
     await Promise.all(blobs.map((x) => s.delete(x.key)));
+    // A demo reset also clears conversations and the autopilot history.
+    const conv = getStore({ name: "conversations", consistency: "strong" });
+    const { blobs: cb } = await conv.list();
+    await Promise.all(cb.map((x) => conv.delete(x.key)));
+    const pilot = getStore({ name: "pilot", consistency: "strong" });
+    await Promise.all(["runs", "digests", "running"].map((k) => pilot.delete(k)));
     return Response.json({ deleted: blobs.length });
   }
 
