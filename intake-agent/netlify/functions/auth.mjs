@@ -15,7 +15,7 @@ export default async (req, context) => {
   if (action === "me") {
     const a = await access(req);
     return json({
-      session: a?.session ? { name: a.session.name, email: a.session.email, role: a.session.role, via: a.session.via } : null,
+      session: a?.session ? { sub: a.session.sub, name: a.session.name, email: a.session.email, role: a.session.role, via: a.session.via } : null,
       role: a?.role || null, roleLabel: a ? ROLES[a.role] : null, perms: a ? permsOf(a.role) : [],
       entra: entraConfigured(), required: authRequired(), demoLogin: demoLoginAllowed(),
     });

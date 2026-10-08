@@ -1665,7 +1665,8 @@ function mineItems() {
   const local = ids.map(id => queue.find(q => q.id === id)).filter(Boolean);
   if (!me.session) return local;
   // Signed in: the fiches they own (on any device), plus those this browser created before sign-in.
-  const own = queue.filter(q => q.owner?.sub === me.session.sub || (q.coporteurs || []).some(c => c.owner?.sub === me.session.sub));
+  const mineOf = o => !!o && ((o.sub && o.sub === me.session.sub) || (!!me.session.email && String(o.email || "").toLowerCase() === me.session.email.toLowerCase()));
+  const own = queue.filter(q => mineOf(q.owner) || (q.coporteurs || []).some(c => mineOf(c.owner)));
   return [...own, ...local.filter(q => !q.owner && !own.includes(q))];
 }
 const needsAction = q => !!q.nudge || (q.pending || []).length > 0 || q.statut === "Brouillon" || staleFields(q).length > 0;
