@@ -2,7 +2,8 @@
 
 Prototype d'un agent qui transforme un besoin exprimé en texte libre en **Fiche d'Expression de Besoin — Innovation Digitale & IA** complète et challengée, puis la transmet à une file de qualification DSI.
 
-Page publiée : https://claude.ai/artifact/6cbjANLUu9U4Je58reuiXm
+- Site de démo : https://agent-intake-innovation.netlify.app (code d'accès requis : variable `DEMO_CODE` du projet Netlify)
+- Version claude.ai : https://claude.ai/artifact/6cbjANLUu9U4Je58reuiXm
 
 ## Ce que fait le prototype
 
@@ -23,7 +24,19 @@ Page publiée : https://claude.ai/artifact/6cbjANLUu9U4Je58reuiXm
 
 ## Architecture du prototype
 
-Une seule page HTML, sans build ni dépendance :
+Une seule page source, `index.html`, qui fonctionne dans deux environnements.
+
+### Site web autonome (Netlify)
+
+- `build.mjs` génère `public/index.html` (la page dans un document HTML complet) et `netlify/lib/rules.mjs` (les instructions de l'agent, gardées côté serveur).
+- `netlify/functions/agent.mjs` (`POST /api/agent`) : appelle Claude via la passerelle IA de Netlify, sans clé API à gérer, et renvoie la réponse en flux. Limité à 20 appels par minute et par adresse IP.
+- `netlify/functions/fiches.mjs` (`GET`/`POST /api/fiches`, `PATCH /api/fiches/:id`) : file DSI stockée dans Netlify Blobs (store `fiches`).
+- `DEMO_CODE` : si cette variable d'environnement est définie, chaque appel d'API doit porter ce code (en-tête `x-demo-code`). La page le demande une seule fois et le mémorise.
+- Déploiement : `netlify.toml` lance `node build.mjs` et publie `public/`.
+
+### Version claude.ai (Artifact)
+
+La même page, publiée sans build ni dépendance :
 - **Agent** : capacité `sample` du runtime Artifact (appel à Claude au nom de l'utilisateur, sans clé API). Les instructions de l'agent sont dans la constante `RULES` de `index.html`.
 - **File DSI** : capacité `db` (collection `fiches`, partagée entre les personnes qui ont accès à la page).
 - **Identité** : capacité `user`. Le nom du profil pré-remplit « Responsable métier » comme proposition à confirmer.

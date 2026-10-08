@@ -242,6 +242,10 @@ main { flex: 1; min-height: 0; }
 .empty-state h3 { margin: 0 0 4px; font: 600 17px/1.3 var(--font-doc); color: var(--ink); }
 .empty-state p { margin: 0 auto; max-width: 52ch; font-size: 14px; }
 
+.gate { max-width: 420px; margin-top: 10vh; }
+.gate input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; background: var(--bg); font: 500 16px/1.3 var(--font-mono); }
+.gate p { margin: 10px 0; font-size: 14px; color: var(--ink-2); }
+.gate .errtxt { color: var(--danger); }
 .notice { margin: 0 20px 10px; font-size: 13px; color: var(--ink-2); background: var(--surface-2); padding: 8px 12px; border-radius: 8px; }
 
 @media (max-width: 900px) {
@@ -367,6 +371,18 @@ main { flex: 1; min-height: 0; }
     <div class="sheet-b" id="modal-body"></div>
     <div class="sheet-f" id="modal-foot"></div>
   </div>
+</div>
+
+<div class="modal" id="gate" hidden>
+  <form class="sheet gate" id="gate-form" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="sheet-h"><h3 id="gate-title">Accès à la démo</h3></div>
+    <div class="sheet-b">
+      <p>Saisissez le code d'accès communiqué par l'équipe DSI & TD.</p>
+      <input type="text" id="gate-code" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Code d'accès">
+      <p class="errtxt" id="gate-err" hidden>Ce code n'est pas reconnu.</p>
+    </div>
+    <div class="sheet-f"><div class="row"><button type="submit" class="btn-primary">Entrer</button></div></div>
+  </form>
 </div>
 
 <script>
@@ -698,15 +714,122 @@ function compactFiche() {
   for (const f of FIELDS) { const e = state.fiche[f.k]; o[f.k] = e && hasVal(e.valeur) ? { valeur: e.valeur, statut: e.statut } : null; }
   return JSON.stringify(o, null, 1);
 }
-function buildInput(text, file) {
-  const ctx = `${RULES}\n\nCONTEXTE : date du jour ${fmtDate(Date.now())}.${profileName ? ` Nom de l'utilisateur d'après son profil : ${profileName}.` : ""}`;
+const contextLine = () => `CONTEXTE : date du jour ${fmtDate(Date.now())}.${profileName ? ` Nom de l'utilisateur d'après son profil : ${profileName}.` : ""}`;
+function historyTurns() {
   const history = state.turns.slice(0, -1).filter(t => !t.error).slice(-16).map(t => ({
     role: t.role, content: t.role === "user" ? t.content + (t.image ? `\n[Photo jointe : ${t.image}]` : "") : t.content,
   }));
   while (history.length && history[0].role === "assistant") history.shift();
-  const now = `ÉTAT ACTUEL DE LA FICHE (JSON, null = vide) :\n${compactFiche()}\n\nBESOINS DÉJÀ TRANSMIS À LA DSI (pour détecter les doublons) :\n${existingNeeds()}\n\nNOUVEAU MESSAGE DE L'UTILISATEUR :\n${text}${file ? "\n\n(Une image est jointe à ce message.)" : ""}`;
-  return [{ role: "user", content: ctx }, ...history, { role: "user", content: now }];
+  return history;
 }
+const nowContent = (text, file) => `ÉTAT ACTUEL DE LA FICHE (JSON, null = vide) :\n${compactFiche()}\n\nBESOINS DÉJÀ TRANSMIS À LA DSI (pour détecter les doublons) :\n${existingNeeds()}\n\nNOUVEAU MESSAGE DE L'UTILISATEUR :\n${text}${file ? "\n\n(Une image est jointe à ce message.)" : ""}`;
+function buildInput(text, file) {
+  return [{ role: "user", content: `${RULES}\n\n${contextLine()}` }, ...historyTurns(), { role: "user", content: nowContent(text, file) }];
+}
+
+/* ---- Standalone website mode: same page, served with its own API (/api/agent, /api/fiches) ---- */
+const MODE = (window.claude && typeof window.claude.use === "function") ? "claude" : "web";
+const CODE_KEY = "intake-demo-code";
+function apiHeaders() {
+  const h = { "content-type": "application/json" };
+  try { const c = localStorage.getItem(CODE_KEY); if (c) h["x-demo-code"] = c; } catch {}
+  return h;
+}
+function parseLoose(raw) {
+  try { return JSON.parse(raw); } catch {}
+  const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) { try { return JSON.parse(fence[1]); } catch {} }
+  const a = raw.indexOf("{"), b = raw.lastIndexOf("}");
+  if (a >= 0 && b > a) { try { return JSON.parse(raw.slice(a, b + 1)); } catch {} }
+  return null;
+}
+function fileToJpeg(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1568 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve({ media_type: "image/jpeg", data: c.toDataURL("image/jpeg", 0.85).split(",")[1] });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject({ code: "image_rejected" }); };
+    img.src = url;
+  });
+}
+async function webAsk(text, file, signal, onText) {
+  const body = { context: contextLine(), history: historyTurns(), message: nowContent(text, file) };
+  if (file) body.image = await fileToJpeg(file);
+  let r;
+  try { r = await fetch("/api/agent", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body), signal }); }
+  catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "upstream_error" }; }
+  if (r.status === 401) { showGate(); throw { code: "needs_code" }; }
+  if (r.status === 429) throw { code: "rate_limited" };
+  if (!r.ok || !r.body) throw { code: "upstream_error" };
+  const reader = r.body.getReader(), dec = new TextDecoder();
+  let buf = "", out = "", stop = null, err = null;
+  try {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, i); buf = buf.slice(i + 1);
+        if (!line.trim()) continue;
+        let ev; try { ev = JSON.parse(line); } catch { continue; }
+        if (typeof ev.d === "string") { out += ev.d; onText({ text: out }); }
+        else if (ev.done) stop = ev.stop;
+        else if (ev.error) err = ev.error;
+      }
+    }
+  } catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "upstream_error" }; }
+  if (err) throw { code: err };
+  if (stop === "refusal") throw { code: "refused" };
+  const obj = parseLoose(out);
+  if (!obj || typeof obj !== "object") throw { code: "invalid_json" };
+  return obj;
+}
+const webDownloads = {
+  save: async ({ filename, data }) => {
+    const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data]));
+    const a = document.createElement("a"); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return { status: "saved" };
+  },
+};
+let webQueueTimer = null, webQueueOk = false;
+async function refreshWebQueue() {
+  try {
+    const r = await fetch("/api/fiches", { headers: apiHeaders() });
+    if (r.status === 401) { showGate(); return; }
+    if (!r.ok) return;
+    const j = await r.json();
+    queue = Array.isArray(j.items) ? j.items : [];
+    webQueueOk = true;
+    renderQueue();
+  } catch {}
+}
+function startWebQueue() {
+  refreshWebQueue();
+  if (!webQueueTimer) webQueueTimer = setInterval(() => { if (!document.hidden) refreshWebQueue(); }, 15000);
+}
+function showGate() {
+  const g = $("#gate"); if (!g.hidden) return;
+  g.hidden = false; $("#gate-code").focus();
+}
+$("#gate-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const v = $("#gate-code").value.trim(); if (!v) return;
+  try { localStorage.setItem(CODE_KEY, v); } catch {}
+  $("#gate").hidden = true; $("#gate-err").hidden = true;
+  fetch("/api/fiches", { headers: apiHeaders() }).then(r => {
+    if (r.status === 401) { $("#gate").hidden = false; $("#gate-err").hidden = false; return; }
+    startWebQueue();
+  }).catch(() => {});
+});
 function extractMessage(raw) {
   const i = raw.indexOf('"message"'); if (i < 0) return null;
   const c = raw.indexOf(":", i + 9); if (c < 0) return null;
@@ -739,7 +862,7 @@ const ERR_COPY = {
 const OFF_CODES = new Set(["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"]);
 
 async function send(text, file) {
-  if (busy || !sample) return;
+  if (busy || (!sample && MODE !== "web")) return;
   busy = true;
   state.turns.push({ role: "user", content: text, image: file ? file.name : null, ts: Date.now() });
   saveState(); renderChat();
@@ -759,12 +882,18 @@ async function send(text, file) {
         if (m && m.trim()) { pend.querySelector(".bubble").innerHTML = md(m); log.scrollTop = log.scrollHeight; }
       },
     };
-    if (file) opts.images = [file];
-    const res = await sample.json(buildInput(text, file), opts);
+    let res;
+    if (MODE === "web") res = await webAsk(text, file, ctl.signal, opts.onText);
+    else {
+      if (file) opts.images = [file];
+      res = await sample.json(buildInput(text, file), opts);
+    }
     applyAgent(res);
   } catch (e) {
     const code = e && e.code;
-    if (code === "cancelled") {
+    if (code === "needs_code") {
+      state.turns.push({ role: "assistant", error: true, retry: true, content: "Saisissez le code d'accès de la démo, puis renvoyez votre message." });
+    } else if (code === "cancelled") {
       state.turns.push({ role: "assistant", error: true, content: "Réponse interrompue." });
     } else if (OFF_CODES.has(code)) {
       agentOff = true;
@@ -899,7 +1028,7 @@ $("#review").addEventListener("click", () => {
 
 async function submitFiche() {
   const btn = $("#submit"), box = $("#submit-msg");
-  if (!db) { box.innerHTML = `<div class="errbox">La transmission n'est pas disponible dans cette vue. Téléchargez la fiche et envoyez-la à la DSI & TD.</div>`; return; }
+  if (!db && MODE !== "web") { box.innerHTML = `<div class="errbox">La transmission n'est pas disponible dans cette vue. Téléchargez la fiche et envoyez-la à la DSI & TD.</div>`; return; }
   btn.disabled = true; btn.textContent = "Transmission…";
   const at = new Date();
   const echeance = addBusinessDays(at, 5);
@@ -913,14 +1042,22 @@ async function submitFiche() {
     transcript: state.turns.filter(t => !t.error).slice(-40).map(t => ({ role: t.role, content: String(t.content).slice(0, 2000) })),
   };
   try {
-    const ref = await db.collection("fiches").add(doc);
-    state.submitted = { id: ref.id, at: doc.submittedAt, echeance: doc.echeance };
+    let id;
+    if (MODE === "web") {
+      const r = await fetch("/api/fiches", { method: "POST", headers: apiHeaders(), body: JSON.stringify(doc) });
+      if (r.status === 401) { showGate(); throw { code: "needs_code" }; }
+      if (!r.ok) throw { code: "unavailable" };
+      id = (await r.json()).id;
+      refreshWebQueue();
+    } else id = (await db.collection("fiches").add(doc)).id;
+    state.submitted = { id, at: doc.submittedAt, echeance: doc.echeance };
     state.turns.push({ role: "assistant", content: `**Fiche transmise à la DSI & TD.** Vous recevrez un retour avant le **${fmtDate(echeance)}** (5 jours ouvrables). Elle apparaît dans la file de qualification avec l'historique de notre échange.`, ts: Date.now() });
     saveState(); renderChat(); renderFiche();
     $("#review").click();
   } catch (e) {
     btn.disabled = false; btn.textContent = "Transmettre à la DSI";
-    const msg = e?.code === "invalid_argument" ? "Vous n'avez pas les droits pour transmettre depuis cette vue. Demandez un accès Contributeur, ou téléchargez la fiche."
+    const msg = e?.code === "needs_code" ? "Saisissez le code d'accès de la démo, puis transmettez à nouveau."
+      : e?.code === "invalid_argument" ? "Vous n'avez pas les droits pour transmettre depuis cette vue. Demandez un accès Contributeur, ou téléchargez la fiche."
       : e?.code === "quota_exceeded" ? "La file DSI est pleine. Prévenez l'équipe DSI & TD."
       : "La transmission a échoué. Réessayez dans un instant.";
     box.innerHTML = `<div class="errbox">${msg}</div>`;
@@ -979,7 +1116,8 @@ function renderQueue() {
     ["Jugés prêts par l'agent", ready, ""],
   ].map(([l, v, c]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${c}">${v}</div></div>`).join("");
 
-  if (!db) { el.innerHTML = `<div class="empty-state"><h3>File indisponible dans cette vue</h3><p>Ouvrez cette page dans claude.ai, connecté, pour voir les besoins transmis.</p></div>`; return; }
+  if (!db && MODE !== "web") { el.innerHTML = `<div class="empty-state"><h3>File indisponible dans cette vue</h3><p>Ouvrez cette page dans claude.ai, connecté, pour voir les besoins transmis.</p></div>`; return; }
+  if (MODE === "web" && !webQueueOk) { el.innerHTML = `<div class="empty-state"><h3>Chargement de la file…</h3><p>Si rien n'apparaît, vérifiez le code d'accès de la démo.</p></div>`; return; }
   if (!queue.length) { el.innerHTML = `<div class="empty-state"><h3>Aucun besoin transmis pour l'instant</h3><p>Dès qu'un collaborateur valide sa fiche dans l'onglet « Exprimer un besoin », elle arrive ici avec son niveau de maturité et l'échéance de retour.</p></div>`; return; }
 
   el.innerHTML = queue.map(q => {
@@ -1015,9 +1153,15 @@ $("#queue").addEventListener("click", ev => {
   if (d) { const q = queue.find(x => x.id === d.dataset.dl); if (q) downloadFiche(q.fiche || {}, { titre: q.titre, at: q.submittedAt, echeance: q.echeance }); }
 });
 $("#queue").addEventListener("change", async ev => {
-  const s = ev.target.closest("[data-status]"); if (!s || !db) return;
+  const s = ev.target.closest("[data-status]"); if (!s || (!db && MODE !== "web")) return;
   s.disabled = true;
-  try { await db.doc("fiches/" + s.dataset.status).update({ statut: s.value, statutMaj: new Date().toISOString() }); }
+  try {
+    if (MODE === "web") {
+      const r = await fetch("/api/fiches/" + encodeURIComponent(s.dataset.status), { method: "PATCH", headers: apiHeaders(), body: JSON.stringify({ statut: s.value }) });
+      if (!r.ok) throw new Error("status " + r.status);
+      refreshWebQueue();
+    } else await db.doc("fiches/" + s.dataset.status).update({ statut: s.value, statutMaj: new Date().toISOString() });
+  }
   catch { s.value = queue.find(x => x.id === s.dataset.status)?.statut || QUEUE_STATUTS[0]; }
   finally { s.disabled = false; }
 });
@@ -1032,6 +1176,12 @@ renderChat(); renderFiche(); autosize();
 
 const use = n => (window.claude && typeof window.claude.use === "function") ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
 
+if (MODE === "web") {
+  agentReady = true; canEditQueue = true; downloads = webDownloads;
+  $("#attach").hidden = false;
+  renderChat();
+  startWebQueue();
+} else {
 use("sample").then(async s => {
   sample = s; agentReady = true;
   if (!s) { agentOff = true; showNotice("Agent indisponible dans cette vue : ouvrez la page dans claude.ai pour converser. La fiche reste modifiable à la main."); }
@@ -1057,5 +1207,6 @@ use("db").then(d => {
     () => { renderQueue(); }
   );
 });
+}
 })();
 </script>
