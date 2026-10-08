@@ -367,6 +367,33 @@ main { flex: 1; min-height: 0; }
 .fn-bar { height: 14px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
 .fn-bar i { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; }
 .fn-n { text-align: right; }
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.wave { background: var(--bg); border-radius: var(--radius); padding: 10px; display: grid; gap: 8px; min-width: 0; }
+.wave-h { font-size: 14px; padding: 2px 2px 6px; border-bottom: 2px solid var(--accent); }
+.cu { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 6px; font-size: 13.5px; min-width: 0; }
+.cu p { margin: 0; }
+.cu.soc { border-style: dashed; border-color: var(--accent); }
+.cu-h { display: flex; gap: 8px; align-items: baseline; }
+.cu-id { color: var(--accent); font-size: 12px; white-space: nowrap; }
+.cu ul { margin: 4px 0; padding-left: 18px; }
+.cu details summary { cursor: pointer; color: var(--accent); font-size: 13px; }
+.linkish { border: 0; background: none; padding: 0; color: var(--ink); text-decoration: underline; text-underline-offset: 2px; text-align: left; font-size: 13.5px; }
+@media (max-width: 900px) { .board { grid-template-columns: minmax(0, 1fr); } }
+.app-bar { display: flex; gap: 8px 12px; flex-wrap: wrap; align-items: center; }
+.adm-state { margin: 0; font-size: 14px; color: var(--ink-2); }
+.adm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+.adm-grid .adm-wide { grid-column: 1 / -1; }
+.mono-ta { font: 12.5px/1.5 var(--font-mono) !important; }
+.lv-block input[type=text], .lv-block input[type=number], .lv-block textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; background: var(--bg); }
+.adm-evals { display: grid; gap: 10px; }
+.eval-case { border: 1px dashed var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 6px; }
+.ev-l { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); font-weight: 600; }
+.ev-l textarea, .form-grid label input, .form-grid label select { font-weight: 400; color: var(--ink); font-size: 14px; }
+.eval-res { border-top: 1px solid var(--line); padding: 10px 0; display: grid; gap: 4px; }
+.eval-res p, .eval-res ul { margin: 0; }
+.eval-res ul { padding-left: 20px; font-size: 13.5px; }
+.tag.bad { background: var(--danger-bg); color: var(--danger); }
+@media (max-width: 760px) { .adm-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 900px) { .sim-layout { grid-template-columns: minmax(0, 1fr); } .phone { height: 72vh; } }
 @media (max-width: 520px) { .fn-row { grid-template-columns: minmax(0, 1fr) 2.5em; } .fn-bar { grid-column: 1 / -1; grid-row: 2; } .ph-btn { padding: 7px 8px; } }
 .notice { margin: 0 20px 10px; font-size: 13px; color: var(--ink-2); background: var(--surface-2); padding: 8px 12px; border-radius: 8px; }
@@ -383,10 +410,13 @@ main { flex: 1; min-height: 0; }
   .fiche-head, .alerts, .sec, .fiche-foot { padding-left: 16px; padding-right: 16px; }
   .brand small { display: none; }
 }
+@media (max-width: 760px) {
+  .tabs { margin-left: 0; width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button { flex: none; white-space: nowrap; }
+}
 @media (max-width: 520px) {
   .top { gap: 8px; }
-  .tabs { margin-left: 0; width: 100%; }
-  .tabs button { flex: 1; justify-content: center; }
   .card-h { grid-template-columns: minmax(0, 1fr); }
   .card-h .right { justify-content: flex-start; }
   .sheet-h, .sheet-b, .sheet-f { padding-left: 16px; padding-right: 16px; }
@@ -410,6 +440,7 @@ main { flex: 1; min-height: 0; }
       <button id="tab-chat" role="tab" aria-selected="false" aria-controls="view-chat" hidden>Messagerie</button>
       <button id="tab-mine" role="tab" aria-selected="false" aria-controls="view-mine" hidden>Mes besoins <span class="count" id="mine-count" hidden>0</span></button>
       <button id="tab-dsi" role="tab" aria-selected="false" aria-controls="view-dsi">File DSI <span class="count" id="queue-count" hidden>0</span></button>
+      <button id="tab-admin" role="tab" aria-selected="false" aria-controls="view-admin" hidden>Administration</button>
     </nav>
   </header>
 
@@ -519,6 +550,7 @@ main { flex: 1; min-height: 0; }
           <h2>Mes besoins</h2>
           <p>Vos besoins restent vivants après l'envoi. L'agent vous pose une question quand une information vieillit, vous soumet ce qu'il observe sur le terrain, et vous pouvez donner des nouvelles en une phrase, écrite ou dictée.</p>
         </div>
+        <div class="app-bar" id="app-bar" hidden></div>
         <div class="seg-inline" id="mine-filter" role="group" aria-label="Filtre">
           <button data-mine="mine" aria-pressed="true">Mes besoins</button>
           <button data-mine="all" aria-pressed="false">Tous les besoins (démo)</button>
@@ -537,6 +569,7 @@ main { flex: 1; min-height: 0; }
         <div class="tools" id="dsi-tools" hidden>
           <div class="tools-row">
             <div class="tool-tabs" role="group" aria-label="Outils DSI">
+              <button data-tool="roadmap" aria-pressed="false">Feuille de route</button>
               <button data-tool="matrix" aria-pressed="false">Matrice valeur / faisabilité</button>
               <button data-tool="nudges" aria-pressed="false">Relances</button>
               <button data-tool="signal" aria-pressed="false">Signal terrain</button>
@@ -552,6 +585,36 @@ main { flex: 1; min-height: 0; }
           <div class="tool-panel" id="tool-panel" hidden></div>
         </div>
         <div class="queue" id="queue"></div>
+      </div>
+    </section>
+    <section id="view-admin" class="view dsi" role="tabpanel" aria-labelledby="tab-admin" hidden>
+      <div class="dsi-inner">
+        <div class="dsi-head">
+          <h2>Administration</h2>
+          <p>Réglez le comportement des agents sans toucher au code. Chaque enregistrement crée une version que vous pouvez restaurer. Avant d'enregistrer, passez vos changements au banc d'essai : il teste les réglages affichés, même non enregistrés.</p>
+        </div>
+        <p class="adm-state" id="adm-state">Chargement des réglages…</p>
+        <div class="adm-grid">
+          <section class="lv-block adm-wide"><div class="cp-head"><h4>Instructions de l'agent d'intake</h4><button class="btn-ghost" data-adm-default="intake">Rétablir le texte par défaut</button></div>
+            <p class="muted">Ce que l'agent sait, comment il challenge et le format de sa réponse. Il les applique sur tous les canaux : web, e-mail, WhatsApp et Teams. Gardez la section « FORMAT DE RÉPONSE » intacte : l'application en dépend.</p>
+            <textarea id="adm-intake" rows="16" class="mono-ta" aria-label="Instructions de l'agent d'intake"></textarea></section>
+          <section class="lv-block adm-wide"><div class="cp-head"><h4>Grille de qualification du copilote DSI</h4><button class="btn-ghost" data-adm-default="qualify">Rétablir le texte par défaut</button></div>
+            <p class="muted">Repères Valeur / Faisabilité, lecture bottleneck shift, trajectoires. Le format JSON en fin de texte doit rester identique.</p>
+            <textarea id="adm-qualify" rows="12" class="mono-ta" aria-label="Grille de qualification"></textarea></section>
+          <section class="lv-block"><div class="cp-head"><h4>Durées de validité</h4><button class="btn-ghost" data-adm-default="ttl">Par défaut</button></div><p class="muted">En jours. Au-delà, l'information est signalée « À revalider » et la tournée la fait confirmer.</p><div class="form-grid" id="adm-ttl"></div></section>
+          <section class="lv-block"><div class="cp-head"><h4>Seuils de relance</h4><button class="btn-ghost" data-adm-default="seuils">Par défaut</button></div><p class="muted">En jours. Utilisés par la tournée automatique.</p><div class="form-grid" id="adm-seuils"></div></section>
+          <section class="lv-block"><div class="cp-head"><h4>Directions</h4><button class="btn-ghost" data-adm-default="directions">Par défaut</button></div><p class="muted">Une par ligne. L'agent utilise ces libellés pour le champ « Direction ».</p><textarea id="adm-directions" rows="9" aria-label="Directions"></textarea></section>
+          <section class="lv-block"><div class="cp-head"><h4>Signature des messages</h4></div><p class="muted">Utilisée dans les e-mails envoyés par l'agent.</p><input type="text" id="adm-signature" aria-label="Signature"></section>
+        </div>
+        <section class="lv-block"><div class="cp-head"><h4>Banc d'essai</h4><span class="muted" id="adm-lastrun"></span></div>
+          <p class="muted">Chaque cas envoie un message à l'agent avec les réglages ci-dessus. Des contrôles fixes vérifient le format, le nombre de questions et les statuts, puis une IA juge la réponse au regard des attentes.</p>
+          <div id="adm-evals" class="adm-evals"></div>
+          <div class="row-end"><button class="btn-ghost" id="adm-eval-add">Ajouter un cas</button><button class="btn-primary" id="adm-eval-run">Lancer le banc d'essai</button></div>
+          <div id="adm-eval-out"></div></section>
+        <section class="lv-block"><div class="cp-head"><h4>Enregistrer et versions</h4></div>
+          <div class="form-grid"><label class="wide">Note de version<input type="text" id="adm-note" placeholder="Ce qui change, en une phrase"></label></div>
+          <div class="row-end"><button class="btn-primary" id="adm-save">Enregistrer une nouvelle version</button></div>
+          <h5 class="jh">Historique</h5><div id="adm-history"></div></section>
       </div>
     </section>
   </main>
@@ -931,9 +994,16 @@ function buildInput(text, file) {
 /* ---- Standalone website mode: same page, served with its own API (/api/agent, /api/fiches) ---- */
 const MODE = (window.claude && typeof window.claude.use === "function") ? "claude" : "web";
 const CODE_KEY = "intake-demo-code";
+// One automatic retry when the platform answers with a gateway error (seen on the first call after a deploy).
+async function fetchRetry(url, opts) {
+  const r = await fetch(url, opts);
+  if (![502, 503, 504].includes(r.status) || (opts && opts.signal && opts.signal.aborted)) return r;
+  await new Promise(res => setTimeout(res, 1500));
+  return fetch(url, opts);
+}
 function apiHeaders() {
   const h = { "content-type": "application/json" };
-  try { const c = localStorage.getItem(CODE_KEY); if (c) h["x-demo-code"] = c; } catch {}
+  try { const c = localStorage.getItem(CODE_KEY); if (c) h["x-demo-code"] = c; const a = localStorage.getItem("intake-admin-code"); if (a) h["x-admin-code"] = a; } catch {}
   return h;
 }
 function parseLoose(raw) {
@@ -967,7 +1037,7 @@ async function webAsk(text, file, signal, onText) {
 const askAgent = (mode, input, onText, signal) => postAgent({ mode, input }, signal, onText || (() => {}));
 async function postAgent(body, signal, onText) {
   let r;
-  try { r = await fetch("/api/agent", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body), signal }); }
+  try { r = await fetchRetry("/api/agent", { method: "POST", headers: apiHeaders(), body: JSON.stringify(body), signal }); }
   catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : "upstream_error" }; }
   if (r.status === 401) { showGate(); throw { code: "needs_code" }; }
   if (r.status === 429) throw { code: "rate_limited" };
@@ -1295,18 +1365,20 @@ $("#reset").addEventListener("click", () => {
 
 /* ================= Tabs & mobile panes ================= */
 function showTab(which) {
-  for (const t of ["capture", "chat", "mine", "dsi"]) {
+  for (const t of ["capture", "chat", "mine", "dsi", "admin"]) {
     $("#tab-" + t).setAttribute("aria-selected", t === which);
     $("#view-" + t).hidden = t !== which;
   }
   if (which === "dsi") renderQueue();
   if (which === "mine") renderMine();
   if (which === "chat") simOpen();
+  if (which === "admin") admLoad();
   if (which !== "chat") simClose();
 }
 $("#tab-capture").addEventListener("click", () => showTab("capture"));
 $("#tab-mine").addEventListener("click", () => showTab("mine"));
 $("#tab-chat").addEventListener("click", () => showTab("chat"));
+$("#tab-admin").addEventListener("click", () => showTab("admin"));
 $("#tab-dsi").addEventListener("click", () => showTab("dsi"));
 function showPane(p) {
   $("#panes").classList.toggle("show-fiche", p === "fiche");
@@ -1441,7 +1513,7 @@ const MINE_KEY = "intake-mine";
 let mineFilter = "mine";
 const openMine = new Set();
 function mineIds() { try { const a = JSON.parse(localStorage.getItem(MINE_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch { return []; } }
-function addMine(id) { const a = mineIds().filter(x => x !== id); a.unshift(id); try { localStorage.setItem(MINE_KEY, JSON.stringify(a.slice(0, 50))); } catch {} }
+function addMine(id) { const a = mineIds().filter(x => x !== id); a.unshift(id); try { localStorage.setItem(MINE_KEY, JSON.stringify(a.slice(0, 50))); } catch {} if (swReg) syncPush(); }
 function mineItems() {
   if (mineFilter === "all") return queue;
   const ids = mineIds();
@@ -1740,6 +1812,7 @@ function renderTool() {
   if (!currentTool) { p.innerHTML = ""; return; }
   if (currentTool === "matrix") p.innerHTML = matrixHTML();
   if (currentTool === "pilot") { p.innerHTML = pilotHTML(); loadPilot(); }
+  if (currentTool === "roadmap") { p.innerHTML = roadmapHTML(); loadPortfolio(); }
   if (currentTool === "value") { p.innerHTML = valueDashHTML(); loadPilot(); }
   if (currentTool === "nudges") p.innerHTML = `<div class="tp-head"><h4>Relances ciblées</h4><p class="muted">L'agent repère les informations non confirmées ou périmées, les propositions sans réponse et les délais DSI, puis rédige une question précise pour la bonne personne. Avancez l'horloge de démo pour voir les informations vieillir.</p><button class="btn-primary" id="run-nudges">Préparer les relances</button></div><div id="nudge-out"></div>`;
   if (currentTool === "signal") p.innerHTML = `<div class="tp-head"><h4>Signal terrain</h4><p class="muted">Collez ce que la réalité dit : compte rendu de comité, ticket, mise à jour de projet, extrait de données. L'agent le rattache aux besoins concernés et propose les mises à jour, que chaque porteur valide.</p></div>
@@ -2033,7 +2106,7 @@ async function simPost(payload, optimistic) {
   simBusy = true; simMsgs = [...simMsgs, { dir: "in", at: new Date().toISOString(), pending: true, ...optimistic }];
   simRender();
   try {
-    const r = await fetch("/api/channel/simulate", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ channel: simChannel, sender: simSender(), name: PERSONAS[simPersona].name, ...payload }) });
+    const r = await fetchRetry("/api/channel/simulate", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ channel: simChannel, sender: simSender(), name: PERSONAS[simPersona].name, ...payload }) });
     if (r.status === 401) { showGate(); throw new Error("code"); }
     if (r.status === 429) throw new Error("rate");
     if (!r.ok) throw new Error("status " + r.status);
@@ -2193,6 +2266,385 @@ async function runIndicators(q) {
   finally { valueRunning.delete(q.id); renderQueue(); }
 }
 
+/* ================= Administration ================= */
+const SEUIL_LABELS = { hypothese_jours: "Relancer une hypothèse non confirmée après", proposition_jours: "Relancer une proposition sans réponse après", inactivite_jours: "Considérer un besoin inactif après", valeur_jours: "Demander une mesure de valeur tous les", relance_pause_jours: "Délai minimal entre deux relances" };
+let adm = null, admRunning = false;
+async function loadPublicConfig() {
+  try {
+    const r = await fetch("/api/config", { headers: apiHeaders() });
+    if (!r.ok) return;
+    const c = await r.json();
+    if (c.ttl) Object.assign(TTL, c.ttl);
+    renderQueue(); renderMine();
+  } catch {}
+}
+async function admLoad() {
+  if (MODE !== "web") return;
+  try {
+    const r = await fetch("/api/admin/config", { headers: apiHeaders() });
+    if (r.status === 401) {
+      $("#adm-state").innerHTML = `Accès administrateur requis. <input type="text" id="adm-code" placeholder="Code administrateur" aria-label="Code administrateur"> <button class="btn-ghost" id="adm-code-ok">Valider</button>`;
+      return;
+    }
+    if (!r.ok) throw new Error();
+    adm = await r.json();
+    admFill(adm.values); admRenderHistory(); admRenderLastRun(); admDirty();
+  } catch { $("#adm-state").textContent = "Les réglages n'ont pas pu être chargés."; }
+}
+function admFill(v) {
+  $("#adm-intake").value = v.intake; $("#adm-qualify").value = v.qualify;
+  $("#adm-ttl").innerHTML = Object.keys(v.ttl).map(k => `<label>${esc(SHORT[k] || k)}<input type="number" min="1" max="3650" data-ttl="${k}" value="${v.ttl[k]}"></label>`).join("");
+  $("#adm-seuils").innerHTML = Object.keys(v.seuils).map(k => `<label>${esc(SEUIL_LABELS[k] || k)}<input type="number" min="1" max="3650" data-seuil="${k}" value="${v.seuils[k]}"></label>`).join("");
+  $("#adm-directions").value = v.directions.join("\n");
+  $("#adm-signature").value = v.signature;
+  admRenderEvals(v.evals);
+}
+function admRenderEvals(evals) {
+  $("#adm-evals").innerHTML = evals.map((e, i) => `<div class="eval-case" data-ev="${i}">
+    <div class="form-grid"><label>Nom du cas<input type="text" class="ev-nom" value="${esc(e.nom)}"></label></div>
+    <label class="ev-l">Message envoyé à l'agent<textarea class="ev-msg" rows="2">${esc(e.message)}</textarea></label>
+    <label class="ev-l">Attentes<textarea class="ev-att" rows="2">${esc(e.attentes)}</textarea></label>
+    <div class="row-end"><button class="btn-ghost" data-ev-del="${i}">Retirer ce cas</button></div></div>`).join("") || `<p class="muted">Aucun cas de test.</p>`;
+}
+function admRead() {
+  const ttl = {}, seuils = {};
+  document.querySelectorAll("[data-ttl]").forEach(i => { ttl[i.dataset.ttl] = Number(i.value); });
+  document.querySelectorAll("[data-seuil]").forEach(i => { seuils[i.dataset.seuil] = Number(i.value); });
+  const evals = [...document.querySelectorAll(".eval-case")].map(c => ({ nom: c.querySelector(".ev-nom").value.trim(), message: c.querySelector(".ev-msg").value.trim(), attentes: c.querySelector(".ev-att").value.trim() })).filter(e => e.message);
+  return { intake: $("#adm-intake").value, qualify: $("#adm-qualify").value, ttl, seuils, directions: $("#adm-directions").value.split("\n").map(x => x.trim()).filter(Boolean), signature: $("#adm-signature").value.trim(), evals };
+}
+function admDirty() {
+  if (!adm) return;
+  const dirty = JSON.stringify(admRead()) !== JSON.stringify(adm.values);
+  $("#adm-state").innerHTML = `Version en vigueur : <b>${adm.version || "par défaut"}</b>${adm.at ? ` · ${fmtDateTime(adm.at)}` : ""}${adm.note ? ` · « ${esc(adm.note)} »` : ""}${dirty ? ` · <span class="tag warn">Modifications non enregistrées</span>` : ""}`;
+}
+function admRenderHistory() {
+  const h = adm.history || [];
+  $("#adm-history").innerHTML = h.length ? h.map(x => `<div class="run"><div class="run-h"><b>Version ${x.version}</b><span class="muted">${fmtDateTime(x.at)}${x.note ? ` · ${esc(x.note)}` : ""}</span><button class="btn-ghost" data-adm-restore="${x.version}">Restaurer</button></div></div>`).join("") : `<p class="muted">Aucune version antérieure.</p>`;
+}
+function admRenderLastRun() {
+  const r = (adm.evalruns || [])[0];
+  if (!r) { $("#adm-lastrun").textContent = ""; return; }
+  const ok = r.results.filter(x => x.verdict === "conforme").length;
+  $("#adm-lastrun").textContent = `Dernier passage : ${fmtDateTime(r.at)} · ${ok}/${r.results.length} conformes${r.draft ? " (réglages non enregistrés)" : r.version ? ` (version ${r.version})` : ""}`;
+}
+function evalResultHTML(x) {
+  if (x.erreur) return `<div class="eval-res"><div class="ni-top"><b>${esc(x.nom)}</b><span class="tag warn">Erreur</span></div><p class="errbox">${esc(x.erreur)}</p></div>`;
+  const v = x.juge?.verdict || "non jugé";
+  const cls = v === "conforme" ? "ok" : v === "partiel" ? "warn" : "bad";
+  const fails = x.checks.filter(c => !c.ok);
+  return `<div class="eval-res"><div class="ni-top"><b>${esc(x.nom)}</b><span class="tag ${cls}">${esc(v)}</span><span class="muted">${x.checks.length - fails.length}/${x.checks.length} contrôles · ${Math.round(x.ms / 100) / 10} s</span></div>
+    ${fails.length ? `<p class="muted">Contrôles en échec : ${fails.map(c => esc(c.nom) + (c.detail ? ` (${esc(c.detail)})` : "")).join(" ; ")}</p>` : ""}
+    ${(x.juge?.points || []).length ? `<ul>${x.juge.points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}
+    <details><summary>Réponse de l'agent</summary><div class="bubble">${md(x.message || "")}</div></details></div>`;
+}
+async function admRunEvals(btn) {
+  if (admRunning) return;
+  const draft = admRead();
+  const cases = draft.evals;
+  if (!cases.length) { toast("Ajoutez au moins un cas de test."); return; }
+  admRunning = true; btn.disabled = true;
+  const out = $("#adm-eval-out");
+  const results = [];
+  const dirty = JSON.stringify(draft) !== JSON.stringify(adm.values);
+  out.innerHTML = `<p class="thinking" id="adm-progress">Cas 1 sur ${cases.length}<span class="dots"></span></p><div id="adm-results"></div>`;
+  for (const [i, c] of cases.entries()) {
+    $("#adm-progress").innerHTML = `Cas ${i + 1} sur ${cases.length} : ${esc(c.nom)}<span class="dots"></span>`;
+    try {
+      const r = await fetchRetry("/api/admin/eval", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ case: c, draft: { intake: draft.intake, directions: draft.directions } }) });
+      const x = r.ok ? await r.json() : { nom: c.nom, erreur: `Erreur ${r.status}` };
+      results.push(x);
+      $("#adm-results").insertAdjacentHTML("beforeend", evalResultHTML(x));
+    } catch { results.push({ nom: c.nom, erreur: "Connexion interrompue" }); }
+  }
+  const ok = results.filter(x => x.juge?.verdict === "conforme").length;
+  $("#adm-progress").outerHTML = `<p class="${ok === results.length ? "okbox" : "warnbox"}">${ok}/${results.length} cas conformes${dirty ? " avec les réglages non enregistrés" : ""}.</p>`;
+  try {
+    const r = await fetch("/api/admin/config", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ evalrun: { version: adm.version, draft: dirty, results: results.map(x => ({ nom: x.nom, verdict: x.erreur ? "erreur" : (x.juge?.verdict || "non jugé"), controles: x.checks ? `${x.checks.filter(c => c.ok).length}/${x.checks.length}` : "" })) } }) });
+    if (r.ok) { const st = await r.json(); adm.evalruns = st.evalruns; admRenderLastRun(); }
+  } catch {}
+  admRunning = false; btn.disabled = false;
+}
+$("#view-admin").addEventListener("input", () => admDirty());
+$("#view-admin").addEventListener("click", async e => {
+  const t = e.target;
+  if (t.id === "adm-code-ok") { try { localStorage.setItem("intake-admin-code", $("#adm-code").value.trim()); } catch {} admLoad(); return; }
+  if (!adm) return;
+  const d = t.closest("[data-adm-default]");
+  if (d) {
+    const k = d.dataset.admDefault, def = adm.defaults[k];
+    if (k === "intake") $("#adm-intake").value = def;
+    if (k === "qualify") $("#adm-qualify").value = def;
+    if (k === "directions") $("#adm-directions").value = def.join("\n");
+    if (k === "ttl") document.querySelectorAll("[data-ttl]").forEach(i => { i.value = def[i.dataset.ttl]; });
+    if (k === "seuils") document.querySelectorAll("[data-seuil]").forEach(i => { i.value = def[i.dataset.seuil]; });
+    admDirty(); return;
+  }
+  if (t.id === "adm-eval-add") {
+    const cur = admRead().evals; cur.push({ nom: "Nouveau cas", message: "", attentes: "" });
+    admRenderEvals(cur); admDirty(); return;
+  }
+  const del = t.closest("[data-ev-del]");
+  if (del) { const cur = admRead(); const all = [...document.querySelectorAll(".eval-case")].map(c => ({ nom: c.querySelector(".ev-nom").value, message: c.querySelector(".ev-msg").value, attentes: c.querySelector(".ev-att").value })); all.splice(+del.dataset.evDel, 1); admRenderEvals(all); admDirty(); return; }
+  if (t.id === "adm-eval-run") { admRunEvals(t); return; }
+  if (t.id === "adm-save") {
+    t.disabled = true;
+    try {
+      const r = await fetch("/api/admin/config", { method: "PUT", headers: apiHeaders(), body: JSON.stringify({ values: admRead(), note: $("#adm-note").value.trim() }) });
+      if (!r.ok) throw new Error();
+      adm = await r.json(); $("#adm-note").value = "";
+      admFill(adm.values); admRenderHistory(); admDirty(); loadPublicConfig();
+      toast(`Version ${adm.version} enregistrée. Les agents l'appliquent sous une minute.`);
+    } catch { toast("L'enregistrement n'a pas abouti."); }
+    finally { t.disabled = false; }
+    return;
+  }
+  const rs = t.closest("[data-adm-restore]");
+  if (rs) {
+    rs.disabled = true;
+    try {
+      const r = await fetch("/api/admin/config", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ restore: Number(rs.dataset.admRestore) }) });
+      if (!r.ok) throw new Error();
+      adm = await r.json(); admFill(adm.values); admRenderHistory(); admDirty(); loadPublicConfig();
+      toast(`Version ${rs.dataset.admRestore} restaurée (nouvelle version ${adm.version}).`);
+    } catch { toast("La restauration n'a pas abouti."); rs.disabled = false; }
+  }
+});
+
+/* ================= Portfolio & roadmap ================= */
+let pf = null;
+const scriptCache = {};
+function loadScript(src) {
+  return scriptCache[src] ||= new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => { delete scriptCache[src]; rej(new Error("load")); }; document.head.appendChild(s); });
+}
+async function loadPortfolio() {
+  try {
+    const r = await fetch("/api/portfolio", { headers: apiHeaders() });
+    if (r.status === 401) { showGate(); return null; }
+    if (!r.ok) return null;
+    pf = await r.json();
+    if (currentTool === "roadmap" && $("#pf-body")) $("#pf-body").innerHTML = roadmapBodyHTML();
+    return pf;
+  } catch { return null; }
+}
+function roadmapHTML() {
+  return `<div class="tp-head"><h4>Portefeuille et feuille de route</h4>
+    <p class="muted">L'agent regroupe les besoins de toutes les directions en cas d'usage, repère les socles communs, puis répartit le tout en trois vagues selon la valeur, la faisabilité et les dépendances. Il s'appuie sur les qualifications du copilote quand elles existent. C'est une proposition à valider en COPIL, exportable vers le Toolkit de pilotage.</p>
+    <div class="row-start"><button class="btn-primary" data-pf="build">Construire la feuille de route</button><button class="btn-ghost" data-pf="xlsx">Exporter vers Suivi_Cas_Usage (Excel)</button><button class="btn-ghost" data-pf="pptx">Support COPIL (PowerPoint)</button></div></div>
+    <div id="pf-body"><p class="thinking">Chargement<span class="dots"></span></p></div>`;
+}
+const qTitle = id => queue.find(q => q.id === id)?.titre || "Besoin";
+function cuCardHTML(c) {
+  const v = c.valeur?.note, f = c.faisabilite?.note, est = c.valeur?.source === "estimé" || c.faisabilite?.source === "estimé";
+  return `<div class="cu"><div class="cu-h"><span class="mono cu-id">${esc(c.id)}</span><b>${esc(c.nom)}</b></div>
+    <div class="chips"><span class="tag accent">${esc(c.famille || "—")}</span>${(c.metiers || []).map(m => `<span class="tag">${esc(m)}</span>`).join("")}</div>
+    <p>${esc(c.description || "")}</p>
+    <p class="muted">Valeur ${v ?? "?"} · Faisabilité ${f ?? "?"}${est ? " (estimées)" : ""}${(c.dependances || []).length ? ` · dépend de ${esc(c.dependances.join(", "))}` : ""}</p>
+    <details><summary>${(c.besoins || []).length} besoin${(c.besoins || []).length > 1 ? "s" : ""} et détails</summary>
+      <ul>${(c.besoins || []).map(id => `<li><button class="linkish" data-pf-open="${esc(id)}">${esc(qTitle(id))}</button></li>`).join("")}</ul>
+      ${(c.prerequis || []).length ? `<p><b>Prérequis</b> : ${esc(c.prerequis.join(" ; "))}</p>` : ""}
+      ${c.bottleneck ? `<p><b>Contrainte à anticiper</b> : ${esc(c.bottleneck)}</p>` : ""}
+      ${c.justification_vague ? `<p class="muted">${esc(c.justification_vague)}</p>` : ""}
+    </details></div>`;
+}
+function roadmapBodyHTML() {
+  if (!pf) return `<p class="muted">Données indisponibles.</p>`;
+  const p = pf.portfolio;
+  let head = "";
+  if (pf.running) head += `<p class="thinking">L'agent construit le portefeuille, comptez une à deux minutes<span class="dots"></span></p>`;
+  if (pf.error && !pf.running) head += `<p class="errbox">Dernière construction en échec : ${esc(pf.error.message)}</p>`;
+  if (!p) return head + `<div class="empty-state"><h3>Pas encore de feuille de route</h3><p>Cliquez « Construire la feuille de route » : l'agent analyse tous les besoins transmis.</p></div>`;
+  const recus = queue.filter(q => q.statut !== "Brouillon");
+  const changed = recus.filter(q => (q.events || []).some(e => String(e.at) > p.at && toMs(e.at) <= Date.now())).length + Math.max(0, recus.length - (p.besoins_consideres || 0));
+  const vagues = [1, 2, 3].map(n => ({ n, meta: (p.vagues || []).find(v => Number(v.numero) === n) || { numero: n }, cas: (p.cas_usage || []).filter(c => Number(c.vague) === n), soc: (p.socles || []).filter(s => Number(s.vague) === n) }));
+  return head + `<div class="lv-block digest"><div class="cp-head"><h4>Proposition de feuille de route</h4><span class="tag">Proposition IA à valider en COPIL · v${p.version} · ${fmtDateTime(p.at)}</span>${changed ? `<span class="tag warn">${changed} besoin(s) nouveaux ou modifiés depuis</span>` : ""}</div>
+      <p>${esc(p.synthese || "")}</p>
+      <p class="muted">${p.besoins_consideres || "?"} besoins → ${(p.cas_usage || []).length} cas d'usage, ${(p.socles || []).length} socle(s) transverse(s).</p></div>
+    <div class="board">${vagues.map(v => `<div class="wave"><div class="wave-h"><b>Vague ${v.n}</b>${v.meta.nom ? ` · ${esc(v.meta.nom)}` : ""}<br><span class="muted">${esc(v.meta.horizon || "")}${v.meta.objectif ? ` · ${esc(v.meta.objectif)}` : ""}</span></div>
+      ${v.soc.map(s => `<div class="cu soc"><div class="cu-h"><span class="mono cu-id">${esc(s.id)}</span><b>${esc(s.nom)}</b></div><p>${esc(s.description || "")}</p><p class="muted">Sert ${esc((s.sert || []).join(", ") || "—")}</p></div>`).join("")}
+      ${v.cas.map(cuCardHTML).join("") || (v.soc.length ? "" : `<p class="muted">Aucun cas d'usage.</p>`)}</div>`).join("")}</div>
+    ${(p.decisions_copil || []).length ? `<h5 class="jh">Décisions attendues du COPIL</h5><ul>${p.decisions_copil.map(d => `<li>${esc(d)}</li>`).join("")}</ul>` : ""}
+    ${(p.besoins_hors_portefeuille || []).length ? `<h5 class="jh">Besoins hors portefeuille</h5><ul>${p.besoins_hors_portefeuille.map(b => `<li><b>${esc(qTitle(b.id))}</b> : ${esc(b.raison || "")}</li>`).join("")}</ul>` : ""}`;
+}
+async function buildRoadmap(btn) {
+  const before = pf?.portfolio?.version || 0;
+  btn.disabled = true;
+  try {
+    const r = await fetch("/api/portfolio-bg", { method: "POST", headers: apiHeaders(), body: "{}" });
+    if (r.status === 401) { showGate(); return; }
+    const t0 = Date.now();
+    await new Promise(res => setTimeout(res, 1500));
+    for (;;) {
+      await loadPortfolio();
+      const done = pf && !pf.running && ((pf.portfolio?.version || 0) > before || (pf.error && toMs(pf.error.at) > t0 - 5000));
+      if (done || Date.now() - t0 > 240000) break;
+      await new Promise(res => setTimeout(res, 4000));
+    }
+    toast(pf?.portfolio?.version > before ? "Feuille de route prête." : "La construction n'a pas abouti.");
+  } catch { toast("Le lancement n'a pas abouti."); }
+  finally { btn.disabled = false; }
+}
+const todayTag = () => new Date().toISOString().slice(0, 10);
+async function exportXlsx() {
+  const p = pf?.portfolio; if (!p) { toast("Construisez d'abord la feuille de route."); return; }
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");
+  const X = window.XLSX, wb = X.utils.book_new();
+  const head = ["ID", "Nom", "Métier", "Famille IA", "Statut", "Score Valeur", "Score Faisabilité", "Score Priorité", "Scoring_IA_propose", "Décision COPIL", "Complexité", "Vague proposée", "Prérequis", "Dépendances", "Bottleneck à anticiper", "Besoins sources", "Nb besoins", "Justification de la vague"];
+  const rows = (p.cas_usage || []).map(c => [c.id, c.nom, (c.metiers || []).join(", "), c.famille || "", "Identifié", c.valeur?.note ?? "", c.faisabilite?.note ?? "", "", "Oui", "", "", c.vague ?? "", (c.prerequis || []).join(" ; "), (c.dependances || []).join(", "), c.bottleneck || "", (c.besoins || []).map(qTitle).join(" | "), (c.besoins || []).length, c.justification_vague || ""]);
+  const ws = X.utils.aoa_to_sheet([head, ...rows]);
+  rows.forEach((r, i) => { const n = i + 2; if (typeof r[5] === "number" && typeof r[6] === "number") ws["H" + n] = { t: "n", f: `F${n}*G${n}`, v: r[5] * r[6] }; });
+  ws["!cols"] = [8, 34, 22, 24, 11, 12, 15, 13, 17, 15, 11, 14, 40, 16, 40, 50, 11, 50].map(w => ({ wch: w }));
+  X.utils.book_append_sheet(wb, ws, "Suivi_Cas_Usage");
+  X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet([["ID", "Nom", "Description", "Cas d'usage servis", "Vague"], ...(p.socles || []).map(s => [s.id, s.nom, s.description || "", (s.sert || []).join(", "), s.vague ?? ""])]), "Socles");
+  X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet([["Vague", "Nom", "Horizon", "Objectif", "Cas d'usage", "Socles"], ...[1, 2, 3].map(n => { const v = (p.vagues || []).find(x => Number(x.numero) === n) || {}; return [n, v.nom || "", v.horizon || "", v.objectif || "", (p.cas_usage || []).filter(c => Number(c.vague) === n).map(c => `${c.id} ${c.nom}`).join(" | "), (p.socles || []).filter(s => Number(s.vague) === n).map(s => `${s.id} ${s.nom}`).join(" | ")]; })]), "Feuille_de_route");
+  const cuOf = id => (p.cas_usage || []).find(c => (c.besoins || []).includes(id))?.id || "";
+  X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet([["ID fiche", "Titre", "Direction", "Statut DSI", "Cas d'usage", "Maturité %", "Problème", "Coût actuel", "Canal", "Reçu le"], ...queue.filter(q => q.statut !== "Brouillon").map(q => [q.id, q.titre, valText(q.fiche?.direction?.valeur), q.statut, cuOf(q.id), q.score ?? "", valText(q.fiche?.probleme?.valeur), valText(q.fiche?.cout?.valeur), q.origine || "web", q.submittedAt ? fmtDate(q.submittedAt) : ""])]), "Besoins");
+  X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet([["Notes"], [`Proposition IA générée le ${fmtDateTime(p.at)} (version ${p.version}), à valider en COPIL.`], ["Les colonnes humaines « Décision COPIL » et « Complexité » sont laissées vides."], ["Score Priorité = Score Valeur × Score Faisabilité (formule)."], ["Coller les lignes de l'onglet Suivi_Cas_Usage dans le Toolkit de pilotage en conservant ses formules et sa mise en forme."]]), "Notes");
+  const out = X.write(wb, { bookType: "xlsx", type: "array" });
+  await downloads.save({ filename: `Portefeuille_IA_${todayTag()}.xlsx`, data: new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }) });
+}
+async function exportPptx() {
+  const p = pf?.portfolio; if (!p) { toast("Construisez d'abord la feuille de route."); return; }
+  await loadScript("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js");
+  const INK = "13212A", ACC = "7A1F45", MUT = "6B7A83", SOFT = "F4E5EB", LINE = "D3DCE1", FONT = "Calibri";
+  const pptx = new window.PptxGenJS(); pptx.layout = "LAYOUT_WIDE";
+  const foot = (s, n) => { s.addText("Proposition IA — à valider en COPIL · DSI & TD, Innovation Digitale & IA", { x: 0.5, y: 7.0, w: 10, h: 0.3, fontSize: 9, color: MUT, fontFace: FONT }); s.addText(String(n), { x: 12.3, y: 7.0, w: 0.6, h: 0.3, fontSize: 9, color: MUT, align: "right", fontFace: FONT }); };
+  const title = (s, t) => { s.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.45, w: 0.08, h: 0.55, fill: { color: ACC }, line: { color: ACC } }); s.addText(t, { x: 0.75, y: 0.4, w: 12, h: 0.65, fontSize: 26, bold: true, color: INK, fontFace: FONT }); };
+  let n = 1;
+  let s = pptx.addSlide();
+  s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.35, h: 7.5, fill: { color: ACC }, line: { color: ACC } });
+  s.addText("Portefeuille Innovation Digitale & IA", { x: 0.9, y: 2.2, w: 11.5, h: 0.9, fontSize: 40, bold: true, color: INK, fontFace: FONT });
+  s.addText("Proposition de feuille de route", { x: 0.9, y: 3.1, w: 11.5, h: 0.6, fontSize: 24, color: ACC, fontFace: FONT });
+  s.addText(`${fmtDate(p.at)} · ${p.besoins_consideres || "?"} besoins analysés · ${(p.cas_usage || []).length} cas d'usage`, { x: 0.9, y: 4.0, w: 11.5, h: 0.4, fontSize: 14, color: MUT, fontFace: FONT });
+  foot(s, n++);
+  s = pptx.addSlide(); title(s, "Synthèse");
+  s.addText(p.synthese || "", { x: 0.75, y: 1.3, w: 11.8, h: 2.6, fontSize: 16, color: INK, fontFace: FONT, valign: "top" });
+  [["Besoins analysés", p.besoins_consideres || 0], ["Cas d'usage", (p.cas_usage || []).length], ["Socles transverses", (p.socles || []).length], ["Vagues", 3]].forEach(([l, v], i) => {
+    const x = 0.75 + i * 3.05;
+    s.addShape(pptx.ShapeType.rect, { x, y: 4.4, w: 2.8, h: 1.6, fill: { color: "FFFFFF" }, line: { color: LINE, width: 1 } });
+    s.addText(String(v), { x, y: 4.5, w: 2.8, h: 0.9, fontSize: 36, bold: true, color: ACC, align: "center", fontFace: FONT });
+    s.addText(l, { x, y: 5.4, w: 2.8, h: 0.4, fontSize: 13, color: MUT, align: "center", fontFace: FONT });
+  });
+  foot(s, n++);
+  s = pptx.addSlide(); title(s, "Feuille de route proposée");
+  [1, 2, 3].forEach((k, i) => {
+    const v = (p.vagues || []).find(x => Number(x.numero) === k) || {}, x = 0.6 + i * 4.1;
+    s.addShape(pptx.ShapeType.rect, { x, y: 1.3, w: 3.9, h: 0.9, fill: { color: i === 0 ? ACC : i === 1 ? "8F3A5E" : "9C4F72" }, line: { color: "FFFFFF" } });
+    s.addText([{ text: `Vague ${k}`, options: { bold: true, fontSize: 16, breakLine: true } }, { text: `${v.horizon || ""}${v.nom ? " · " + v.nom : ""}`, options: { fontSize: 11 } }], { x: x + 0.15, y: 1.32, w: 3.6, h: 0.86, color: "FFFFFF", fontFace: FONT, valign: "middle" });
+    const items = [...(p.socles || []).filter(z => Number(z.vague) === k).map(z => ({ text: `Socle · ${z.nom}`, options: { bullet: true, color: ACC, bold: true, breakLine: true } })), ...(p.cas_usage || []).filter(c => Number(c.vague) === k).map(c => ({ text: `${c.id} · ${c.nom}`, options: { bullet: true, color: INK, breakLine: true } }))];
+    s.addShape(pptx.ShapeType.rect, { x, y: 2.3, w: 3.9, h: 4.4, fill: { color: "FFFFFF" }, line: { color: LINE, width: 1 } });
+    s.addText(items.length ? items : [{ text: "—", options: {} }], { x: x + 0.1, y: 2.4, w: 3.7, h: 4.2, fontSize: 12, fontFace: FONT, valign: "top", paraSpaceAfter: 4 });
+  });
+  foot(s, n++);
+  const placed = (p.cas_usage || []).filter(c => c.valeur?.note && c.faisabilite?.note);
+  if (placed.length) {
+    s = pptx.addSlide(); title(s, "Valeur et faisabilité des cas d'usage");
+    const X0 = 1.2, Y0 = 1.4, W = 6.4, H = 5.2, px = f => X0 + (f - 0.5) / 5 * W, py = v => Y0 + (5.5 - v) / 5 * H;
+    s.addShape(pptx.ShapeType.rect, { x: X0, y: Y0, w: W, h: H, fill: { color: "FFFFFF" }, line: { color: LINE, width: 1 } });
+    s.addShape(pptx.ShapeType.line, { x: px(3), y: Y0, w: 0, h: H, line: { color: MUT, width: 1, dashType: "dash" } });
+    s.addShape(pptx.ShapeType.line, { x: X0, y: py(3), w: W, h: 0, line: { color: MUT, width: 1, dashType: "dash" } });
+    s.addText("Faisabilité →", { x: X0, y: Y0 + H + 0.05, w: W, h: 0.3, fontSize: 11, color: MUT, align: "center", fontFace: FONT });
+    s.addText("Valeur →", { x: 0.3, y: Y0 + H / 2 - 0.15, w: 0.9, h: 0.3, fontSize: 11, color: MUT, fontFace: FONT, rotate: 270 });
+    s.addText("Quick wins", { x: px(4.2) - 0.8, y: Y0 + 0.1, w: 1.6, h: 0.3, fontSize: 10, color: MUT, align: "center", fontFace: FONT });
+    const seen = {};
+    placed.forEach(c => {
+      const key = c.valeur.note + "-" + c.faisabilite.note, j = (seen[key] = (seen[key] || 0) + 1) - 1;
+      const cx = px(c.faisabilite.note) + (j % 3) * 0.32 - 0.16, cy = py(c.valeur.note) + Math.floor(j / 3) * 0.32 - 0.16;
+      s.addShape(pptx.ShapeType.ellipse, { x: cx, y: cy, w: 0.32, h: 0.32, fill: { color: ACC }, line: { color: "FFFFFF", width: 1.5 } });
+      s.addText(c.id.replace(/^CU-0?/, ""), { x: cx - 0.05, y: cy, w: 0.42, h: 0.32, fontSize: 9, bold: true, color: "FFFFFF", align: "center", valign: "middle", fontFace: FONT });
+    });
+    s.addText(placed.map(c => ({ text: `${c.id} · ${c.nom} (V${c.valeur.note} F${c.faisabilite.note})`, options: { breakLine: true } })), { x: 8.0, y: 1.4, w: 4.9, h: 5.2, fontSize: 11, color: INK, fontFace: FONT, valign: "top", paraSpaceAfter: 3 });
+    foot(s, n++);
+  }
+  [1, 2, 3].forEach(k => {
+    const cas = (p.cas_usage || []).filter(c => Number(c.vague) === k); if (!cas.length) return;
+    const v = (p.vagues || []).find(x => Number(x.numero) === k) || {};
+    s = pptx.addSlide(); title(s, `Vague ${k}${v.horizon ? " · " + v.horizon : ""}${v.nom ? " · " + v.nom : ""}`);
+    if (v.objectif) s.addText(v.objectif, { x: 0.75, y: 1.05, w: 12, h: 0.4, fontSize: 13, color: MUT, fontFace: FONT });
+    const hdr = ["ID", "Cas d'usage", "Famille", "Métiers", "V", "F", "Prérequis"].map(t => ({ text: t, options: { bold: true, color: "FFFFFF", fill: { color: INK } } }));
+    const rows = cas.map(c => [c.id, c.nom, c.famille || "", (c.metiers || []).join(", "), String(c.valeur?.note ?? "?"), String(c.faisabilite?.note ?? "?"), (c.prerequis || []).slice(0, 3).join(" ; ")].map(t => ({ text: t })));
+    s.addTable([hdr, ...rows], { x: 0.6, y: 1.55, w: 12.1, colW: [0.8, 2.9, 1.9, 1.9, 0.5, 0.5, 3.6], fontSize: 10.5, fontFace: FONT, color: INK, border: { type: "solid", color: LINE, pt: 0.75 }, valign: "top", autoPage: true });
+    foot(s, n++);
+  });
+  if ((p.decisions_copil || []).length) {
+    s = pptx.addSlide(); title(s, "Décisions attendues du COPIL");
+    s.addText(p.decisions_copil.map(d => ({ text: d, options: { bullet: true, breakLine: true } })), { x: 0.75, y: 1.4, w: 11.8, h: 5.2, fontSize: 16, color: INK, fontFace: FONT, valign: "top", paraSpaceAfter: 8 });
+    foot(s, n++);
+  }
+  const blob = await pptx.write({ outputType: "blob" });
+  await downloads.save({ filename: `Support_COPIL_Portefeuille_IA_${todayTag()}.pptx`, data: blob });
+}
+$("#tool-panel").addEventListener("click", async e => {
+  const b = e.target.closest("[data-pf]");
+  if (b) {
+    if (b.dataset.pf === "build") return buildRoadmap(b);
+    b.disabled = true;
+    try { if (b.dataset.pf === "xlsx") await exportXlsx(); else await exportPptx(); }
+    catch { toast("L'export n'a pas abouti."); }
+    finally { b.disabled = false; }
+    return;
+  }
+  const o = e.target.closest("[data-pf-open]");
+  if (o) { openCards.add(o.dataset.pfOpen); renderQueue(); const el = document.querySelector(`[data-open="${CSS.escape(o.dataset.pfOpen)}"]`); el?.scrollIntoView({ behavior: "smooth", block: "center" }); }
+});
+
+/* ================= Installable app & notifications ================= */
+let swReg = null, installEvt = null, pushInfo = null, pushSyncTimer = null;
+const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+function urlB64ToUint8(b64) { const pad = "=".repeat((4 - b64.length % 4) % 4); const raw = atob((b64 + pad).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from([...raw].map(c => c.charCodeAt(0))); }
+async function pwaInit() {
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; renderAppBar(); });
+  window.addEventListener("appinstalled", () => { installEvt = null; renderAppBar(); toast("Application installée."); });
+  if (!("serviceWorker" in navigator)) return;
+  try { swReg = await navigator.serviceWorker.register("/sw.js"); } catch { return; }
+  try { pushInfo = await (await fetch("/api/push", { headers: apiHeaders() })).json(); } catch {}
+  renderAppBar();
+  const sub = await swReg.pushManager?.getSubscription().catch(() => null);
+  if (sub) syncPush();
+}
+async function renderAppBar() {
+  const el = $("#app-bar"); if (!el) return;
+  const sub = swReg?.pushManager ? await swReg.pushManager.getSubscription().catch(() => null) : null;
+  const canPush = !!(pushInfo?.enabled && swReg && "PushManager" in window && "Notification" in window);
+  const parts = [];
+  if (!isStandalone()) {
+    if (installEvt) parts.push(`<button class="btn-primary" data-app="install">Installer l'application</button>`);
+    else if (isIOS) parts.push(`<span class="muted">Sur iPhone : touchez Partager, puis « Sur l'écran d'accueil » pour installer l'application.</span>`);
+  }
+  if (canPush) parts.push(sub ? `<span class="tag ok">Notifications activées sur cet appareil</span><button class="btn-ghost" data-app="push-off">Désactiver</button>` : `<button class="btn-ghost" data-app="push-on">Recevoir les questions de l'agent en notification</button>`);
+  else if (isIOS && !isStandalone()) parts.push(`<span class="muted">Les notifications fonctionnent une fois l'application installée.</span>`);
+  el.innerHTML = parts.join("");
+  el.hidden = !parts.length;
+}
+function syncPush() {
+  clearTimeout(pushSyncTimer);
+  pushSyncTimer = setTimeout(async () => {
+    const s = await swReg?.pushManager?.getSubscription().catch(() => null); if (!s) return;
+    try { await fetch("/api/push", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ subscription: s.toJSON(), ficheIds: mineIds() }) }); } catch {}
+  }, 800);
+}
+$("#app-bar").addEventListener("click", async e => {
+  const b = e.target.closest("[data-app]"); if (!b) return;
+  b.disabled = true;
+  try {
+    if (b.dataset.app === "install" && installEvt) { installEvt.prompt(); await installEvt.userChoice.catch(() => null); installEvt = null; }
+    if (b.dataset.app === "push-on") {
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") { toast("Les notifications sont bloquées dans le navigateur pour ce site."); return; }
+      const sub = await swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(pushInfo.publicKey) });
+      const r = await fetch("/api/push", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ subscription: sub.toJSON(), ficheIds: mineIds(), test: true }) });
+      toast(r.ok ? "Notifications activées : une notification de test vient d'être envoyée." : "L'activation n'a pas abouti.");
+    }
+    if (b.dataset.app === "push-off") {
+      const sub = await swReg.pushManager.getSubscription();
+      if (sub) { await fetch("/api/push", { method: "DELETE", headers: apiHeaders(), body: JSON.stringify({ endpoint: sub.endpoint }) }).catch(() => {}); await sub.unsubscribe(); }
+      toast("Notifications désactivées sur cet appareil.");
+    }
+  } catch { toast("Cette action n'est pas disponible sur ce navigateur."); }
+  finally { b.disabled = false; renderAppBar(); }
+});
+
 /* ================= Boot ================= */
 function prefillIdentity() {
   if (profileName && !state.fiche.responsable) {
@@ -2206,13 +2658,17 @@ const use = n => (window.claude && typeof window.claude.use === "function") ? wi
 if (MODE === "web") {
   agentReady = true; canEditQueue = true; downloads = webDownloads;
   $("#attach").hidden = false;
-  $("#tab-mine").hidden = false; $("#tab-chat").hidden = false; $("#dsi-tools").hidden = false;
+  $("#tab-mine").hidden = false; $("#tab-chat").hidden = false; $("#tab-admin").hidden = false; $("#dsi-tools").hidden = false;
+  loadPublicConfig();
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) for (const m of document.querySelectorAll(".mic")) m.hidden = false;
   $("#demo-clock").value = String(demoOffsetDays);
   if (![0, 7, 30, 100].includes(demoOffsetDays)) { demoOffsetDays = 0; $("#demo-clock").value = "0"; }
   renderChat();
   startWebQueue();
   openFicheFromLink();
+  pwaInit();
+  const tabParam = new URLSearchParams(location.search).get("tab");
+  if (["capture", "chat", "mine", "dsi"].includes(tabParam)) { history.replaceState(null, "", location.pathname); showTab(tabParam); }
 } else {
 use("sample").then(async s => {
   sample = s; agentReady = true;

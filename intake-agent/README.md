@@ -53,6 +53,27 @@ Prototype d'un agent qui transforme un besoin exprimé en texte libre en **Fiche
 - Après 30 jours en production, la tournée demande la mesure au porteur. Sa réponse, sur n'importe quel canal, est enregistrée en face de l'indicateur.
 - Tableau de bord « Valeur & indicateurs » : délai de première réponse de la DSI, part des fiches à jour, besoins par statut, valeur attendue face à la valeur mesurée.
 
+**Portefeuille et feuille de route (outil « Feuille de route » de la File DSI)**
+- L'agent regroupe les besoins de toutes les directions en cas d'usage, avec famille IA, métiers, valeur, faisabilité, prérequis, dépendances et contrainte à anticiper. Il repère les socles transverses, puis répartit le tout en trois vagues : 0 à 6 mois, 6 à 18 mois, au-delà.
+- Les notes du copilote sont réutilisées quand elles existent ; sinon, l'agent les marque « estimées ».
+- La construction tourne en arrière-plan (`/api/portfolio-bg`) et chaque version est conservée.
+- Export Excel au format de l'onglet `Suivi_Cas_Usage` du Toolkit de pilotage :
+  - Score Priorité calculé par formule (Valeur × Faisabilité) ;
+  - colonnes humaines (Décision COPIL, Complexité) laissées vides ;
+  - onglets Socles, Feuille_de_route, Besoins et Notes.
+- Support COPIL en PowerPoint : synthèse, feuille de route, matrice, une diapositive par vague, décisions attendues.
+
+**Console d'administration (onglet « Administration »)**
+- Réglages modifiables sans code et appliqués par tous les agents en moins d'une minute : instructions de l'agent d'intake, grille de qualification, durées de validité, seuils de relance, directions, signature.
+- Chaque enregistrement crée une version restaurable.
+- Banc d'essai : des cas de test modifiables sont envoyés à l'agent avec les réglages affichés, même non enregistrés. Chaque réponse passe des contrôles fixes (JSON, 3 questions au plus, statuts, longueur, temps de réponse), puis un jugement par IA au regard des attentes. Les derniers passages sont historisés.
+- Si `ADMIN_CODE` est défini, l'administration exige aussi ce code (en-tête `x-admin-code`).
+
+**Application mobile**
+- Le site s'installe comme une application (manifeste, service worker, icônes) et s'ouvre même hors connexion sur la dernière version chargée.
+- Notifications Web Push sur chaque appareil abonné, pour les besoins qu'il suit : questions de l'agent (relances), réponses de la DSI, changements de statut. Un clic ouvre directement le besoin.
+- Clés VAPID : `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (facultatif). Sur iPhone, les notifications ne fonctionnent qu'une fois l'application ajoutée à l'écran d'accueil (iOS 16.4 ou plus récent).
+
 **Côté DSI (onglet « File DSI »)**
 - Fiches reçues avec leur niveau de maturité, leur urgence, les points signalés par l'agent et l'historique complet de l'échange.
 - Échéance de retour calculée à 5 jours ouvrables, avec signalement des retards.
@@ -73,7 +94,10 @@ Une seule page source, `index.html`, qui fonctionne dans deux environnements.
 - `netlify/functions/inbound-email.mjs` (`POST /api/inbound-email`) : canal e-mail.
 - `netlify/lib/channels.mjs` : logique de conversation commune à tous les canaux de messagerie. Elle sert `channel-simulate.mjs`, `channel-whatsapp.mjs` et `channel-teams.mjs` ; les envois passent par `netlify/lib/adapters.mjs`.
 - `netlify/lib/pilot.mjs` : tournée quotidienne, bilan hebdomadaire et indicateurs. Fonctions associées : `pilot-daily.mjs` et `pilot-weekly.mjs` (planifiées), `pilot-bg.mjs` (en arrière-plan), `pilot.mjs` (lecture).
-- Stockage Netlify Blobs : `fiches`, `conversations`, `pilot`.
+- `netlify/lib/config.mjs` et `admin-config.mjs`, `admin-eval.mjs`, `config.mjs` : réglages versionnés et banc d'essai.
+- `netlify/lib/portfolio.mjs` et `portfolio.mjs`, `portfolio-bg.mjs` : portefeuille et feuille de route.
+- `netlify/lib/push.mjs` et `push.mjs` : abonnements et envoi des notifications. `static/` contient le manifeste, le service worker et les icônes, copiés dans `public/` par `build.mjs`.
+- Stockage Netlify Blobs : `fiches`, `conversations`, `pilot`, `config`, `push`.
 - `DEMO_CODE` : si cette variable d'environnement est définie, chaque appel d'API doit porter ce code (en-tête `x-demo-code`). La page le demande une seule fois et le mémorise.
 - Déploiement : `netlify.toml` lance `node build.mjs` et publie `public/`.
 

@@ -2,6 +2,7 @@ import { getStore } from "@netlify/blobs";
 import { authorized } from "../lib/auth.mjs";
 import { store, listFiches, QUEUE_STATUTS, applyChanges, applyMesures, addEvent, isoOr, scoreOf } from "../lib/fiche.mjs";
 import { deliverNudge } from "../lib/channels.mjs";
+import { pushForFiche } from "../lib/push.mjs";
 
 const bad = (msg, status = 400) => Response.json({ error: msg }, { status });
 const rid = () => crypto.randomUUID().slice(0, 8);
@@ -53,6 +54,7 @@ export default async (req, context) => {
         if (b.statut === "En production" && !doc.productionAt) doc.productionAt = at;
         if (b.statut === "En réalisation" && !doc.realisationAt) doc.realisationAt = at;
         addEvent(doc, { at, type: "statut", by: "DSI", text: `Statut : ${prev || "—"} → ${b.statut}${b.note ? ` (${String(b.note).slice(0, 500)})` : ""}` });
+        if (prev !== b.statut) await pushForFiche(id, { title: `« ${String(doc.titre || "Votre besoin").slice(0, 60)} »`, body: `Nouveau statut : ${b.statut}` }).catch(() => 0);
         break;
       }
       case "submit": {
@@ -130,6 +132,7 @@ export default async (req, context) => {
         const text = String(b.text || "").trim();
         if (!text) return bad("empty");
         addEvent(doc, { at, type: "reponse", by: "DSI", text: text.slice(0, 4000) });
+        await pushForFiche(id, { title: `Réponse de la DSI sur « ${String(doc.titre || "votre besoin").slice(0, 60)} »`, body: text.slice(0, 180) }).catch(() => 0);
         break;
       }
       case "note": {
@@ -153,7 +156,7 @@ export default async (req, context) => {
     const { blobs: cb } = await conv.list();
     await Promise.all(cb.map((x) => conv.delete(x.key)));
     const pilot = getStore({ name: "pilot", consistency: "strong" });
-    await Promise.all(["runs", "digests", "running"].map((k) => pilot.delete(k)));
+    await Promise.all(["runs", "digests", "running", "portfolio", "portfolio-history", "portfolio-running", "portfolio-error"].map((k) => pilot.delete(k)));
     return Response.json({ deleted: blobs.length });
   }
 
