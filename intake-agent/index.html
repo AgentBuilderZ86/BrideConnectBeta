@@ -270,6 +270,9 @@ main { flex: 1; min-height: 0; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 12px; }
 .form-grid label { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); font-weight: 600; }
 .form-grid label.wide { grid-column: 1 / -1; }
+.lv-block .form-grid { align-items: end; }
+.form-grid label { min-width: 0; }
+.lv-block input, .lv-block textarea, .lv-block select { box-sizing: border-box; max-width: 100%; }
 .row-end { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; align-items: center; margin-top: 6px; }
 .lv-block { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin: 12px 0; display: grid; gap: 6px; background: var(--surface); min-width: 0; }
 .lv-block p { margin: 0; }

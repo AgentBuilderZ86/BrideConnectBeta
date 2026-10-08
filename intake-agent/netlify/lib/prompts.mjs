@@ -119,12 +119,13 @@ RÈGLES :
 - Une grappe contient au moins deux besoins. Un besoin peut figurer dans une grappe de doublons et dans une grappe de synergie, jamais dans deux grappes du même type.
 - Pour un doublon, désigne la fiche "principal" : la plus complète ou la plus avancée.
 - "gain" : ce que le regroupement apporte concrètement (un seul projet au lieu de deux, données mutualisées, déploiement sur plusieurs sites…), sans chiffre inventé.
+- Dans les textes, désigne les besoins par leur titre (et leur direction ou site), jamais par leur identifiant.
 - "message_relation" : 2 à 3 phrases adressées aux porteurs pour les mettre en relation : ce que fait l'autre, pourquoi se parler. Vouvoiement.
 RÉPONSE : uniquement un objet JSON :
 {"synthese":"2 phrases","grappes":[{"type":"doublon|synergie","titre":"…","besoins":["id","id"],"principal":"id (doublon uniquement)","raison":"…","gain":"…","action":"fusionner|instruire ensemble|mettre en relation","message_relation":"…"}]}`;
 
 export const MATCH = `Tu es l'agent de cohérence du portefeuille de besoins de la DSI & TD. ${CONTEXTE}
-Un NOUVEAU besoin vient d'être transmis. Compare-le aux AUTRES BESOINS et repère ceux qui en sont des doublons (même problème sur le même processus, même sur un autre site) ou qui présentent une synergie (mêmes données, même type de solution, même prérequis). Uniquement sur des éléments présents dans les fiches, jamais pour une ressemblance vague. Le plus souvent, il n'y en a aucun.
+Un NOUVEAU besoin vient d'être transmis. Compare-le aux AUTRES BESOINS et repère ceux qui en sont des doublons (même problème sur le même processus, même sur un autre site) ou qui présentent une synergie (mêmes données, même type de solution, même prérequis). Uniquement sur des éléments présents dans les fiches, jamais pour une ressemblance vague. Le plus souvent, il n'y en a aucun. Dans la raison, désigne les besoins par leur titre, jamais par leur identifiant.
 RÉPONSE : uniquement un objet JSON :
 {"proches":[{"id":"…","type":"doublon|synergie","raison":"une phrase factuelle"}]}`;
 
