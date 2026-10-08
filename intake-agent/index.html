@@ -1,0 +1,1061 @@
+<title>Agent d'Intake Innovation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
+<style>
+/* Layout: two working panes — conversation on the left, the living fiche on the right; a DSI queue as a second view. */
+:root {
+  --bg: #F2F5F6;
+  --surface: #FFFFFF;
+  --surface-2: #E8EDEF;
+  --ink: #13212A;
+  --ink-2: #4B5C66;
+  --ink-3: #7A8A93;
+  --line: #D3DCE1;
+  --accent: #7A1F45;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #F4E5EB;
+  --st-vide: #8A979F;   --st-vide-bg: #EEF1F3;
+  --st-deduit: #9A5B00; --st-deduit-bg: #FBEFD8;
+  --st-declare: #1D5A9E;--st-declare-bg: #E1EBF7;
+  --st-confirme: #1C6E45;--st-confirme-bg: #DDF1E5;
+  --danger: #A8261E;    --danger-bg: #FBE6E4;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-doc: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1418; --surface: #151E24; --surface-2: #1C272E; --ink: #E4EBEE; --ink-2: #A3B4BD; --ink-3: #74868F; --line: #2A3740;
+    --accent: #E67FA8; --accent-ink: #22101A; --accent-soft: #3A1C2A;
+    --st-vide: #8C9AA2; --st-vide-bg: #1F2A31;
+    --st-deduit: #F0B65A; --st-deduit-bg: #3A2B12;
+    --st-declare: #8BB8F0; --st-declare-bg: #172B44;
+    --st-confirme: #7FD3A4; --st-confirme-bg: #143323;
+    --danger: #F2958D; --danger-bg: #3D1916;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1418; --surface: #151E24; --surface-2: #1C272E; --ink: #E4EBEE; --ink-2: #A3B4BD; --ink-3: #74868F; --line: #2A3740;
+  --accent: #E67FA8; --accent-ink: #22101A; --accent-soft: #3A1C2A;
+  --st-vide: #8C9AA2; --st-vide-bg: #1F2A31;
+  --st-deduit: #F0B65A; --st-deduit-bg: #3A2B12;
+  --st-declare: #8BB8F0; --st-declare-bg: #172B44;
+  --st-confirme: #7FD3A4; --st-confirme-bg: #143323;
+  --danger: #F2958D; --danger-bg: #3D1916;
+  color-scheme: dark;
+}
+
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-ui); }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { display: flex; flex-direction: column; height: 100%; }
+
+/* ---------- top bar ---------- */
+.top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mark { font: 500 11px/1 var(--font-mono); letter-spacing: .06em; background: var(--accent); color: var(--accent-ink); padding: 6px 7px; border-radius: 6px; }
+.brand h1 { font: 600 16px/1.2 var(--font-ui); margin: 0; }
+.brand small { display: block; font-size: 12px; color: var(--ink-3); }
+.tabs { display: flex; gap: 4px; margin-left: auto; background: var(--surface-2); padding: 3px; border-radius: 9px; }
+.tabs button { border: 0; background: transparent; padding: 6px 12px; border-radius: 7px; font-weight: 500; font-size: 14px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
+.count { font: 500 11px/1 var(--font-mono); background: var(--accent-soft); color: var(--accent); padding: 3px 6px; border-radius: 20px; }
+
+main { flex: 1; min-height: 0; }
+.view { height: 100%; }
+
+/* ---------- capture view ---------- */
+.panes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 480px); height: 100%; }
+.pane { min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.seg { display: none; gap: 4px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.seg button { flex: 1; border: 1px solid var(--line); background: transparent; padding: 7px 10px; border-radius: 8px; font-weight: 500; font-size: 14px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.chat-head { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+.chat-head .t { min-width: 0; flex: 1; }
+.chat-head .eyebrow { font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.chat-head h2 { margin: 2px 0 0; font: 600 17px/1.3 var(--font-ui); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn-ghost { border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.btn-ghost:hover { border-color: var(--ink-3); }
+.btn-ghost.warn { border-color: var(--danger); color: var(--danger); }
+
+.log { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.msg { max-width: 680px; display: flex; flex-direction: column; gap: 6px; }
+.msg.user { align-self: flex-end; align-items: flex-end; }
+.msg .who { font: 500 11px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.bubble { padding: 10px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); overflow-wrap: anywhere; }
+.msg.user .bubble { background: var(--ink); color: var(--bg); border-color: var(--ink); white-space: pre-wrap; }
+.bubble p { margin: 0 0 6px; } .bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { margin: 4px 0 6px; padding-left: 20px; }
+.bubble li { margin: 2px 0; }
+.msg.err .bubble { background: var(--danger-bg); border-color: transparent; color: var(--danger); }
+.attach-note { font-size: 12px; color: var(--ink-3); }
+.changed { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-3); }
+.changed span.c { background: var(--surface-2); color: var(--ink-2); padding: 2px 8px; border-radius: 20px; }
+.thinking { color: var(--ink-3); font-style: italic; }
+.thinking .dots::after { content: "…"; animation: dots 1.2s steps(4) infinite; display: inline-block; width: 1.2em; overflow: hidden; vertical-align: bottom; }
+@keyframes dots { 0% { width: 0 } 100% { width: 1.2em } }
+
+.examples { display: grid; gap: 8px; margin-top: 4px; }
+.examples .lbl { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.ex { text-align: left; border: 1px dashed var(--line); background: transparent; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: var(--ink-2); }
+.ex:hover { border-color: var(--accent); color: var(--ink); }
+.ex b { display: block; font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 2px; }
+
+.suggest { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 8px; }
+.suggest button { border: 1px solid var(--accent); color: var(--accent); background: var(--surface); padding: 5px 11px; border-radius: 20px; font-size: 13px; text-align: left; }
+.suggest button:hover { background: var(--accent-soft); }
+
+.composer { padding: 10px 20px 16px; border-top: 1px solid var(--line); background: var(--surface); }
+.composer .box { border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.composer .box:focus-within { border-color: var(--accent); }
+.composer textarea { border: 0; outline: 0; background: transparent; resize: none; width: 100%; min-height: 44px; max-height: 180px; line-height: 1.45; }
+.composer .row { display: flex; align-items: center; gap: 8px; }
+.composer .hint { font-size: 12px; color: var(--ink-3); flex: 1; min-width: 0; }
+.btn-primary { border: 0; background: var(--accent); color: var(--accent-ink); padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; }
+.btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+.btn-icon { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
+.file-chip { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; background: var(--surface-2); padding: 3px 8px; border-radius: 20px; align-self: flex-start; }
+.file-chip button { border: 0; background: transparent; padding: 0 2px; font-size: 14px; line-height: 1; color: var(--ink-3); }
+.locked { font-size: 14px; color: var(--ink-2); padding: 6px 0; }
+
+/* ---------- fiche pane ---------- */
+.fiche { background: var(--surface); border-left: 1px solid var(--line); }
+.fiche-scroll { flex: 1; overflow-y: auto; }
+.fiche-head { padding: 16px 20px 14px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+.fiche-head .eyebrow { font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.fiche-head h3 { margin: 0; font: 600 20px/1.25 var(--font-doc); text-wrap: balance; }
+.meter { display: flex; align-items: center; gap: 12px; }
+.meter .bar { flex: 1; height: 8px; background: var(--surface-2); border-radius: 8px; overflow: hidden; }
+.meter .bar i { display: block; height: 100%; background: var(--accent); border-radius: 8px; transition: width .4s ease; }
+.meter b { font: 500 15px/1 var(--font-mono); font-variant-numeric: tabular-nums; min-width: 3.2em; text-align: right; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+.alerts { padding: 12px 20px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+.alerts h4 { margin: 0; font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.alert { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; font-size: 13px; color: var(--ink-2); }
+.alert .k { font: 500 10.5px/1.6 var(--font-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--st-deduit); background: var(--st-deduit-bg); padding: 0 6px; border-radius: 4px; white-space: nowrap; }
+.alert .k.doublon, .alert .k.conformite { color: var(--danger); background: var(--danger-bg); }
+
+.sec { padding: 14px 20px 6px; border-bottom: 1px solid var(--line); }
+.sec-h { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.sec-h .n { font: 500 12px/1 var(--font-mono); color: var(--accent); }
+.sec-h h4 { margin: 0; font: 600 16px/1.3 var(--font-doc); flex: 1; }
+.sec-h .pct { font: 400 12px/1 var(--font-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+.field { padding: 8px 0 10px; border-top: 1px dashed var(--line); display: grid; gap: 4px; }
+.sec-h + .field { border-top: 0; }
+.f-top { display: flex; align-items: flex-start; gap: 8px; }
+.f-label { flex: 1; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.pill { font: 500 10.5px/1.6 var(--font-mono); padding: 0 7px; border-radius: 20px; white-space: nowrap; }
+.st-vide { color: var(--st-vide); background: var(--st-vide-bg); }
+.st-deduit { color: var(--st-deduit); background: var(--st-deduit-bg); }
+.st-declare { color: var(--st-declare); background: var(--st-declare-bg); }
+.st-confirme { color: var(--st-confirme); background: var(--st-confirme-bg); }
+.f-val { font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.f-val.empty { color: var(--ink-3); font-style: italic; font-size: 13px; }
+.f-val .chip { display: inline-block; background: var(--surface-2); padding: 1px 8px; border-radius: 20px; margin: 0 4px 4px 0; font-size: 13px; }
+.f-note { font-size: 12px; color: var(--ink-3); }
+.f-actions { display: flex; gap: 6px; }
+.f-actions button { border: 0; background: transparent; padding: 2px 0; font-size: 12.5px; font-weight: 500; color: var(--accent); }
+.f-actions button + button { margin-left: 8px; }
+.field.flash { animation: flash 1.6s ease; }
+@keyframes flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
+.edit { display: grid; gap: 6px; }
+.edit textarea, .edit select, .edit input[type=text] { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; background: var(--bg); }
+.edit .checks { display: grid; gap: 4px; font-size: 14px; }
+.edit .checks label { display: flex; gap: 8px; align-items: center; }
+
+.fiche-foot { padding: 12px 20px 16px; border-top: 1px solid var(--line); display: grid; gap: 6px; background: var(--surface); }
+.fiche-foot .btn-primary { width: 100%; padding: 10px; }
+.fiche-foot .sub { font-size: 12.5px; color: var(--ink-3); text-align: center; }
+.ready { color: var(--st-confirme); font-weight: 600; }
+
+/* ---------- modal / recap ---------- */
+.modal { position: fixed; inset: 0; background: rgb(8 14 18 / .55); display: flex; align-items: flex-start; justify-content: center; padding: max(24px, env(safe-area-inset-top, 0px)) 16px 24px; overflow-y: auto; z-index: 10; }
+.sheet { background: var(--surface); border-radius: 14px; width: 100%; max-width: 760px; box-shadow: 0 20px 60px rgb(0 0 0 / .3); }
+.sheet-h { display: flex; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--line); }
+.sheet-h h3 { margin: 0; flex: 1; font: 600 18px/1.3 var(--font-doc); }
+.sheet-b { padding: 6px 22px 18px; }
+.sheet-f { padding: 14px 22px 18px; border-top: 1px solid var(--line); display: grid; gap: 12px; }
+.sheet-f .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+.confirm-line { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.confirm-line input { margin-top: 3px; }
+.warnbox { background: var(--st-deduit-bg); color: var(--st-deduit); padding: 10px 12px; border-radius: 8px; font-size: 13.5px; }
+.okbox { background: var(--st-confirme-bg); color: var(--st-confirme); padding: 12px 14px; border-radius: 8px; font-size: 14px; }
+.errbox { background: var(--danger-bg); color: var(--danger); padding: 10px 12px; border-radius: 8px; font-size: 13.5px; }
+
+.doc { font-size: 14px; }
+.doc .doc-title { font: 600 22px/1.25 var(--font-doc); margin: 14px 0 2px; }
+.doc .doc-sub { color: var(--ink-3); font-size: 13px; margin-bottom: 10px; }
+.doc h5 { font: 600 15px/1.3 var(--font-doc); margin: 18px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--line); display: flex; gap: 8px; }
+.doc h5 .n { font: 500 12px/1.6 var(--font-mono); color: var(--accent); }
+.doc .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 18px; }
+.doc .q { margin: 8px 0; min-width: 0; }
+.doc .q .ql { font-size: 12.5px; color: var(--ink-3); font-weight: 600; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.doc .q .qv { white-space: pre-wrap; overflow-wrap: anywhere; }
+.doc .q .qv.empty { color: var(--ink-3); font-style: italic; }
+.boxes { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.boxes span { white-space: nowrap; }
+.boxes span.on { font-weight: 600; color: var(--accent); }
+
+/* ---------- DSI view ---------- */
+.dsi { height: 100%; overflow-y: auto; }
+.dsi-inner { max-width: 1040px; margin: 0 auto; padding-block: 22px 40px; padding-inline: 16px; display: grid; gap: 18px; }
+.dsi-head h2 { margin: 0; font: 600 22px/1.25 var(--font-doc); }
+.dsi-head p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; max-width: 65ch; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.kpi .l { font-size: 12px; color: var(--ink-3); }
+.kpi .v { font: 500 24px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.kpi .v.bad { color: var(--danger); }
+.queue { display: grid; gap: 10px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.card-h { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; padding: 12px 16px; align-items: center; }
+.card-h button.open { all: unset; cursor: pointer; display: grid; gap: 3px; min-width: 0; }
+.card-h button.open:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.card-h .ttl { font-weight: 600; font-size: 15px; }
+.card-h .meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; color: var(--ink-3); }
+.card-h .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.due { font: 500 12px/1.6 var(--font-mono); padding: 0 8px; border-radius: 20px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.due.late { background: var(--danger-bg); color: var(--danger); }
+.due.soon { background: var(--st-deduit-bg); color: var(--st-deduit); }
+.status-sel { border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; background: var(--surface); font-size: 13px; }
+.status-chip { font-size: 12.5px; padding: 2px 9px; border-radius: 20px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.score { font: 500 12px/1.6 var(--font-mono); color: var(--ink-2); }
+.card-b { border-top: 1px solid var(--line); padding: 4px 16px 16px; }
+.card-b details { margin-top: 12px; font-size: 13.5px; }
+.card-b summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+.transcript { display: grid; gap: 6px; margin-top: 8px; }
+.transcript div { padding: 6px 10px; border-radius: 8px; background: var(--surface-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+.transcript div.u { background: transparent; border: 1px solid var(--line); }
+.transcript b { font: 500 10.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); display: block; margin-bottom: 3px; }
+.empty-state { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius); padding: 28px 22px; text-align: center; color: var(--ink-2); }
+.empty-state h3 { margin: 0 0 4px; font: 600 17px/1.3 var(--font-doc); color: var(--ink); }
+.empty-state p { margin: 0 auto; max-width: 52ch; font-size: 14px; }
+
+.notice { margin: 0 20px 10px; font-size: 13px; color: var(--ink-2); background: var(--surface-2); padding: 8px 12px; border-radius: 8px; }
+
+@media (max-width: 900px) {
+  .panes { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .seg { display: flex; }
+  .panes .pane { grid-row: 2; }
+  .panes:not(.show-fiche) .fiche { display: none; }
+  .panes.show-fiche .chat { display: none; }
+  .fiche { border-left: 0; }
+  .log, .composer, .chat-head { padding-left: 16px; padding-right: 16px; }
+  .suggest { padding: 0 16px 8px; }
+  .fiche-head, .alerts, .sec, .fiche-foot { padding-left: 16px; padding-right: 16px; }
+  .brand small { display: none; }
+}
+@media (max-width: 520px) {
+  .top { gap: 8px; }
+  .tabs { margin-left: 0; width: 100%; }
+  .tabs button { flex: 1; justify-content: center; }
+  .card-h { grid-template-columns: minmax(0, 1fr); }
+  .card-h .right { justify-content: flex-start; }
+  .sheet-h, .sheet-b, .sheet-f { padding-left: 16px; padding-right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">DSI&nbsp;TD</span>
+      <div>
+        <h1>Agent d'Intake Innovation</h1>
+        <small>Prototype · Fiche d'Expression de Besoin assistée</small>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Vues">
+      <button id="tab-capture" role="tab" aria-selected="true" aria-controls="view-capture">Exprimer un besoin</button>
+      <button id="tab-dsi" role="tab" aria-selected="false" aria-controls="view-dsi">File DSI <span class="count" id="queue-count" hidden>0</span></button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="view-capture" class="view" role="tabpanel" aria-labelledby="tab-capture">
+      <div class="panes" id="panes">
+        <div class="seg" role="group" aria-label="Affichage">
+          <button id="seg-chat" aria-pressed="true">Conversation</button>
+          <button id="seg-fiche" aria-pressed="false">Fiche · <span id="seg-pct">0 %</span></button>
+        </div>
+
+        <div class="pane chat">
+          <div class="chat-head">
+            <div class="t">
+              <div class="eyebrow" id="chat-eyebrow">Nouveau besoin</div>
+              <h2 id="chat-title">Décrivez votre besoin, l'agent s'occupe de la fiche</h2>
+            </div>
+            <button class="btn-ghost" id="reset">Nouveau besoin</button>
+          </div>
+          <div class="log" id="log" aria-live="polite"></div>
+          <div class="notice" id="agent-notice" hidden></div>
+          <div class="suggest" id="suggest"></div>
+          <form class="composer" id="composer">
+            <div class="box">
+              <span class="file-chip" id="file-chip" hidden><span id="file-name"></span><button type="button" id="file-remove" aria-label="Retirer l'image">×</button></span>
+              <textarea id="msg" rows="2" aria-label="Votre message" placeholder="Ex. : on ressaisit à la main les bons de pesée dans SAP pendant la campagne…"></textarea>
+              <div class="row">
+                <button type="button" class="btn-icon" id="attach" hidden title="Joindre une photo (tableau blanc, capture Excel, document)">Joindre une photo</button>
+                <input type="file" id="file" accept="image/*" hidden>
+                <span class="hint" id="composer-hint">Entrée pour envoyer · Maj+Entrée pour un retour à la ligne</span>
+                <button type="button" class="btn-ghost" id="stop" hidden>Arrêter</button>
+                <button type="submit" class="btn-primary" id="send">Envoyer</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <aside class="pane fiche" aria-label="Fiche d'expression de besoin">
+          <div class="fiche-scroll">
+            <div class="fiche-head">
+              <div class="eyebrow">Fiche d'Expression de Besoin · en direct</div>
+              <h3 id="fiche-title">Besoin sans titre</h3>
+              <div class="meter" aria-label="Maturité de la fiche">
+                <div class="bar"><i id="meter-bar" style="width:0%"></i></div>
+                <b id="meter-val">0 %</b>
+              </div>
+              <div class="legend">
+                <span><i style="background:var(--st-vide)"></i>À compléter</span>
+                <span><i style="background:var(--st-deduit)"></i>Proposé par l'agent</span>
+                <span><i style="background:var(--st-declare)"></i>Déclaré</span>
+                <span><i style="background:var(--st-confirme)"></i>Confirmé</span>
+              </div>
+            </div>
+            <div class="alerts" id="alerts" hidden></div>
+            <div id="fiche-body"></div>
+          </div>
+          <div class="fiche-foot">
+            <button class="btn-primary" id="review" disabled>Relire et transmettre à la DSI</button>
+            <div class="sub" id="review-sub">Décrivez d'abord le problème rencontré.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="view-dsi" class="view dsi" role="tabpanel" aria-labelledby="tab-dsi" hidden>
+      <div class="dsi-inner">
+        <div class="dsi-head">
+          <h2>File de qualification</h2>
+          <p>Les besoins validés par les métiers arrivent ici avec leur niveau de maturité, l'historique de l'échange et l'échéance de retour à 5 jours ouvrables.</p>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="queue" id="queue"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="sheet-h">
+      <h3 id="modal-title">Relecture avant transmission</h3>
+      <button class="btn-ghost" id="modal-close">Fermer</button>
+    </div>
+    <div class="sheet-b" id="modal-body"></div>
+    <div class="sheet-f" id="modal-foot"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ================= Model of the form ================= */
+const URGENCES = ["Immédiat", "Court terme (< 3 mois)", "Moyen terme (3–12 mois)", "Long terme"];
+const RESULTATS = ["Réduction de coûts", "Gain de temps", "Amélioration qualité", "Aide à la décision"];
+const SECTIONS = [
+  { n: "1", titre: "Identification", fields: [
+    { k: "direction", label: "Direction / Entité", hint: "Ex. : Amont Agricole, Supply Chain…", w: 5 },
+    { k: "responsable", label: "Responsable métier", hint: "Nom et fonction", w: 5 },
+    { k: "urgence", label: "Niveau d'urgence", hint: URGENCES.join(" · "), w: 5, type: "enum" },
+  ]},
+  { n: "2", titre: "Le problème", fields: [
+    { k: "probleme", label: "Quel problème essayez-vous de résoudre ?", hint: "La situation actuelle, pas la solution souhaitée : fréquence, volume, impact terrain.", w: 15 },
+    { k: "processus", label: "Quel processus est impacté ?", hint: "Processus concerné, qui l'exécute, à quelle fréquence.", w: 10 },
+    { k: "cout", label: "Quel est le coût actuel du problème ?", hint: "Temps perdu, erreurs, retards, manque à gagner, risques. Estimé si possible.", w: 15 },
+  ]},
+  { n: "3", titre: "La valeur attendue", fields: [
+    { k: "decision", label: "Quelle décision ou action ce projet améliorerait-il ?", hint: "Meilleure planification, réduction des délais, automatisation, aide à la décision…", w: 10 },
+    { k: "resultats", label: "Quel résultat concret attendez-vous ?", hint: RESULTATS.join(" · ") + " · Autre", w: 5, type: "multi" },
+  ]},
+  { n: "4", titre: "Les données", fields: [
+    { k: "donnees_existantes", label: "Quelles données existent aujourd'hui ?", hint: "Excel, ERP, bases, capteurs, historiques : format et accessibilité.", w: 10 },
+    { k: "donnees_manquantes", label: "Des données sont-elles manquantes ou difficiles d'accès ?", hint: "Cela oriente la faisabilité.", w: 5 },
+  ]},
+  { n: "5", titre: "Contraintes & contexte", fields: [
+    { k: "contraintes", label: "Contraintes connues", hint: "Systèmes existants, réglementation, délais imposés, sensibilité des données, parties prenantes.", w: 5 },
+    { k: "budget", label: "Budget indicatif", hint: "Ordre de grandeur, avant tout chiffrage.", w: 5 },
+    { k: "similaires", label: "Des initiatives similaires existent-elles ?", hint: "En interne ou ailleurs dans le Groupe.", w: 5 },
+  ]},
+];
+const FIELDS = SECTIONS.flatMap(s => s.fields);
+const FMAP = Object.fromEntries(FIELDS.map(f => [f.k, f]));
+const STATUTS = {
+  "vide":     { label: "À compléter", cls: "st-vide", f: 0 },
+  "déduit":   { label: "Proposé par l'agent", cls: "st-deduit", f: 0.5 },
+  "déclaré":  { label: "Déclaré", cls: "st-declare", f: 1 },
+  "confirmé": { label: "Confirmé", cls: "st-confirme", f: 1 },
+};
+const QUEUE_STATUTS = ["À qualifier", "En qualification", "Qualifié — à instruire", "Réorienté", "Clos"];
+
+const EXAMPLES = [
+  { who: "Amont Agricole", text: "Pendant la campagne, on ressaisit à la main dans SAP les tickets de pesée et les bons de livraison de betteraves des agriculteurs. Ça prend énormément de temps et les erreurs créent des réclamations sur les paiements." },
+  { who: "Maintenance", text: "On voudrait un outil d'IA pour prédire les pannes des centrifugeuses." },
+  { who: "Commercial", text: "Chaque lundi, l'équipe passe la matinée à consolider dans Excel les ventes de chaque région pour le comité commercial." },
+];
+
+/* ================= Agent instructions ================= */
+const RULES = `Tu es l'agent d'intake de la DSI & TD (démarche Innovation Digitale & IA) d'un groupe agro-industriel sucrier marocain (sucreries, raffinerie, amont agricole betterave et canne, supply chain, commercial, finance, RH, maintenance, qualité). Tu accompagnes un collaborateur métier pour transformer son expression brute en « Fiche d'Expression de Besoin » complète, précise et challengée, prête à être qualifiée par la DSI. Tu ne conçois pas la solution et tu ne promets rien sur la suite.
+
+CHAMPS DE LA FICHE (clés JSON) :
+- direction : Direction / Entité porteuse
+- responsable : nom et fonction du responsable métier
+- urgence : exactement une valeur parmi "Immédiat", "Court terme (< 3 mois)", "Moyen terme (3–12 mois)", "Long terme"
+- probleme : la situation actuelle (pas la solution) : fréquence, volume, impact terrain
+- processus : processus impacté, qui l'exécute, à quelle fréquence, avec quels outils
+- cout : coût actuel du problème (temps perdu, erreurs, retards, manque à gagner, risques), chiffré si possible (heures, MAD, %)
+- decision : décision ou action que le projet améliorerait
+- resultats : tableau de valeurs parmi "Réduction de coûts", "Gain de temps", "Amélioration qualité", "Aide à la décision", "Autre : <précision>"
+- donnees_existantes : données disponibles (Excel, SAP, bases, capteurs, historiques), format, accessibilité, propriétaire
+- donnees_manquantes : données manquantes ou difficiles d'accès
+- contraintes : systèmes existants, réglementation (loi 09-08 / CNDP si données personnelles), délais imposés (campagne sucrière…), sensibilité, parties prenantes
+- budget : ordre de grandeur indicatif
+- similaires : initiatives similaires connues, en interne ou dans le Groupe
+
+STATUTS :
+- "déclaré" : l'utilisateur l'a dit explicitement.
+- "déduit" : ta reformulation, inférence ou estimation, à faire confirmer.
+- "confirmé" : l'utilisateur a validé explicitement ta proposition.
+Ne transforme jamais une supposition en "déclaré". N'invente aucun fait. Ne modifie pas un champ "confirmé" sauf si l'utilisateur le corrige lui-même. Si l'utilisateur dit ne pas savoir, écris "Inconnu à ce stade — à investiguer" avec le statut "déclaré".
+
+COMMENT CHALLENGER :
+1. Solution déguisée : si l'utilisateur décrit une solution (« un chatbot », « une appli », « de l'IA », « un dashboard »), remonte au problème : que se passe-t-il aujourd'hui, pour qui, pourquoi est-ce gênant ? Signale-le dans les alertes.
+2. Quantifier : fréquence, volume, nombre de personnes, durée, taux d'erreur. Propose un ordre de grandeur calculé à partir de ce qui est dit (montre le calcul dans "note") et fais-le confirmer.
+3. Valeur : quelle décision ou action change, et comment on mesurera le résultat (indicateur avant/après).
+4. Données : où elles sont, sous quel format, qui y a accès, ce qui manque.
+5. Contexte : contraintes, saisonnalité, parties prenantes, données personnelles.
+6. Doublons : compare avec les besoins déjà transmis listés dans le message ; si l'un est proche, mentionne-le (champ similaires + alerte "doublon").
+
+ÉCONOMIE D'EFFORT POUR L'UTILISATEUR :
+- Au premier échange, commence par « Si je résume : … » (1 à 2 phrases), puis pose tes questions.
+- 3 questions au maximum par tour, les plus utiles à la qualification d'abord ; numérote-les s'il y en a plusieurs.
+- Préfère une hypothèse à confirmer à une question ouverte (« Je comprends environ 200 bons par semaine, c'est bien ça ? »).
+- Ne cite jamais les noms techniques des champs ; parle naturellement.
+- Propose 2 à 4 "suggestions" : réponses courtes que l'utilisateur pourrait cliquer (moins de 60 caractères, à la première personne, ex. « Oui, environ 200 par semaine »).
+- Vouvoiement, ton professionnel et direct, en français. L'utilisateur peut écrire en darija, en arabe ou en anglais : comprends-le et réponds en français.
+- Message court : 2 à 6 phrases ou une courte liste. Mise en forme autorisée : **gras** et listes « - » ou « 1. ».
+- Si une image est jointe (tableau blanc, capture Excel, document), extrais-en les informations utiles (volumes, colonnes, étapes) et dis ce que tu en as retenu.
+
+PRÊT POUR QUALIFICATION ("pret": true) quand le problème, le processus, le coût (au moins un ordre de grandeur), la décision ou valeur attendue et les données existantes sont renseignés de façon précise. Dis-le alors et invite l'utilisateur à relire la fiche (panneau « Fiche »), à confirmer tes propositions puis à la transmettre. Ne bloque jamais : s'il veut transmettre plus tôt, c'est possible.
+
+FORMAT DE RÉPONSE : uniquement un objet JSON, avec "message" en premier :
+{"message":"…","titre":"intitulé court du besoin (6 mots max)","maj":{"<clé>":{"valeur":"…","statut":"déclaré|déduit|confirmé","note":"facultatif : source ou calcul"}},"alertes":[{"type":"solution|quantification|valeur|donnees|contexte|doublon|conformite","texte":"…"}],"suggestions":["…"],"pret":false}
+- "maj" contient uniquement les champs nouveaux ou modifiés à ce tour ("resultats" est un tableau de chaînes).
+- "alertes" est la liste complète des faiblesses encore ouvertes (elle remplace la précédente) ; [] s'il n'y en a plus.`;
+
+/* ================= State ================= */
+const KEY = "intake-draft-v1";
+const fresh = () => ({ fiche: {}, turns: [], alertes: [], suggestions: [], pret: false, titre: "", submitted: null });
+function loadState() {
+  try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); return s && s.fiche && Array.isArray(s.turns) ? s : null; } catch { return null; }
+}
+function saveState() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+let state = loadState() || fresh();
+
+let sample = null, db = null, user = null, downloads = null;
+let agentReady = false, agentOff = false, canEditQueue = false, uid = null, profileName = "";
+let busy = false, ctl = null, pendingFile = null, editing = null, flashKeys = new Set();
+let queue = [], openCards = new Set();
+
+/* ================= Helpers ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const inline = s => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+function md(src) {
+  const lines = esc(src).split("\n"); let html = "", list = null;
+  for (const l of lines) {
+    const m = l.match(/^\s*(?:[-•*]|(\d+)[.)])\s+(.*)$/);
+    if (m) {
+      const t = m[1] ? "ol" : "ul";
+      if (list !== t) { if (list) html += `</${list}>`; html += `<${t}>`; list = t; }
+      html += `<li>${inline(m[2])}</li>`;
+    } else {
+      if (list) { html += `</${list}>`; list = null; }
+      if (l.trim()) html += `<p>${inline(l)}</p>`;
+    }
+  }
+  if (list) html += `</${list}>`;
+  return html;
+}
+const hasVal = v => Array.isArray(v) ? v.length > 0 : typeof v === "string" && v.trim().length > 0;
+const valText = v => Array.isArray(v) ? v.join(", ") : String(v ?? "");
+const statutOf = k => (state.fiche[k] && hasVal(state.fiche[k].valeur)) ? (state.fiche[k].statut || "déclaré") : "vide";
+const fmtDate = d => new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+function addBusinessDays(date, n) {
+  const r = new Date(date); let added = 0;
+  while (added < n) { r.setDate(r.getDate() + 1); const w = r.getDay(); if (w !== 0 && w !== 6) added++; }
+  return r;
+}
+function businessDaysBetween(a, b) {
+  const d = new Date(a); d.setHours(0, 0, 0, 0);
+  const e = new Date(b); e.setHours(0, 0, 0, 0);
+  const sign = d <= e ? 1 : -1; let n = 0, guard = 0;
+  while (d.getTime() !== e.getTime() && guard++ < 2000) { d.setDate(d.getDate() + sign); const w = d.getDay(); if (w !== 0 && w !== 6) n += sign; }
+  return n;
+}
+function scoreOf(fiche) {
+  let s = 0;
+  for (const f of FIELDS) {
+    const e = fiche[f.k];
+    if (e && hasVal(e.valeur)) s += f.w * (STATUTS[e.statut]?.f ?? 1);
+  }
+  return Math.round(s);
+}
+function sectionPct(sec, fiche) {
+  const tot = sec.fields.reduce((a, f) => a + f.w, 0);
+  const got = sec.fields.reduce((a, f) => { const e = fiche[f.k]; return a + (e && hasVal(e.valeur) ? f.w * (STATUTS[e.statut]?.f ?? 1) : 0); }, 0);
+  return Math.round(100 * got / tot);
+}
+
+/* ================= Fiche pane ================= */
+function renderFiche() {
+  const score = scoreOf(state.fiche);
+  $("#meter-bar").style.width = score + "%";
+  $("#meter-val").textContent = score + " %";
+  $("#seg-pct").textContent = score + " %";
+  $("#fiche-title").textContent = state.titre || "Besoin sans titre";
+
+  const al = $("#alerts");
+  if (state.alertes.length) {
+    al.hidden = false;
+    al.innerHTML = `<h4>Points à renforcer · ${state.alertes.length}</h4>` + state.alertes.map(a =>
+      `<div class="alert"><span class="k ${esc(a.type)}">${esc(a.type || "point")}</span><span>${esc(a.texte)}</span></div>`).join("");
+  } else al.hidden = true;
+
+  $("#fiche-body").innerHTML = SECTIONS.map(sec => `
+    <section class="sec">
+      <div class="sec-h"><span class="n">${sec.n}</span><h4>${esc(sec.titre)}</h4><span class="pct">${sectionPct(sec, state.fiche)} %</span></div>
+      ${sec.fields.map(fieldHTML).join("")}
+    </section>`).join("");
+
+  const locked = !!state.submitted;
+  const deduits = FIELDS.filter(f => statutOf(f.k) === "déduit").length;
+  const btn = $("#review"), sub = $("#review-sub");
+  if (locked) {
+    btn.disabled = false; btn.textContent = "Voir la fiche transmise";
+    sub.innerHTML = `Transmise le ${fmtDate(state.submitted.at)} · retour attendu avant le ${fmtDate(state.submitted.echeance)}`;
+  } else {
+    btn.textContent = "Relire et transmettre à la DSI";
+    btn.disabled = !hasVal(state.fiche.probleme?.valeur);
+    if (btn.disabled) sub.textContent = "Décrivez d'abord le problème rencontré.";
+    else if (state.pret && score >= 70) sub.innerHTML = `<span class="ready">Prête pour qualification</span>${deduits ? ` · ${deduits} proposition${deduits > 1 ? "s" : ""} à confirmer` : ""}`;
+    else sub.textContent = `${state.alertes.length ? state.alertes.length + " point" + (state.alertes.length > 1 ? "s" : "") + " à renforcer · " : ""}transmission possible à tout moment`;
+  }
+  flashKeys.clear();
+}
+function fieldHTML(f) {
+  const e = state.fiche[f.k], st = statutOf(f.k), S = STATUTS[st];
+  const locked = !!state.submitted;
+  if (editing === f.k && !locked) return `<div class="field" data-k="${f.k}">
+      <div class="f-top"><span class="f-label">${esc(f.label)}</span></div>
+      <div class="edit">${editorHTML(f, e)}
+        <div class="f-actions"><button data-act="save" data-k="${f.k}">Enregistrer</button><button data-act="cancel">Annuler</button></div>
+      </div></div>`;
+  let val;
+  if (st === "vide") val = `<div class="f-val empty">${esc(f.hint)}</div>`;
+  else if (Array.isArray(e.valeur)) val = `<div class="f-val">${e.valeur.map(v => `<span class="chip">${esc(v)}</span>`).join("")}</div>`;
+  else val = `<div class="f-val">${esc(e.valeur)}</div>`;
+  const note = e?.note && st !== "vide" ? `<div class="f-note">${esc(e.note)}</div>` : "";
+  const acts = locked ? "" : `<div class="f-actions">${st === "déduit" ? `<button data-act="confirm" data-k="${f.k}">Confirmer</button>` : ""}<button data-act="edit" data-k="${f.k}">${st === "vide" ? "Renseigner" : "Modifier"}</button></div>`;
+  return `<div class="field${flashKeys.has(f.k) ? " flash" : ""}" data-k="${f.k}">
+    <div class="f-top"><span class="f-label">${esc(f.label)}</span><span class="pill ${S.cls}">${S.label}</span></div>
+    ${val}${note}${acts}</div>`;
+}
+function editorHTML(f, e) {
+  const v = e?.valeur;
+  if (f.type === "enum") return `<select id="edit-${f.k}" aria-label="${esc(f.label)}"><option value="">—</option>${URGENCES.map(u => `<option${v === u ? " selected" : ""}>${esc(u)}</option>`).join("")}</select>`;
+  if (f.type === "multi") {
+    const arr = Array.isArray(v) ? v : [];
+    const autre = arr.find(x => /^autre/i.test(x)) || "";
+    return `<div class="checks">${RESULTATS.map((r, i) => `<label><input type="checkbox" id="edit-res-${i}" value="${esc(r)}"${arr.includes(r) ? " checked" : ""}> ${esc(r)}</label>`).join("")}
+      <input type="text" id="edit-res-autre" placeholder="Autre : précisez" value="${esc(autre.replace(/^autre\s*:?\s*/i, ""))}"></div>`;
+  }
+  return `<textarea id="edit-${f.k}" rows="3" aria-label="${esc(f.label)}">${esc(valText(v))}</textarea>`;
+}
+$("#fiche-body").addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-act]"); if (!b) return;
+  const k = b.dataset.k, act = b.dataset.act;
+  if (act === "confirm") { state.fiche[k] = { ...state.fiche[k], statut: "confirmé", maj: Date.now() }; flashKeys.add(k); }
+  else if (act === "edit") { editing = k; renderFiche(); const el = document.getElementById("edit-" + k) || document.getElementById("edit-res-0"); el?.focus(); return; }
+  else if (act === "cancel") { editing = null; }
+  else if (act === "save") {
+    const f = FMAP[k]; let v;
+    if (f.type === "multi") {
+      v = RESULTATS.filter((_, i) => document.getElementById("edit-res-" + i).checked);
+      const a = document.getElementById("edit-res-autre").value.trim(); if (a) v.push("Autre : " + a);
+    } else v = document.getElementById("edit-" + k).value.trim();
+    if (hasVal(v)) state.fiche[k] = { valeur: v, statut: "confirmé", note: "Saisi par vous", maj: Date.now() };
+    else delete state.fiche[k];
+    editing = null; flashKeys.add(k);
+  }
+  saveState(); renderFiche();
+});
+
+/* ================= Chat pane ================= */
+function welcomeHTML() {
+  return `<div class="msg agent"><span class="who">Agent</span><div class="bubble">
+    <p>Bonjour. Décrivez votre besoin comme vous le raconteriez à un collègue : quelques phrases suffisent, sans vous soucier de la forme.</p>
+    <p>Je remplis la fiche pour vous, puis je vous pose quelques questions pour la rendre solide avant qu'elle parte en qualification à la DSI. Vous gardez la main : chaque information affiche son statut et vous validez tout avant l'envoi.</p>
+  </div>${state.turns.length ? "" : `<div class="examples"><span class="lbl">Exemples pour essayer</span>${EXAMPLES.map((e, i) => `<button type="button" class="ex" data-ex="${i}"><b>${esc(e.who)}</b>${esc(e.text)}</button>`).join("")}</div>`}</div>`;
+}
+function turnHTML(t, i) {
+  if (t.role === "user") return `<div class="msg user"><span class="who">Vous</span><div class="bubble">${esc(t.content)}</div>${t.image ? `<span class="attach-note">Photo jointe : ${esc(t.image)}</span>` : ""}</div>`;
+  if (t.error) return `<div class="msg agent err"><span class="who">Agent</span><div class="bubble">${esc(t.content)}${t.retry ? ` <button type="button" class="btn-ghost" data-retry="${i}">Renvoyer le message</button>` : ""}</div></div>`;
+  const ch = t.changed?.length ? `<div class="changed">Fiche mise à jour : ${t.changed.map(c => `<span class="c">${esc(c)}</span>`).join("")}</div>` : "";
+  return `<div class="msg agent"><span class="who">Agent</span><div class="bubble">${md(t.content)}</div>${ch}</div>`;
+}
+function renderChat() {
+  const log = $("#log");
+  log.innerHTML = welcomeHTML() + state.turns.map(turnHTML).join("");
+  renderSuggestions(); renderComposer(); renderHead();
+  log.scrollTop = log.scrollHeight;
+}
+function renderHead() {
+  $("#chat-eyebrow").textContent = state.submitted ? "Transmis à la DSI" : state.turns.length ? "Besoin en cours de définition" : "Nouveau besoin";
+  $("#chat-title").textContent = state.titre || "Décrivez votre besoin, l'agent s'occupe de la fiche";
+}
+function renderSuggestions() {
+  const el = $("#suggest");
+  const last = state.turns[state.turns.length - 1];
+  const show = !busy && !state.submitted && agentReady && last && last.role === "assistant" && !last.error && state.suggestions.length;
+  el.innerHTML = show ? state.suggestions.map(s => `<button type="button" data-sug="${esc(s)}">${esc(s)}</button>`).join("") : "";
+}
+function renderComposer() {
+  const locked = !!state.submitted;
+  const form = $("#composer");
+  if (locked) {
+    form.innerHTML = `<div class="locked">Cette fiche a été transmise à la DSI. Pour exprimer un autre besoin, cliquez sur « Nouveau besoin ».</div>`;
+    return;
+  }
+  $("#send").hidden = busy; $("#stop").hidden = !busy;
+  $("#send").disabled = !agentReady || agentOff;
+  $("#msg").disabled = !agentReady || agentOff;
+  $("#composer-hint").textContent = !agentReady ? "Connexion à l'agent…" : agentOff ? "Agent indisponible : remplissez la fiche directement." : "Entrée pour envoyer · Maj+Entrée pour un retour à la ligne";
+}
+$("#log").addEventListener("click", ev => {
+  const ex = ev.target.closest("[data-ex]");
+  if (ex && agentReady && !agentOff && !busy) { send(EXAMPLES[+ex.dataset.ex].text); return; }
+  const r = ev.target.closest("[data-retry]");
+  if (r && !busy) {
+    const i = +r.dataset.retry; const u = state.turns[i - 1];
+    state.turns.splice(i - 1, 2);
+    if (u && u.role === "user") send(u.content);
+  }
+});
+$("#suggest").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-sug]"); if (b && !busy) send(b.dataset.sug);
+});
+
+/* ================= Composer ================= */
+const msgEl = $("#msg");
+function autosize() { msgEl.style.height = "auto"; msgEl.style.height = Math.min(msgEl.scrollHeight, 180) + "px"; }
+msgEl.addEventListener("input", () => { autosize(); try { localStorage.setItem(KEY + "-msg", msgEl.value); } catch {} });
+msgEl.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("#composer").requestSubmit(); } });
+$("#composer").addEventListener("submit", e => {
+  e.preventDefault();
+  const t = msgEl.value.trim(); if (!t || busy || !agentReady || agentOff) return;
+  msgEl.value = ""; autosize(); try { localStorage.removeItem(KEY + "-msg"); } catch {}
+  send(t, pendingFile);
+  setFile(null);
+});
+$("#stop").addEventListener("click", () => ctl?.abort());
+$("#attach").addEventListener("click", () => $("#file").click());
+$("#file").addEventListener("change", e => { setFile(e.target.files[0] || null); e.target.value = ""; });
+$("#file-remove").addEventListener("click", () => setFile(null));
+function setFile(f) { pendingFile = f; $("#file-chip").hidden = !f; $("#file-name").textContent = f ? "Photo : " + f.name : ""; }
+try { const d = localStorage.getItem(KEY + "-msg"); if (d) { msgEl.value = d; } } catch {}
+
+/* ================= Agent call ================= */
+function existingNeeds() {
+  if (!queue.length) return "(aucun pour l'instant)";
+  return queue.slice(0, 30).map(q => `- « ${q.titre || "Sans titre"} » (${valText(q.fiche?.direction?.valeur) || "direction non précisée"}) : ${valText(q.fiche?.probleme?.valeur).slice(0, 220)}`).join("\n");
+}
+function compactFiche() {
+  const o = {};
+  for (const f of FIELDS) { const e = state.fiche[f.k]; o[f.k] = e && hasVal(e.valeur) ? { valeur: e.valeur, statut: e.statut } : null; }
+  return JSON.stringify(o, null, 1);
+}
+function buildInput(text, file) {
+  const ctx = `${RULES}\n\nCONTEXTE : date du jour ${fmtDate(Date.now())}.${profileName ? ` Nom de l'utilisateur d'après son profil : ${profileName}.` : ""}`;
+  const history = state.turns.slice(0, -1).filter(t => !t.error).slice(-16).map(t => ({
+    role: t.role, content: t.role === "user" ? t.content + (t.image ? `\n[Photo jointe : ${t.image}]` : "") : t.content,
+  }));
+  while (history.length && history[0].role === "assistant") history.shift();
+  const now = `ÉTAT ACTUEL DE LA FICHE (JSON, null = vide) :\n${compactFiche()}\n\nBESOINS DÉJÀ TRANSMIS À LA DSI (pour détecter les doublons) :\n${existingNeeds()}\n\nNOUVEAU MESSAGE DE L'UTILISATEUR :\n${text}${file ? "\n\n(Une image est jointe à ce message.)" : ""}`;
+  return [{ role: "user", content: ctx }, ...history, { role: "user", content: now }];
+}
+function extractMessage(raw) {
+  const i = raw.indexOf('"message"'); if (i < 0) return null;
+  const c = raw.indexOf(":", i + 9); if (c < 0) return null;
+  const q = raw.indexOf('"', c + 1); if (q < 0) return null;
+  let out = "", k = q + 1;
+  while (k < raw.length) {
+    const ch = raw[k];
+    if (ch === "\\") {
+      const n = raw[k + 1]; if (n === undefined) break;
+      if (n === "n") out += "\n"; else if (n === "t") out += " ";
+      else if (n === "u") { const h = raw.slice(k + 2, k + 6); if (h.length < 4) break; out += String.fromCharCode(parseInt(h, 16)); k += 6; continue; }
+      else out += n;
+      k += 2; continue;
+    }
+    if (ch === '"') break;
+    out += ch; k++;
+  }
+  return out;
+}
+const ERR_COPY = {
+  rate_limited: "Trop de demandes en peu de temps. Patientez un instant puis renvoyez votre message.",
+  session_expired: "Votre session a expiré. Reconnectez-vous, puis renvoyez votre message.",
+  image_rejected: "La photo n'a pas pu être lue. Essayez une image JPEG ou PNG plus légère.",
+  refused: "L'agent n'a pas pu traiter ce message. Reformulez-le autrement.",
+  invalid_json: "La réponse de l'agent était incomplète. Renvoyez votre message.",
+  empty_completion: "L'agent n'a rien répondu. Renvoyez votre message, éventuellement plus court.",
+  prompt_too_large: "L'échange est devenu trop long. Raccourcissez votre message ou commencez un nouveau besoin.",
+  upstream_error: "La connexion à l'agent a été interrompue. Renvoyez votre message.",
+};
+const OFF_CODES = new Set(["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"]);
+
+async function send(text, file) {
+  if (busy || !sample) return;
+  busy = true;
+  state.turns.push({ role: "user", content: text, image: file ? file.name : null, ts: Date.now() });
+  saveState(); renderChat();
+  const log = $("#log");
+  const pend = document.createElement("div");
+  pend.className = "msg agent";
+  pend.innerHTML = `<span class="who">Agent</span><div class="bubble"><span class="thinking">L'agent analyse votre besoin<span class="dots"></span> <span class="secs"></span></span></div>`;
+  log.appendChild(pend); log.scrollTop = log.scrollHeight;
+  const t0 = Date.now();
+  const timer = setInterval(() => { const s = pend.querySelector(".secs"); if (s) s.textContent = Math.round((Date.now() - t0) / 1000) + " s"; }, 1000);
+  ctl = new AbortController();
+  try {
+    const opts = {
+      signal: ctl.signal, cache: false,
+      onText: ({ text: raw }) => {
+        const m = extractMessage(raw);
+        if (m && m.trim()) { pend.querySelector(".bubble").innerHTML = md(m); log.scrollTop = log.scrollHeight; }
+      },
+    };
+    if (file) opts.images = [file];
+    const res = await sample.json(buildInput(text, file), opts);
+    applyAgent(res);
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "cancelled") {
+      state.turns.push({ role: "assistant", error: true, content: "Réponse interrompue." });
+    } else if (OFF_CODES.has(code)) {
+      agentOff = true;
+      state.turns.push({ role: "assistant", error: true, content: "L'agent n'est pas autorisé dans cette vue. Vous pouvez remplir la fiche directement dans le panneau « Fiche »." });
+      showNotice("Agent indisponible dans cette vue. La fiche reste modifiable à la main.");
+    } else {
+      state.turns.push({ role: "assistant", error: true, retry: true, content: ERR_COPY[code] || ERR_COPY.upstream_error });
+    }
+  } finally {
+    clearInterval(timer); busy = false; ctl = null;
+    saveState(); renderChat(); renderFiche();
+  }
+}
+function applyAgent(res) {
+  if (!res || typeof res !== "object") throw { code: "invalid_json" };
+  const changed = [];
+  const maj = res.maj && typeof res.maj === "object" ? res.maj : {};
+  for (const [k, u] of Object.entries(maj)) {
+    const f = FMAP[k]; if (!f || !u || typeof u !== "object") continue;
+    let v = u.valeur;
+    if (f.type === "multi") v = (Array.isArray(v) ? v : [v]).filter(x => typeof x === "string" && x.trim()).map(x => x.trim());
+    else if (Array.isArray(v)) v = v.join(", ");
+    if (!hasVal(v)) continue;
+    if (f.type === "enum") { const m = URGENCES.find(x => x.toLowerCase().startsWith(String(v).toLowerCase().slice(0, 5))); if (m) v = m; }
+    const st = ["déclaré", "déduit", "confirmé"].includes(u.statut) ? u.statut : "déduit";
+    const cur = state.fiche[k];
+    if (cur && cur.statut === "confirmé" && st === "déduit") continue; // never overwrite what the user validated with a guess
+    if (cur && valText(cur.valeur) === valText(v) && cur.statut === st) continue;
+    state.fiche[k] = { valeur: v, statut: st, note: typeof u.note === "string" ? u.note : "", maj: Date.now() };
+    changed.push(SHORT[k]);
+    flashKeys.add(k);
+  }
+  const message = typeof res.message === "string" && res.message.trim() ? res.message.trim() : "J'ai mis à jour la fiche.";
+  state.turns.push({ role: "assistant", content: message, changed, ts: Date.now() });
+  if (typeof res.titre === "string" && res.titre.trim()) state.titre = res.titre.trim().slice(0, 80);
+  if (Array.isArray(res.alertes)) state.alertes = res.alertes.filter(a => a && a.texte).slice(0, 8).map(a => ({ type: String(a.type || "point"), texte: String(a.texte) }));
+  state.suggestions = Array.isArray(res.suggestions) ? res.suggestions.filter(s => typeof s === "string" && s.trim()).slice(0, 4).map(s => s.slice(0, 80)) : [];
+  state.pret = res.pret === true;
+}
+const SHORT = { direction: "Direction", responsable: "Responsable", urgence: "Urgence", probleme: "Problème", processus: "Processus", cout: "Coût actuel", decision: "Décision améliorée", resultats: "Résultats attendus", donnees_existantes: "Données existantes", donnees_manquantes: "Données manquantes", contraintes: "Contraintes", budget: "Budget", similaires: "Initiatives similaires" };
+function showNotice(t) { const n = $("#agent-notice"); n.textContent = t; n.hidden = false; }
+
+/* ================= Recap / submission ================= */
+function recapHTML(fiche, meta) {
+  const q = (k, extra = "") => {
+    const f = FMAP[k], e = fiche[k], st = e && hasVal(e.valeur) ? (e.statut || "déclaré") : "vide", S = STATUTS[st];
+    let v;
+    if (k === "urgence") v = `<div class="boxes">${URGENCES.map(u => `<span class="${e?.valeur === u ? "on" : ""}">${e?.valeur === u ? "☒" : "☐"} ${esc(u)}</span>`).join("")}</div>`;
+    else if (k === "resultats") {
+      const arr = Array.isArray(e?.valeur) ? e.valeur : [];
+      const autre = arr.find(x => /^autre/i.test(x));
+      v = `<div class="boxes">${RESULTATS.map(r => `<span class="${arr.includes(r) ? "on" : ""}">${arr.includes(r) ? "☒" : "☐"} ${esc(r)}</span>`).join("")}<span class="${autre ? "on" : ""}">${autre ? "☒ " + esc(autre) : "☐ Autre"}</span></div>`;
+    } else v = st === "vide" ? `<div class="qv empty">Non renseigné</div>` : `<div class="qv">${esc(valText(e.valeur))}</div>`;
+    return `<div class="q${extra}"><div class="ql">${esc(f.label)} <span class="pill ${S.cls}">${S.label}</span></div>${v}</div>`;
+  };
+  return `<div class="doc">
+    <div class="doc-title">${esc(meta.titre || "Besoin sans titre")}</div>
+    <div class="doc-sub">Fiche d'Expression de Besoin · Innovation Digitale & IA · maturité ${scoreOf(fiche)} %</div>
+    <h5><span class="n">1</span>Identification</h5>
+    <div class="grid2">${q("direction")}${q("responsable")}
+      <div class="q"><div class="ql">Référence Intake</div><div class="qv ${meta.ref ? "" : "empty"}">${meta.ref ? esc(meta.ref) : "Attribuée par la DSI & TD"}</div></div>
+      <div class="q"><div class="ql">Date de soumission</div><div class="qv">${meta.at ? fmtDate(meta.at) : fmtDate(Date.now()) + " (à l'envoi)"}</div></div>
+    </div>${q("urgence")}
+    <h5><span class="n">2</span>Le problème</h5>${q("probleme")}${q("processus")}${q("cout")}
+    <h5><span class="n">3</span>La valeur attendue</h5>${q("decision")}${q("resultats")}
+    <h5><span class="n">4</span>Les données</h5>${q("donnees_existantes")}${q("donnees_manquantes")}
+    <h5><span class="n">5</span>Contraintes & contexte</h5>${q("contraintes")}<div class="grid2">${q("budget")}${q("similaires")}</div>
+    <h5><span class="n">6</span>Validation métier</h5>
+    <div class="grid2">
+      <div class="q"><div class="ql">Responsable métier</div><div class="qv">${esc(valText(fiche.responsable?.valeur)) || "—"}${meta.at ? `<br>Validé en ligne le ${fmtDate(meta.at)}` : ""}</div></div>
+      <div class="q"><div class="ql">Reçu par</div><div class="qv">Responsable Innovation Digitale et IA<br>Retour attendu ${meta.echeance ? "avant le " + fmtDate(meta.echeance) : "sous 5 jours ouvrables"}</div></div>
+    </div>
+  </div>`;
+}
+function docFileHTML(fiche, meta) {
+  const row = (label, v) => `<tr><td style="width:34%;vertical-align:top;color:#555;padding:6px;border:1px solid #ccc"><b>${esc(label)}</b></td><td style="padding:6px;border:1px solid #ccc;white-space:pre-wrap">${esc(v) || "<i>Non renseigné</i>"}</td></tr>`;
+  const st = k => { const e = fiche[k]; return e && hasVal(e.valeur) ? ` [${STATUTS[e.statut]?.label || "Déclaré"}]` : ""; };
+  let body = `<h1 style="font-family:Georgia,serif">Fiche d'Expression de Besoin — Innovation Digitale & IA</h1><p><b>${esc(meta.titre || "Besoin sans titre")}</b> · maturité ${scoreOf(fiche)} %</p>`;
+  for (const sec of SECTIONS) {
+    body += `<h2 style="font-family:Georgia,serif">${sec.n}. ${esc(sec.titre)}</h2><table style="border-collapse:collapse;width:100%">`;
+    for (const f of sec.fields) body += row(f.label + st(f.k), valText(fiche[f.k]?.valeur));
+    if (sec.n === "1") { body += row("Référence Intake", meta.ref || "Attribuée par la DSI & TD"); body += row("Date de soumission", meta.at ? fmtDate(meta.at) : ""); }
+    body += `</table>`;
+  }
+  body += `<h2 style="font-family:Georgia,serif">6. Validation métier</h2><p>Responsable métier : ${esc(valText(fiche.responsable?.valeur))}${meta.at ? " — validé en ligne le " + fmtDate(meta.at) : ""}<br>Reçu par : Responsable Innovation Digitale et IA</p>`;
+  return `<html><head><meta charset="utf-8"><title>${esc(meta.titre || "Fiche besoin")}</title></head><body style="font-family:Calibri,Arial,sans-serif;font-size:11pt">${body}</body></html>`;
+}
+async function downloadFiche(fiche, meta, statusEl) {
+  if (!downloads) return;
+  const base = "Fiche_Besoin_" + (meta.titre || "sans_titre").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "_").slice(0, 50);
+  const html = docFileHTML(fiche, meta);
+  try {
+    await downloads.save({ filename: base + ".doc", data: new Blob([html], { type: "application/msword" }) });
+  } catch (e) {
+    if (e?.code === "rejected_extension") {
+      try { await downloads.save({ filename: base + ".html", data: new Blob([html], { type: "text/html" }) }); } catch {}
+    } else if (e?.code !== "declined" && statusEl) statusEl.textContent = "Le téléchargement n'a pas abouti.";
+  }
+}
+
+const modal = $("#modal");
+function openModal() { modal.hidden = false; document.body.style.overflow = "hidden"; $("#modal-close").focus(); }
+function closeModal() { modal.hidden = true; document.body.style.overflow = ""; }
+$("#modal-close").addEventListener("click", closeModal);
+modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !modal.hidden) closeModal(); });
+
+$("#review").addEventListener("click", () => {
+  const meta = { titre: state.titre, at: state.submitted?.at, echeance: state.submitted?.echeance, ref: "" };
+  $("#modal-title").textContent = state.submitted ? "Fiche transmise" : "Relecture avant transmission";
+  $("#modal-body").innerHTML = recapHTML(state.fiche, meta);
+  const foot = $("#modal-foot");
+  const dlBtn = downloads ? `<button class="btn-ghost" id="dl">Télécharger (Word)</button>` : "";
+  if (state.submitted) {
+    foot.innerHTML = `<div class="okbox">Fiche transmise le ${fmtDate(state.submitted.at)}. La DSI & TD vous répondra avant le ${fmtDate(state.submitted.echeance)}.</div><div class="row"><span id="dl-status" class="attach-note"></span>${dlBtn}</div>`;
+  } else {
+    const deduits = FIELDS.filter(f => statutOf(f.k) === "déduit").length;
+    const vides = FIELDS.filter(f => statutOf(f.k) === "vide").length;
+    const warn = deduits || vides || state.alertes.length
+      ? `<div class="warnbox">${[deduits ? `${deduits} information${deduits > 1 ? "s sont des propositions" : " est une proposition"} de l'agent non confirmée${deduits > 1 ? "s" : ""}` : "", vides ? `${vides} champ${vides > 1 ? "s restent" : " reste"} vide${vides > 1 ? "s" : ""}` : "", state.alertes.length ? `${state.alertes.length} point${state.alertes.length > 1 ? "s" : ""} à renforcer` : ""].filter(Boolean).join(" · ")}. Vous pouvez transmettre tel quel : la DSI verra le statut de chaque information.</div>` : "";
+    foot.innerHTML = `${warn}
+      <label class="confirm-line"><input type="checkbox" id="valid"> <span>Je valide que cette fiche décrit fidèlement mon besoin. Cette validation tient lieu de signature du responsable métier.</span></label>
+      <div id="submit-msg"></div>
+      <div class="row"><span id="dl-status" class="attach-note"></span>${dlBtn}<button class="btn-ghost" id="back">Continuer à compléter</button><button class="btn-primary" id="submit" disabled>Transmettre à la DSI</button></div>`;
+    $("#valid").addEventListener("change", e => { $("#submit").disabled = !e.target.checked; });
+    $("#back").addEventListener("click", closeModal);
+    $("#submit").addEventListener("click", submitFiche);
+  }
+  $("#dl")?.addEventListener("click", () => downloadFiche(state.fiche, meta, $("#dl-status")));
+  openModal();
+});
+
+async function submitFiche() {
+  const btn = $("#submit"), box = $("#submit-msg");
+  if (!db) { box.innerHTML = `<div class="errbox">La transmission n'est pas disponible dans cette vue. Téléchargez la fiche et envoyez-la à la DSI & TD.</div>`; return; }
+  btn.disabled = true; btn.textContent = "Transmission…";
+  const at = new Date();
+  const echeance = addBusinessDays(at, 5);
+  const fiche = {};
+  for (const f of FIELDS) { const e = state.fiche[f.k]; if (e && hasVal(e.valeur)) fiche[f.k] = { valeur: e.valeur, statut: e.statut, note: e.note || "" }; }
+  const doc = {
+    titre: state.titre || "Besoin sans titre",
+    fiche, score: scoreOf(state.fiche), pret: state.pret, alertes: state.alertes,
+    statut: "À qualifier", submittedAt: at.toISOString(), echeance: echeance.toISOString(),
+    submitter: uid || null, echanges: state.turns.filter(t => t.role === "user").length,
+    transcript: state.turns.filter(t => !t.error).slice(-40).map(t => ({ role: t.role, content: String(t.content).slice(0, 2000) })),
+  };
+  try {
+    const ref = await db.collection("fiches").add(doc);
+    state.submitted = { id: ref.id, at: doc.submittedAt, echeance: doc.echeance };
+    state.turns.push({ role: "assistant", content: `**Fiche transmise à la DSI & TD.** Vous recevrez un retour avant le **${fmtDate(echeance)}** (5 jours ouvrables). Elle apparaît dans la file de qualification avec l'historique de notre échange.`, ts: Date.now() });
+    saveState(); renderChat(); renderFiche();
+    $("#review").click();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "Transmettre à la DSI";
+    const msg = e?.code === "invalid_argument" ? "Vous n'avez pas les droits pour transmettre depuis cette vue. Demandez un accès Contributeur, ou téléchargez la fiche."
+      : e?.code === "quota_exceeded" ? "La file DSI est pleine. Prévenez l'équipe DSI & TD."
+      : "La transmission a échoué. Réessayez dans un instant.";
+    box.innerHTML = `<div class="errbox">${msg}</div>`;
+  }
+}
+
+/* ================= Reset ================= */
+let resetArmed = null;
+$("#reset").addEventListener("click", () => {
+  const b = $("#reset");
+  if (!state.turns.length && !Object.keys(state.fiche).length) return;
+  if (!resetArmed) {
+    b.textContent = "Confirmer : effacer le brouillon"; b.classList.add("warn");
+    resetArmed = setTimeout(() => { resetArmed = null; b.textContent = "Nouveau besoin"; b.classList.remove("warn"); }, 4000);
+    return;
+  }
+  clearTimeout(resetArmed); resetArmed = null; b.textContent = "Nouveau besoin"; b.classList.remove("warn");
+  ctl?.abort();
+  state = fresh(); editing = null; prefillIdentity();
+  saveState();
+  location.reload();
+});
+
+/* ================= Tabs & mobile panes ================= */
+function showTab(which) {
+  const cap = which === "capture";
+  $("#tab-capture").setAttribute("aria-selected", cap); $("#tab-dsi").setAttribute("aria-selected", !cap);
+  $("#view-capture").hidden = !cap; $("#view-dsi").hidden = cap;
+  if (!cap) renderQueue();
+}
+$("#tab-capture").addEventListener("click", () => showTab("capture"));
+$("#tab-dsi").addEventListener("click", () => showTab("dsi"));
+function showPane(p) {
+  $("#panes").classList.toggle("show-fiche", p === "fiche");
+  $("#seg-chat").setAttribute("aria-pressed", p !== "fiche"); $("#seg-fiche").setAttribute("aria-pressed", p === "fiche");
+}
+$("#seg-chat").addEventListener("click", () => showPane("chat"));
+$("#seg-fiche").addEventListener("click", () => showPane("fiche"));
+
+/* ================= DSI queue ================= */
+function renderQueue() {
+  const el = $("#queue"), k = $("#kpis");
+  const cnt = $("#queue-count");
+  const open = queue.filter(q => !["Clos", "Réorienté", "Qualifié — à instruire"].includes(q.statut));
+  cnt.hidden = !open.length; cnt.textContent = open.length;
+  if ($("#view-dsi").hidden) return;
+  const now = Date.now();
+  const late = open.filter(q => q.echeance && new Date(q.echeance).getTime() < now).length;
+  const avg = queue.length ? Math.round(queue.reduce((a, q) => a + (q.score || 0), 0) / queue.length) : 0;
+  const ready = queue.filter(q => q.pret).length;
+  k.innerHTML = [
+    ["Besoins reçus", queue.length, ""],
+    ["En attente de retour", open.length, ""],
+    ["Délai de 5 jours dépassé", late, late ? "bad" : ""],
+    ["Maturité moyenne", queue.length ? avg + " %" : "—", ""],
+    ["Jugés prêts par l'agent", ready, ""],
+  ].map(([l, v, c]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${c}">${v}</div></div>`).join("");
+
+  if (!db) { el.innerHTML = `<div class="empty-state"><h3>File indisponible dans cette vue</h3><p>Ouvrez cette page dans claude.ai, connecté, pour voir les besoins transmis.</p></div>`; return; }
+  if (!queue.length) { el.innerHTML = `<div class="empty-state"><h3>Aucun besoin transmis pour l'instant</h3><p>Dès qu'un collaborateur valide sa fiche dans l'onglet « Exprimer un besoin », elle arrive ici avec son niveau de maturité et l'échéance de retour.</p></div>`; return; }
+
+  el.innerHTML = queue.map(q => {
+    const d = q.echeance ? businessDaysBetween(now, q.echeance) : null;
+    const closed = !open.includes(q);
+    const dueCls = closed ? "" : d < 0 ? "late" : d <= 1 ? "soon" : "";
+    const dueTxt = closed ? "Traité" : d === null ? "—" : d < 0 ? `En retard de ${-d} j ouvré${-d > 1 ? "s" : ""}` : d === 0 ? "Échéance aujourd'hui" : `J-${d} ouvré${d > 1 ? "s" : ""}`;
+    const f = q.fiche || {};
+    const statusCtl = canEditQueue
+      ? `<select class="status-sel" data-status="${esc(q.id)}" aria-label="Statut">${QUEUE_STATUTS.map(s => `<option${s === q.statut ? " selected" : ""}>${esc(s)}</option>`).join("")}</select>`
+      : `<span class="status-chip">${esc(q.statut || "À qualifier")}</span>`;
+    const isOpen = openCards.has(q.id);
+    return `<article class="card">
+      <div class="card-h">
+        <button class="open" data-open="${esc(q.id)}" aria-expanded="${isOpen}">
+          <span class="ttl">${esc(q.titre || "Besoin sans titre")}</span>
+          <span class="meta"><span>${esc(valText(f.direction?.valeur) || "Direction non précisée")}</span><span>${esc(valText(f.urgence?.valeur) || "Urgence non précisée")}</span><span>Reçu le ${q.submittedAt ? fmtDate(q.submittedAt) : "—"}</span><span>${q.echanges || 0} échange${(q.echanges || 0) > 1 ? "s" : ""}</span></span>
+        </button>
+        <div class="right"><span class="score">${q.score ?? 0} %</span><span class="due ${dueCls}">${dueTxt}</span>${statusCtl}</div>
+      </div>
+      ${isOpen ? `<div class="card-b">${recapHTML(f, { titre: q.titre, at: q.submittedAt, echeance: q.echeance, ref: "" })}
+        ${(q.alertes || []).length ? `<details open><summary>Points signalés par l'agent (${q.alertes.length})</summary><ul>${q.alertes.map(a => `<li><b>${esc(a.type)}</b> : ${esc(a.texte)}</li>`).join("")}</ul></details>` : ""}
+        <details><summary>Historique de l'échange (${(q.transcript || []).length} messages)</summary><div class="transcript">${(q.transcript || []).map(t => `<div class="${t.role === "user" ? "u" : ""}"><b>${t.role === "user" ? "Métier" : "Agent"}</b>${esc(t.content)}</div>`).join("")}</div></details>
+        ${downloads ? `<p><button class="btn-ghost" data-dl="${esc(q.id)}">Télécharger la fiche (Word)</button></p>` : ""}
+      </div>` : ""}
+    </article>`;
+  }).join("");
+}
+$("#queue").addEventListener("click", ev => {
+  const o = ev.target.closest("[data-open]");
+  if (o) { const id = o.dataset.open; openCards.has(id) ? openCards.delete(id) : openCards.add(id); renderQueue(); return; }
+  const d = ev.target.closest("[data-dl]");
+  if (d) { const q = queue.find(x => x.id === d.dataset.dl); if (q) downloadFiche(q.fiche || {}, { titre: q.titre, at: q.submittedAt, echeance: q.echeance }); }
+});
+$("#queue").addEventListener("change", async ev => {
+  const s = ev.target.closest("[data-status]"); if (!s || !db) return;
+  s.disabled = true;
+  try { await db.doc("fiches/" + s.dataset.status).update({ statut: s.value, statutMaj: new Date().toISOString() }); }
+  catch { s.value = queue.find(x => x.id === s.dataset.status)?.statut || QUEUE_STATUTS[0]; }
+  finally { s.disabled = false; }
+});
+
+/* ================= Boot ================= */
+function prefillIdentity() {
+  if (profileName && !state.fiche.responsable) {
+    state.fiche.responsable = { valeur: profileName, statut: "déduit", note: "D'après votre profil : précisez votre fonction.", maj: Date.now() };
+  }
+}
+renderChat(); renderFiche(); autosize();
+
+const use = n => (window.claude && typeof window.claude.use === "function") ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
+
+use("sample").then(async s => {
+  sample = s; agentReady = true;
+  if (!s) { agentOff = true; showNotice("Agent indisponible dans cette vue : ouvrez la page dans claude.ai pour converser. La fiche reste modifiable à la main."); }
+  else {
+    try { const lim = await s.limits(); if (lim && lim.images) { $("#attach").hidden = false; $("#file").accept = lim.images.mediaTypes.join(","); } } catch {}
+  }
+  renderChat();
+});
+use("user").then(async u => {
+  user = u; if (!u) return;
+  try { uid = await u.id(); } catch {}
+  try { profileName = (await u.name()) || ""; } catch {}
+  try { canEditQueue = !!(await u.canEdit()); } catch {}
+  if (!state.submitted) { prefillIdentity(); saveState(); renderFiche(); }
+  renderQueue();
+});
+use("downloads").then(d => { downloads = d; });
+use("db").then(d => {
+  db = d;
+  if (!d) { renderQueue(); return; }
+  d.collection("fiches").orderBy("submittedAt", "desc").limit(200).onSnapshot(
+    snap => { queue = snap.docs.map(x => ({ id: x.id, ...x.data() })); renderQueue(); },
+    () => { renderQueue(); }
+  );
+});
+})();
+</script>
