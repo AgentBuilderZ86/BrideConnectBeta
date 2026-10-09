@@ -77,6 +77,23 @@ async function getBotToken() {
   return botToken.value;
 }
 
+// Downloads a file sent to the bot: Teams file cards carry a pre-authorised download URL; inline images
+// need the bot token. Returns {name, mime, data} or null.
+export async function fetchTeamsAttachment(att) {
+  try {
+    if (att?.contentType === "application/vnd.microsoft.teams.file.download.info" && att.content?.downloadUrl) {
+      const r = await fetch(att.content.downloadUrl);
+      const ext = String(att.content.fileType || "").toLowerCase();
+      return r.ok ? { name: att.name || `fichier.${ext}`, mime: r.headers.get("content-type") || "", data: Buffer.from(await r.arrayBuffer()).toString("base64") } : null;
+    }
+    if (/^image\//.test(att?.contentType || "") && att.contentUrl) {
+      const r = await fetch(att.contentUrl, { headers: { authorization: `Bearer ${await getBotToken()}` } });
+      return r.ok ? { name: att.name || "image.png", mime: att.contentType, data: Buffer.from(await r.arrayBuffer()).toString("base64") } : null;
+    }
+  } catch (e) { console.error("teams attachment", e?.message); }
+  return null;
+}
+
 // Sends a message into a stored Teams conversation (works for replies and proactive nudges).
 export async function sendTeams(ref, text, quick = []) {
   if (!teamsConfigured() || !ref?.serviceUrl || !ref?.conversationId) return false;

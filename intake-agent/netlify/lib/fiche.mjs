@@ -2,7 +2,7 @@ import { getStore } from "@netlify/blobs";
 
 export const store = () => getStore({ name: "fiches", consistency: "strong" });
 
-export const QUEUE_STATUTS = ["Brouillon", "À qualifier", "En qualification", "Qualifié — à instruire", "En réalisation", "En production", "Réorienté", "Clos"];
+export const QUEUE_STATUTS = ["Brouillon", "À qualifier", "En qualification", "Qualifié — à instruire", "En réalisation", "En production", "Réorienté", "Fusionné", "Clos"];
 const WEIGHTS = { direction: 5, responsable: 5, urgence: 5, probleme: 15, processus: 10, cout: 15, decision: 10, resultats: 5, donnees_existantes: 10, donnees_manquantes: 5, contraintes: 5, budget: 5, similaires: 5 };
 const FACTOR = { "déduit": 0.5, "déclaré": 1, "confirmé": 1 };
 export const FIELD_KEYS = Object.keys(WEIGHTS);

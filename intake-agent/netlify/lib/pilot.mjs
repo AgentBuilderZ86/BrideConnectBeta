@@ -5,12 +5,14 @@ import { NUDGE, DIGEST } from "./prompts.mjs";
 import { deliverNudge } from "./channels.mjs";
 import { sendEmail } from "./adapters.mjs";
 import { getConfig } from "./config.mjs";
+import { applyRetention } from "./privacy.mjs";
+import { audit } from "./audit.mjs";
 
 // Autopilot: a daily round that keeps every fiche true without anyone filling a form,
 // and a weekly digest for the DSI. Both log what they did so the team can audit the agent.
 export const pilotStore = () => getStore({ name: "pilot", consistency: "strong" });
 const DAY = 864e5;
-const ACTIVE = (s) => !["Brouillon", "Clos", "Réorienté"].includes(s);
+const ACTIVE = (s) => !["Brouillon", "Clos", "Réorienté", "Fusionné"].includes(s);
 const toMs = (v) => Date.parse(v || "") || null;
 const filled = (q, k) => q.fiche && q.fiche[k] && hasVal(q.fiche[k].valeur);
 
@@ -97,7 +99,12 @@ export async function runDaily({ offsetDays = 0, trigger = "planifié" } = {}) {
     }
     await s.setJSON(doc.id, doc);
   }
-  const entry = { job: "daily", at, realAt: new Date().toISOString(), trigger, offsetDays, examines: fiches.length, candidats: cands.map(({ q, d }) => ({ id: q.id, titre: q.titre, raisons: d.reasons })), relances: done };
+  // Loi 09-08 retention, always on the real date (never the demo clock).
+  const retention = await applyRetention(cfg).catch((e) => ({ erreur: String(e?.message || e).slice(0, 200) }));
+  const purged = (retention.brouillons_supprimes || 0) + (retention.fiches_anonymisees || 0) + (retention.conversations_supprimees || 0);
+  if (purged) await audit({ system: "Pilotage automatique" }, "conservation appliquée", { details: JSON.stringify(retention) });
+  for (const n of done) await audit({ system: "Pilotage automatique" }, "relance envoyée", { target: n, details: `${n.destinataire} via ${n.via}` });
+  const entry = { job: "daily", at, realAt: new Date().toISOString(), trigger, offsetDays, examines: fiches.length, candidats: cands.map(({ q, d }) => ({ id: q.id, titre: q.titre, raisons: d.reasons })), relances: done, retention };
   await appendLog(entry);
   return entry;
 }

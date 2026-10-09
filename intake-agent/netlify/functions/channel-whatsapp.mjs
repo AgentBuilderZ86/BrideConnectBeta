@@ -1,23 +1,28 @@
 import { handleIncoming, sendReplies } from "../lib/channels.mjs";
 import { verifyWhatsAppSignature, fetchWhatsAppMedia } from "../lib/adapters.mjs";
+import { triggerBg } from "../lib/bg.mjs";
 
 // WhatsApp Business Cloud API webhook. Configure in the Meta app: callback URL
 // https://<site>/api/channel/whatsapp, verify token = WHATSAPP_VERIFY_TOKEN, subscribe to "messages".
 // Requires WHATSAPP_APP_SECRET (signature check), WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID.
-async function processMessage(value, msg) {
+async function processMessage(value, msg, origin) {
   const name = value.contacts?.find((c) => c.wa_id === msg.from)?.profile?.name || "";
-  let text = "", image = null, audio = null;
+  let text = "", audio = null;
+  const files = [];
   if (msg.type === "text") text = msg.text?.body || "";
   else if (msg.type === "interactive") text = msg.interactive?.button_reply?.title || msg.interactive?.list_reply?.title || "";
   else if (msg.type === "button") text = msg.button?.text || "";
   else if (msg.type === "audio") { const m = await fetchWhatsAppMedia(msg.audio.id); audio = { data: m.data, mimeType: m.mimeType }; }
-  else if (msg.type === "image") {
-    const m = await fetchWhatsAppMedia(msg.image.id);
-    image = { media_type: m.mimeType.split(";")[0], data: m.data };
-    text = msg.image?.caption || "";
+  else if (msg.type === "image" || msg.type === "document") {
+    const media = msg[msg.type];
+    const m = await fetchWhatsAppMedia(media.id);
+    const mime = m.mimeType.split(";")[0];
+    files.push({ name: media.filename || (msg.type === "image" ? "photo.jpg" : "document"), mime, data: m.data });
+    text = media.caption || "";
   } else return;
-  const { conv, replies } = await handleIncoming({ channel: "whatsapp", sender: msg.from, name, text, image, audio });
+  const { conv, replies, submitted } = await handleIncoming({ channel: "whatsapp", sender: msg.from, name, text, audio, files });
   await sendReplies(conv, replies);
+  if (submitted) await triggerBg(origin, "/api/synergies-bg", { match: submitted });
 }
 
 export default async (req, context) => {
@@ -33,7 +38,7 @@ export default async (req, context) => {
   const jobs = [];
   for (const entry of body.entry || []) for (const ch of entry.changes || []) {
     const value = ch.value || {};
-    for (const msg of value.messages || []) jobs.push(processMessage(value, msg).catch((e) => console.error("whatsapp message error", e?.message)));
+    for (const msg of value.messages || []) jobs.push(processMessage(value, msg, u.origin).catch((e) => console.error("whatsapp message error", e?.message)));
   }
   // Acknowledge immediately (Meta retries slow webhooks); the agent answers in the background.
   context.waitUntil(Promise.all(jobs));

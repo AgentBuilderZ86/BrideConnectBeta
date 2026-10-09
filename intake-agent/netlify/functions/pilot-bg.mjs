@@ -1,4 +1,5 @@
-import { authorized } from "../lib/auth.mjs";
+import { guard } from "../lib/session.mjs";
+import { audit } from "../lib/audit.mjs";
 import { runDaily, runWeekly, pilotStore } from "../lib/pilot.mjs";
 
 // Background worker (up to 15 min) for the autopilot. Called by the scheduled functions
@@ -6,7 +7,11 @@ import { runDaily, runWeekly, pilotStore } from "../lib/pilot.mjs";
 export default async (req) => {
   const secret = Netlify.env.get("PILOT_SECRET");
   const bySchedule = !!secret && req.headers.get("x-pilot-secret") === secret;
-  if (!bySchedule && !authorized(req)) return;
+  if (!bySchedule) {
+    const a = await guard(req, "pilot.run");
+    if (a.error) return;
+    await audit(a, "pilotage lancé à la main", { req });
+  }
   let b = {};
   try { b = await req.json(); } catch {}
   const offsetDays = Math.max(0, Math.min(400, Number(b.offsetDays) || 0));

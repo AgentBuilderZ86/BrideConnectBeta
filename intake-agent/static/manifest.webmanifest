@@ -1,13 +1,13 @@
 {
-  "name": "Agent d'Intake Innovation",
-  "short_name": "Intake DSI",
+  "name": "AI Bridge",
+  "short_name": "AI Bridge",
   "description": "Exprimez un besoin d'innovation digitale et IA en quelques phrases ou par la voix, et suivez-le dans le temps.",
   "lang": "fr",
   "start_url": "/?source=app",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#F2F5F6",
-  "theme_color": "#7A1F45",
+  "background_color": "#090C11",
+  "theme_color": "#090C11",
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },

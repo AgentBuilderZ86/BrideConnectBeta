@@ -1,10 +1,11 @@
-import { authorized } from "../lib/auth.mjs";
+import { guard } from "../lib/session.mjs";
 import { saveSubscription, removeSubscription, sendTest, pushConfigured } from "../lib/push.mjs";
 
 const bad = (m, s = 400) => Response.json({ error: m }, { status: s });
 
 export default async (req) => {
-  if (!authorized(req)) return bad("unauthorized", 401);
+  const a = await guard(req, "fiche.create");
+  if (a.error) return a.error;
   if (req.method === "GET") return Response.json({ enabled: pushConfigured(), publicKey: Netlify.env.get("VAPID_PUBLIC_KEY") || null });
   let b;
   try { b = await req.json(); } catch { return bad("invalid json"); }

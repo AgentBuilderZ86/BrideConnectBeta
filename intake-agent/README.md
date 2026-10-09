@@ -1,4 +1,4 @@
-# Agent d'Intake Innovation — prototype
+# AI Bridge — agent d'intake Innovation Digitale & IA
 
 Prototype d'un agent qui transforme un besoin exprimé en texte libre en **Fiche d'Expression de Besoin — Innovation Digitale & IA** complète et challengée, puis la transmet à une file de qualification DSI.
 
@@ -74,12 +74,41 @@ Prototype d'un agent qui transforme un besoin exprimé en texte libre en **Fiche
 - Notifications Web Push sur chaque appareil abonné, pour les besoins qu'il suit : questions de l'agent (relances), réponses de la DSI, changements de statut. Un clic ouvre directement le besoin.
 - Clés VAPID : `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (facultatif). Sur iPhone, les notifications ne fonctionnent qu'une fois l'application ajoutée à l'écran d'accueil (iOS 16.4 ou plus récent).
 
+**Pièces jointes et vision**
+- Photos, PDF, Excel (.xlsx), Word (.docx), PowerPoint (.pptx) et texte (CSV, TXT), 3 fichiers de 4 Mo au plus par message, sur le web, WhatsApp (documents), Teams et l'e-mail (pièces jointes du webhook Postmark).
+- Les PDF et les images sont lus directement par le modèle ; le texte des fichiers Office est extrait sans dépendance (`netlify/lib/extract.mjs` : onglets, dates Excel converties, tableaux Word, diapositives).
+- L'agent cite la source de chaque valeur lue (« d'après Releve.xlsx, onglet … »), la marque « Proposé par l'agent », montre ses calculs et ne recopie aucune donnée personnelle de tiers. Ce qu'il a retenu de chaque pièce est affiché avec le fichier, que la DSI peut rouvrir.
+
+**Doublons et synergies**
+- À chaque transmission, le besoin est comparé aux autres en arrière-plan : doublon (même problème, même processus, même sur un autre site) ou synergie (mêmes données, même solution, même prérequis), avec la raison, sur les deux fiches.
+- Outil DSI « Doublons & synergies » : analyse de tout le portefeuille par grappes, fiche principale proposée pour les doublons.
+- Fusion : l'agent rédige la fiche commune (sites, volumes, contraintes de chaque demandeur), la DSI valide champ par champ ; les fiches absorbées passent « Fusionné », leurs porteurs deviennent co-porteurs et sont prévenus sur leur canal. Mise en relation des porteurs en un clic.
+
+**Du besoin au projet**
+- Dossier de cadrage généré en arrière-plan à partir de la fiche, de la qualification, des indicateurs et des pièces : contexte, objectifs, périmètre, parties prenantes, exigences MoSCoW, données, épopées et user stories avec critères d'acceptation, plan de POC avec go / no go, business case (chiffres de la fiche uniquement, sinon « à chiffrer »), risques, jalons, questions ouvertes.
+- Exports : Word (.docx), backlog Jira (CSV, épopées et stories reliées) et Azure DevOps (CSV hiérarchique Epic / User Story).
+- Suivi de livraison dans la fiche (À faire, En cours, Fait) avec avancement pondéré par les points ; le porteur voit ce qui est livré et reçoit une notification.
+
+**Prêt pour l'entreprise**
+- Connexion Microsoft Entra ID (OpenID Connect, code d'autorisation avec PKCE) dès que `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID` et `ENTRA_CLIENT_SECRET` sont définis (URI de redirection : `https://<site>/api/auth/callback`). Rôle : rôle d'application Entra (`Metier`, `DSI`, `Direction`, `Admin`), sinon la liste « adresse = rôle » de l'administration, sinon Métier. Session dans un cookie signé (`SESSION_SECRET`, sinon un secret généré et gardé dans Blobs), 8 heures.
+- Rôles vérifiés par l'API sur chaque route : Métier (ses besoins seulement), Direction (lecture de la file, du portefeuille, de la valeur), DSI (qualification, relances, fusions, cadrage, pilotage), Administrateur (réglages, audit, demandes loi 09-08). Sans Entra, un sélecteur de personnes sert à la démonstration ; sans session, le code de démo donne tous les droits, sauf si `AUTH_REQUIRED=1`.
+- Journal d'audit : une entrée par action (connexions, transmissions, statuts, qualifications, fusions, cadrages, réglages, consultations de pièces, exports et effacements), jamais réécrite, filtrable et exportable en CSV.
+- Loi 09-08 (CNDP) : information préalable sur chaque canal, consentement horodaté et versionné sur la fiche ; droits d'accès et d'effacement en libre-service (« Mes besoins », ou MES DONNÉES / SUPPRIMER MES DONNÉES sur WhatsApp et Teams ; STOP arrête les relances) ou par l'administrateur ; durées de conservation appliquées chaque jour (brouillons abandonnés supprimés, besoins clos anonymisés, conversations et journal purgés) ; registre du traitement, sous-traitants et liste de contrôle dans l'administration.
+
 **Côté DSI (onglet « File DSI »)**
 - Fiches reçues avec leur niveau de maturité, leur urgence, les points signalés par l'agent et l'historique complet de l'échange.
 - Échéance de retour calculée à 5 jours ouvrables, avec signalement des retards.
 - Changement de statut (*À qualifier*, *En qualification*, *Qualifié — à instruire*, *Réorienté*, *Clos*) pour les éditeurs de la page.
 - Copilote de qualification (site web) : notes Valeur et Faisabilité de 1 à 5 justifiées, lecture « bottleneck shift » (contrainte actuelle, contrainte déplacée, chaîne de second ordre), trajectoire A / B / C proposée, prérequis, questions d'atelier, besoins proches et brouillon de réponse au porteur. Tout reste une proposition IA à valider par la DSI ; aucun chiffre n'est inventé.
 - Outils (site web) : matrice valeur / faisabilité, relances préparées par l'agent, analyse d'un signal terrain, simulation d'e-mail entrant, horloge de démo (+7, +30, +100 jours) pour montrer le vieillissement des informations, remise à zéro de la file.
+
+## Charte graphique
+
+- Charte complète : `charte.html`, servie sur `/charte.html` et liée depuis l'onglet Administration.
+- Fichiers du logo dans `static/brand/` : original, version nuit (fond `#090C11`), version nuit détourée, version claire détourée pour les documents. Icônes d'application dans `static/icons/`.
+- Couleurs relevées sur le logo : bleu pont `#2A5A93`, bleu profond `#1F4677`, or couronne `#B08A4F` (or texte `#7C5E28` sur fond clair), nuit `#090C11`, encre `#0E1A2B`, porcelaine `#F2F5F9`. À confirmer avec les références officielles (Pantone, CMJN) du Groupe avant tout usage imprimé.
+- Typographies : Montserrat (titres, onglets), IBM Plex Sans (texte), Source Serif 4 (la fiche document), IBM Plex Mono (chiffres).
+- Exports aux couleurs de la charte : couverture PowerPoint nuit avec logo, dossier de cadrage Word avec logo et titres bleus.
 
 ## Architecture du prototype
 
@@ -97,7 +126,12 @@ Une seule page source, `index.html`, qui fonctionne dans deux environnements.
 - `netlify/lib/config.mjs` et `admin-config.mjs`, `admin-eval.mjs`, `config.mjs` : réglages versionnés et banc d'essai.
 - `netlify/lib/portfolio.mjs` et `portfolio.mjs`, `portfolio-bg.mjs` : portefeuille et feuille de route.
 - `netlify/lib/push.mjs` et `push.mjs` : abonnements et envoi des notifications. `static/` contient le manifeste, le service worker et les icônes, copiés dans `public/` par `build.mjs`.
-- Stockage Netlify Blobs : `fiches`, `conversations`, `pilot`, `config`, `push`.
+- Stockage Netlify Blobs : `fiches`, `conversations`, `pilot`, `config`, `push`, `pieces`, `audit`.
+- `netlify/lib/session.mjs` et `auth.mjs` (`/api/auth/me|demo|login|callback|logout`) : sessions, rôles et droits ; `netlify/lib/audit.mjs` et `audit.mjs` (`GET /api/audit`).
+- `netlify/lib/pieces.mjs`, `extract.mjs` et `pieces.mjs` (`GET /api/pieces/:id`) : pièces jointes.
+- `netlify/lib/synergies.mjs`, `synergies.mjs` et `synergies-bg.mjs` : doublons et synergies ; opérations `fusion`, `relation`, `proche_ecarte` du `PATCH /api/fiches/:id`.
+- `netlify/lib/cadrage.mjs` et `cadrage-bg.mjs` : dossier de cadrage ; opération `story` pour le suivi de livraison.
+- `netlify/lib/privacy.mjs` et `privacy.mjs` (`GET`/`POST /api/privacy`) : notice, consentement, export, effacement, conservation.
 - `DEMO_CODE` : si cette variable d'environnement est définie, chaque appel d'API doit porter ce code (en-tête `x-demo-code`). La page le demande une seule fois et le mémorise.
 - Déploiement : `netlify.toml` lance `node build.mjs` et publie `public/`.
 
@@ -115,7 +149,8 @@ La même page, publiée sans build ni dépendance :
 - Les connecteurs WhatsApp et Teams sont écrits mais n'ont pas été testés avec de vrais comptes. Il faut un compte WhatsApp Business (Meta) et une inscription de bot Azure dans le tenant. L'e-mail entrant nécessite un service tiers (Postmark, SendGrid, Mailgun…) relié à `/api/inbound-email`.
 - L'horloge de démo n'agit que sur les calculs de la page et sur les tournées lancées à la main. Les messages reçus par messagerie sont horodatés à l'heure réelle.
 - L'observation se fait par signaux collés à la main. En production, des connecteurs (ITSM, Planner, comptes rendus Teams, SAP/BI) appelleraient le même mode `observe`.
-- Pas d'identité : « Mes besoins » repose sur le navigateur. Le code d'accès de démo n'est pas une authentification.
+- La connexion Microsoft Entra ID est écrite mais n'a pas été testée avec un vrai tenant. Tant que `AUTH_REQUIRED=1` n'est pas posé, le code de démo donne tous les droits : le sélecteur de personnes montre les rôles, il ne protège rien.
+- Les données sont traitées hors du Maroc (Netlify, Anthropic, Google) : une autorisation de transfert de la CNDP, ou un hébergement adapté, est nécessaire avant une mise en production.
+- Les fichiers .xls (ancien format Excel) ne sont pas lus : il faut les enregistrer en .xlsx.
 - Les fonctions de la fiche vivante, le copilote et la dictée n'existent que sur le site web, pas dans la version claude.ai.
-- Toutes les personnes ayant accès à la page voient la file DSI. En production, la lecture serait réservée à la DSI et au porteur du besoin.
 - Pas de module d'administration ni de connexion SAP/BI pour mesurer la valeur réelle.

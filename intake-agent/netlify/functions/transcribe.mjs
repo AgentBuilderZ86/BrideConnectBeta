@@ -1,8 +1,9 @@
-import { authorized } from "../lib/auth.mjs";
+import { guard } from "../lib/session.mjs";
 import { transcribeAudio } from "../lib/transcribe.mjs";
 
 export default async (req) => {
-  if (!authorized(req)) return Response.json({ error: "unauthorized" }, { status: 401 });
+  const a = await guard(req, "fiche.create");
+  if (a.error) return a.error;
   let body;
   try { body = await req.json(); } catch { return Response.json({ error: "invalid json" }, { status: 400 }); }
   const data = body?.audio;

@@ -1,5 +1,5 @@
 // Service worker: offline shell, and notifications for nudges and DSI answers.
-const CACHE = "intake-v1";
+const CACHE = "ai-bridge-v2";
 const SHELL = ["/", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png", "/icons/badge-96.png"];
 
 self.addEventListener("install", (e) => {
@@ -21,7 +21,7 @@ self.addEventListener("fetch", (e) => {
 self.addEventListener("push", (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
-  e.waitUntil(self.registration.showNotification(d.title || "Agent d'intake DSI", {
+  e.waitUntil(self.registration.showNotification(d.title || "AI Bridge", {
     body: d.body || "", tag: d.tag || undefined, renotify: !!d.tag, data: { url: d.url || "/" },
     icon: "/icons/icon-192.png", badge: "/icons/badge-96.png", lang: "fr",
   }));

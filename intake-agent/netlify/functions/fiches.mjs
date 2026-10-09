@@ -1,26 +1,47 @@
 import { getStore } from "@netlify/blobs";
-import { authorized } from "../lib/auth.mjs";
-import { store, listFiches, QUEUE_STATUTS, applyChanges, applyMesures, addEvent, isoOr, scoreOf } from "../lib/fiche.mjs";
-import { deliverNudge } from "../lib/channels.mjs";
+import { guard, can, canActAsOwner, canSeeFiche } from "../lib/session.mjs";
+import { store, listFiches, QUEUE_STATUTS, FIELD_KEYS, applyChanges, applyMesures, addEvent, isoOr, scoreOf } from "../lib/fiche.mjs";
+import { deliverNudge, informOwner } from "../lib/channels.mjs";
 import { pushForFiche } from "../lib/push.mjs";
+import { audit } from "../lib/audit.mjs";
+import { triggerBg } from "../lib/bg.mjs";
 
 const bad = (msg, status = 400) => Response.json({ error: msg }, { status });
 const rid = () => crypto.randomUUID().slice(0, 8);
+// Actions of the person who expressed the need, and actions reserved to the DSI.
+const OWNER_OPS = new Set(["submit", "apply", "dismiss"]);
+const DSI_OPS = new Set(["statut", "propose", "qualif", "nudge", "valeur_def", "mesure", "reponse", "fusion", "relation", "proche_ecarte", "story"]);
+const STORY_STATUTS = ["À faire", "En cours", "Fait"];
+const short = (s, n = 60) => String(s || "votre besoin").slice(0, n);
+
+// Attachment metadata sent by the page at submission (the files themselves are already stored).
+const cleanPieces = (list) => (Array.isArray(list) ? list : []).slice(0, 12).filter((p) => p && typeof p.id === "string" && /^[0-9a-f-]{36}$/.test(p.id)).map((p) => ({
+  id: p.id, name: String(p.name || "piece").slice(0, 120), mime: String(p.mime || "").slice(0, 120), kind: String(p.kind || "").slice(0, 10), label: String(p.label || "").slice(0, 20),
+  size: Number(p.size) || 0, at: isoOr(p.at, new Date().toISOString()), by: String(p.by || "").slice(0, 120), canal: String(p.canal || "web").slice(0, 20),
+  apercu: String(p.apercu || "").slice(0, 400), retenu: String(p.retenu || "").slice(0, 400),
+}));
 
 export default async (req, context) => {
-  if (!authorized(req)) return bad("unauthorized", 401);
+  let a = await guard(req, "fiche.create");
+  if (a.error) return a.error;
   const s = store();
   const id = context.params?.id;
+  const origin = new URL(req.url).origin;
 
   if (req.method === "GET" && !id) {
-    const items = await listFiches();
-    items.sort((a, b) => String(b.submittedAt || b.receivedAt).localeCompare(String(a.submittedAt || a.receivedAt)));
+    let items = await listFiches();
+    // Without the right to read every fiche (Métier role), a person sees only their own.
+    if (!can(a.role, "fiche.read")) items = items.filter((d) => canSeeFiche(d, a));
+    items.sort((x, y) => String(y.submittedAt || y.receivedAt).localeCompare(String(x.submittedAt || x.receivedAt)));
     return Response.json({ items });
   }
 
   if (req.method === "GET" && id) {
     const doc = await s.get(id, { type: "json" });
-    return doc ? Response.json(doc) : bad("not found", 404);
+    if (!doc) return bad("not found", 404);
+    // A fiche without owner (e-mail link, demo data) is readable by whoever holds its id.
+    if (!canSeeFiche(doc, a) && doc.owner) return bad("forbidden", 403);
+    return Response.json(doc);
   }
 
   if (req.method === "POST" && !id) {
@@ -32,9 +53,19 @@ export default async (req, context) => {
     const newId = crypto.randomUUID();
     const now = new Date().toISOString();
     const at = isoOr(doc.submittedAt, now);
-    const out = { ...doc, id: newId, statut: "À qualifier", submittedAt: at, receivedAt: now, origine: doc.origine || "web", pending: [], events: [] };
-    addEvent(out, { at, type: "transmise", by: "métier", text: `Fiche transmise à la DSI après ${doc.echanges || 0} échange(s) avec l'agent.` });
+    const sess = a.session;
+    const out = {
+      ...doc, id: newId, statut: "À qualifier", submittedAt: at, receivedAt: now, origine: doc.origine || "web", pending: [], events: [],
+      pieces: cleanPieces(doc.pieces),
+      owner: sess ? { sub: sess.sub, name: sess.name, email: sess.email || "" } : null,
+      demandeur: sess ? (sess.email || sess.name) : (doc.demandeur || null),
+      consentement: doc.consentement && typeof doc.consentement === "object" ? { at: isoOr(doc.consentement.at, now), version: String(doc.consentement.version || "").slice(0, 20), canal: "web" } : null,
+    };
+    for (const k of ["proches", "cadrage", "coporteurs", "fusionnes", "qualif", "valeur", "nudge"]) delete out[k];
+    addEvent(out, { at, type: "transmise", by: "métier", text: `Fiche transmise à la DSI après ${doc.echanges || 0} échange(s) avec l'agent${out.pieces.length ? ` et ${out.pieces.length} pièce(s) jointe(s)` : ""}.` });
     await s.setJSON(newId, out);
+    await audit(a, "fiche transmise", { target: out, req });
+    await triggerBg(origin, "/api/synergies-bg", { match: newId });
     return Response.json({ id: newId });
   }
 
@@ -43,18 +74,24 @@ export default async (req, context) => {
     if (!doc) return bad("not found", 404);
     let b;
     try { b = await req.json(); } catch { return bad("invalid json"); }
+    const op = b?.op;
+    if (OWNER_OPS.has(op) && !canActAsOwner(doc, a)) return bad("forbidden", 403);
+    if (DSI_OPS.has(op) && (a = await guard(req, "fiche.dsi")).error) return a.error;
+    if (op === "note" && !canActAsOwner(doc, a) && !can(a.role, "fiche.dsi")) return bad("forbidden", 403);
     const at = isoOr(b?.at, new Date().toISOString());
     doc.pending = Array.isArray(doc.pending) ? doc.pending : [];
+    let auditText = "";
 
-    switch (b?.op) {
+    switch (op) {
       case "statut": {
-        if (!QUEUE_STATUTS.includes(b.statut)) return bad("invalid statut");
+        if (!QUEUE_STATUTS.includes(b.statut) || b.statut === "Fusionné") return bad("invalid statut");
         const prev = doc.statut;
         doc.statut = b.statut; doc.statutMaj = at;
         if (b.statut === "En production" && !doc.productionAt) doc.productionAt = at;
         if (b.statut === "En réalisation" && !doc.realisationAt) doc.realisationAt = at;
         addEvent(doc, { at, type: "statut", by: "DSI", text: `Statut : ${prev || "—"} → ${b.statut}${b.note ? ` (${String(b.note).slice(0, 500)})` : ""}` });
-        if (prev !== b.statut) await pushForFiche(id, { title: `« ${String(doc.titre || "Votre besoin").slice(0, 60)} »`, body: `Nouveau statut : ${b.statut}` }).catch(() => 0);
+        if (prev !== b.statut) await pushForFiche(id, { title: `« ${short(doc.titre)} »`, body: `Nouveau statut : ${b.statut}` }).catch(() => 0);
+        auditText = `${prev || "—"} → ${b.statut}`;
         break;
       }
       case "submit": {
@@ -64,7 +101,12 @@ export default async (req, context) => {
           titre: d.titre, fiche: d.fiche, score: d.score, pret: d.pret, alertes: d.alertes, transcript: d.transcript,
           echanges: d.echanges, submittedAt: isoOr(d.submittedAt, at), echeance: d.echeance, statut: "À qualifier",
         });
+        const extra = cleanPieces(d.pieces).filter((p) => !(doc.pieces || []).some((x) => x.id === p.id));
+        doc.pieces = [...(doc.pieces || []), ...extra];
+        if (a.session && !doc.owner) doc.owner = { sub: a.session.sub, name: a.session.name, email: a.session.email || "" };
+        if (d.consentement) doc.consentement = { at: isoOr(d.consentement.at, at), version: String(d.consentement.version || "").slice(0, 20), canal: "web" };
         addEvent(doc, { at, type: "transmise", by: "métier", text: "Brouillon complété avec l'agent et transmis à la DSI." });
+        auditText = "brouillon transmis";
         break;
       }
       case "apply": {
@@ -76,6 +118,7 @@ export default async (req, context) => {
         doc.score = scoreOf(doc.fiche);
         if (b.answeredNudge) doc.nudge = null;
         addEvent(doc, { at, type: "maj", by: b.by || "métier", text: String(b.text || "Fiche mise à jour").slice(0, 1000) + (nm ? ` (${nm} mesure${nm > 1 ? "s" : ""} de valeur)` : ""), fields: changed, source: b.source || "" });
+        auditText = changed.length ? `champs : ${changed.join(", ")}` : "mise à jour";
         break;
       }
       case "propose": {
@@ -100,6 +143,7 @@ export default async (req, context) => {
         doc.qualif = { ...b.qualif, at };
         if (doc.statut === "À qualifier") { doc.statut = "En qualification"; doc.statutMaj = at; }
         addEvent(doc, { at, type: "qualif", by: "copilote", text: `Proposition de qualification : Valeur ${b.qualif.valeur?.note ?? "?"}/5, Faisabilité ${b.qualif.faisabilite?.note ?? "?"}/5, trajectoire ${b.qualif.trajectoire?.code || "?"}.` });
+        auditText = `V${b.qualif.valeur?.note ?? "?"} F${b.qualif.faisabilite?.note ?? "?"} ${b.qualif.trajectoire?.code || ""}`;
         break;
       }
       case "nudge": {
@@ -132,7 +176,7 @@ export default async (req, context) => {
         const text = String(b.text || "").trim();
         if (!text) return bad("empty");
         addEvent(doc, { at, type: "reponse", by: "DSI", text: text.slice(0, 4000) });
-        await pushForFiche(id, { title: `Réponse de la DSI sur « ${String(doc.titre || "votre besoin").slice(0, 60)} »`, body: text.slice(0, 180) }).catch(() => 0);
+        await pushForFiche(id, { title: `Réponse de la DSI sur « ${short(doc.titre)} »`, body: text.slice(0, 180) }).catch(() => 0);
         break;
       }
       case "note": {
@@ -141,22 +185,101 @@ export default async (req, context) => {
         addEvent(doc, { at, type: "note", by: String(b.by || "DSI").slice(0, 40), text: text.slice(0, 2000) });
         break;
       }
+      // Duplicates merged into this fiche: the DSI validated the merged values proposed by the agent.
+      case "fusion": {
+        const srcIds = (Array.isArray(b.sources) ? b.sources : []).map(String).filter((x) => x !== id).slice(0, 8);
+        const srcs = (await Promise.all(srcIds.map((x) => s.get(x, { type: "json" })))).filter((d) => d && d.statut !== "Fusionné");
+        if (!srcs.length) return bad("no source");
+        doc.fiche = doc.fiche || {};
+        const changes = Object.fromEntries((Array.isArray(b.propositions) ? b.propositions : []).filter((p) => p && FIELD_KEYS.includes(p.champ)).map((p) => [p.champ, { valeur: p.valeur, statut: p.statut === "déclaré" ? "déclaré" : "déduit", note: p.raison }]));
+        const changed = applyChanges(doc.fiche, changes, at, "fusion", { protectConfirmed: true });
+        if (typeof b.titre === "string" && b.titre.trim()) doc.titre = b.titre.trim().slice(0, 80);
+        doc.coporteurs = [...(doc.coporteurs || []), ...srcs.map((d) => ({ ficheId: d.id, titre: d.titre, demandeur: d.owner?.name || d.contact?.name || d.demandeur || "", direction: d.fiche?.direction?.valeur || "", canal: d.origine || "web", owner: d.owner ? { sub: d.owner.sub, email: d.owner.email || "" } : null, at }))];
+        doc.fusionnes = [...(doc.fusionnes || []), ...srcs.map((d) => d.id)];
+        doc.pieces = [...(doc.pieces || []), ...srcs.flatMap((d) => d.pieces || [])];
+        doc.proches = (doc.proches || []).filter((p) => !srcIds.includes(p.id));
+        doc.score = scoreOf(doc.fiche);
+        addEvent(doc, { at, type: "synergie", by: "DSI", text: `Fusion : ${srcs.map((d) => `« ${d.titre} »`).join(", ")} rejoint ce besoin, désormais porté conjointement. ${String(b.resume || "").slice(0, 400)}`, fields: changed });
+        for (const d of srcs) {
+          Object.assign(d, { statut: "Fusionné", statutMaj: at, fusionneDans: id, nudge: null });
+          addEvent(d, { at, type: "synergie", by: "DSI", text: `Besoin fusionné dans « ${doc.titre} », qui réunit les demandes identiques. Le suivi continue sur cette fiche commune.` });
+          await s.setJSON(d.id, d);
+          await informOwner(d, { title: `Votre besoin « ${short(d.titre)} »`, text: `La DSI a regroupé votre besoin avec une demande identique : « ${doc.titre} ». Vous en êtes co-porteur ; le suivi continue sur cette fiche commune.`, url: `/?fiche=${id}` }).catch(() => 0);
+          await audit(a, "fiche fusionnée", { target: d, details: `dans « ${doc.titre} »`, req });
+        }
+        await informOwner(doc, { title: `Votre besoin « ${short(doc.titre)} »`, text: `La DSI a regroupé votre besoin avec ${srcs.length} demande(s) identique(s) d'autres équipes : il est désormais porté conjointement.` }).catch(() => 0);
+        auditText = `${srcs.length} fiche(s) fusionnée(s)`;
+        break;
+      }
+      // Puts the owners of two related needs in touch.
+      case "relation": {
+        const other = await s.get(String(b.with || ""), { type: "json" });
+        if (!other || other.id === id) return bad("invalid fiche");
+        const msg = String(b.message || "").trim().slice(0, 800);
+        const who = (d) => [d.owner?.name || d.contact?.name || d.demandeur, d.fiche?.direction?.valeur].filter(Boolean).join(", ") || "un autre demandeur";
+        for (const [x, y] of [[doc, other], [other, doc]]) {
+          x.relations = [...(x.relations || []).filter((r) => r.id !== y.id), { id: y.id, titre: y.titre, avec: who(y), at }];
+          x.proches = (x.proches || []).filter((p) => p.id !== y.id);
+          addEvent(x, { at, type: "synergie", by: "DSI", text: `Mise en relation avec ${who(y)} au sujet de « ${y.titre} ».${msg ? " " + msg : ""}` });
+        }
+        await s.setJSON(other.id, other);
+        await informOwner(doc, { title: "Mise en relation", text: `${msg || "Un besoin proche du vôtre existe ailleurs dans le Groupe."} Contact : ${who(other)} (« ${other.titre} »).` }).catch(() => 0);
+        await informOwner(other, { title: "Mise en relation", text: `${msg || "Un besoin proche du vôtre existe ailleurs dans le Groupe."} Contact : ${who(doc)} (« ${doc.titre} »).`, url: `/?fiche=${other.id}` }).catch(() => 0);
+        auditText = `avec « ${other.titre} »`;
+        break;
+      }
+      case "proche_ecarte": {
+        doc.proches = (doc.proches || []).filter((p) => p.id !== b.with);
+        break;
+      }
+      case "story": {
+        const st = (doc.cadrage?.user_stories || []).find((x) => x.id === b.sid);
+        if (!st || !STORY_STATUTS.includes(b.statut)) return bad("invalid story");
+        const prev = st.statut || "À faire";
+        if (prev === b.statut) break;
+        st.statut = b.statut; st.maj = at;
+        const all = doc.cadrage.user_stories, done = all.filter((x) => x.statut === "Fait");
+        const pts = (l) => l.reduce((n, x) => n + (Number(x.points) || 0), 0);
+        doc.cadrage.avancement = { faites: done.length, total: all.length, pct: pts(all) ? Math.round(100 * pts(done) / pts(all)) : Math.round(100 * done.length / all.length) };
+        addEvent(doc, { at, type: "livraison", by: "DSI", text: `${st.id} « je veux ${st.je_veux} » : ${prev} → ${b.statut} (avancement ${doc.cadrage.avancement.pct} %, ${done.length}/${all.length} stories).` });
+        if (b.statut === "Fait") await informOwner(doc, { title: `Avancement de « ${short(doc.titre)} »`, text: `Livré : ${st.en_tant_que ? `en tant que ${st.en_tant_que}, ` : ""}vous pouvez désormais ${st.je_veux}. Avancement du projet : ${doc.cadrage.avancement.pct} %.`, quiet: true }).catch(() => 0);
+        auditText = `${st.id} → ${b.statut}`;
+        break;
+      }
       default:
         return bad("unknown op");
     }
     await s.setJSON(id, doc);
+    if (op !== "note" && op !== "proche_ecarte") await audit(a, `fiche : ${op}`, { target: doc, details: auditText, req });
+    if (op === "submit") await triggerBg(origin, "/api/synergies-bg", { match: id });
     return Response.json(doc);
   }
 
+  // Deletes one fiche and its attachments (administrators: test data, mistaken submissions).
+  if (req.method === "DELETE" && id) {
+    if ((a = await guard(req, "admin")).error) return a.error;
+    const doc = await s.get(id, { type: "json" });
+    if (!doc) return bad("not found", 404);
+    const ps = getStore({ name: "pieces", consistency: "strong" });
+    await Promise.all((doc.pieces || []).map((p) => ps.delete(p.id).catch(() => 0)));
+    await s.delete(id);
+    await audit(a, "fiche supprimée", { target: doc, req });
+    return Response.json({ deleted: id });
+  }
+
   if (req.method === "DELETE" && !id && new URL(req.url).searchParams.get("all") === "1") {
+    if ((a = await guard(req, "demo.reset")).error) return a.error;
     const { blobs } = await s.list();
     await Promise.all(blobs.map((x) => s.delete(x.key)));
-    // A demo reset also clears conversations and the autopilot history.
-    const conv = getStore({ name: "conversations", consistency: "strong" });
-    const { blobs: cb } = await conv.list();
-    await Promise.all(cb.map((x) => conv.delete(x.key)));
+    // A demo reset also clears conversations, attachments and the autopilot history.
+    for (const name of ["conversations", "pieces"]) {
+      const st = getStore({ name, consistency: "strong" });
+      const { blobs: bl } = await st.list();
+      await Promise.all(bl.map((x) => st.delete(x.key)));
+    }
     const pilot = getStore({ name: "pilot", consistency: "strong" });
-    await Promise.all(["runs", "digests", "running", "portfolio", "portfolio-history", "portfolio-running", "portfolio-error"].map((k) => pilot.delete(k)));
+    await Promise.all(["runs", "digests", "running", "portfolio", "portfolio-history", "portfolio-running", "portfolio-error", "synergies", "synergies-running", "synergies-error"].map((k) => pilot.delete(k)));
+    await audit(a, "remise à zéro de la démo", { details: `${blobs.length} fiche(s) supprimée(s)`, req });
     return Response.json({ deleted: blobs.length });
   }
 

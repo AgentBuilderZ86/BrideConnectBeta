@@ -47,3 +47,18 @@ export async function pushForFiche(ficheId, payload) {
   const sent = await Promise.all(recs.map((r) => sendTo(r, { url: `/?fiche=${ficheId}`, tag: `fiche-${ficheId}`, ...payload })));
   return sent.filter(Boolean).length;
 }
+
+// Stops notifications about these fiches (erasure); a device that follows nothing else is forgotten.
+export async function removeForFiches(ids) {
+  const set = new Set(ids || []); if (!set.size) return 0;
+  const s = store();
+  const { blobs } = await s.list();
+  let n = 0;
+  for (const b of blobs) {
+    const r = await s.get(b.key, { type: "json" });
+    if (!r || !(r.ficheIds || []).some((id) => set.has(id))) continue;
+    r.ficheIds = r.ficheIds.filter((id) => !set.has(id)); n++;
+    if (r.ficheIds.length) await s.setJSON(b.key, r); else await s.delete(b.key);
+  }
+  return n;
+}
