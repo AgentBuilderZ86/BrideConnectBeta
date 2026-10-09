@@ -1,4 +1,4 @@
-# Agent d'Intake Innovation — prototype
+# AI Bridge — agent d'intake Innovation Digitale & IA
 
 Prototype d'un agent qui transforme un besoin exprimé en texte libre en **Fiche d'Expression de Besoin — Innovation Digitale & IA** complète et challengée, puis la transmet à une file de qualification DSI.
 
@@ -101,6 +101,14 @@ Prototype d'un agent qui transforme un besoin exprimé en texte libre en **Fiche
 - Changement de statut (*À qualifier*, *En qualification*, *Qualifié — à instruire*, *Réorienté*, *Clos*) pour les éditeurs de la page.
 - Copilote de qualification (site web) : notes Valeur et Faisabilité de 1 à 5 justifiées, lecture « bottleneck shift » (contrainte actuelle, contrainte déplacée, chaîne de second ordre), trajectoire A / B / C proposée, prérequis, questions d'atelier, besoins proches et brouillon de réponse au porteur. Tout reste une proposition IA à valider par la DSI ; aucun chiffre n'est inventé.
 - Outils (site web) : matrice valeur / faisabilité, relances préparées par l'agent, analyse d'un signal terrain, simulation d'e-mail entrant, horloge de démo (+7, +30, +100 jours) pour montrer le vieillissement des informations, remise à zéro de la file.
+
+## Charte graphique
+
+- Charte complète : `charte.html`, servie sur `/charte.html` et liée depuis l'onglet Administration.
+- Fichiers du logo dans `static/brand/` : original, version nuit (fond `#090C11`), version nuit détourée, version claire détourée pour les documents. Icônes d'application dans `static/icons/`.
+- Couleurs relevées sur le logo : bleu pont `#2A5A93`, bleu profond `#1F4677`, or couronne `#B08A4F` (or texte `#7C5E28` sur fond clair), nuit `#090C11`, encre `#0E1A2B`, porcelaine `#F2F5F9`. À confirmer avec les références officielles (Pantone, CMJN) du Groupe avant tout usage imprimé.
+- Typographies : Montserrat (titres, onglets), IBM Plex Sans (texte), Source Serif 4 (la fiche document), IBM Plex Mono (chiffres).
+- Exports aux couleurs de la charte : couverture PowerPoint nuit avec logo, dossier de cadrage Word avec logo et titres bleus.
 
 ## Architecture du prototype
 
