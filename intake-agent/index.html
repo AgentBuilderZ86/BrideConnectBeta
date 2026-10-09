@@ -557,7 +557,7 @@ main { flex: 1; min-height: 0; }
           <form class="composer" id="composer">
             <div class="box">
               <span class="file-chip" id="file-chip" hidden><span id="file-name"></span><button type="button" id="file-remove" aria-label="Retirer les pièces jointes">×</button></span>
-              <textarea id="msg" rows="2" aria-label="Votre message" placeholder="Ex. : on ressaisit à la main les bons de pesée dans SAP pendant la campagne…"></textarea>
+              <textarea id="msg" rows="2" aria-label="Votre message" placeholder="Ex. : chaque clôture mensuelle, on consolide à la main dans Excel les extractions SAP de tous les sites…"></textarea>
               <div class="row">
                 <button type="button" class="btn-icon" id="attach" hidden title="Joindre une photo, un PDF, un fichier Excel, Word ou PowerPoint (3 fichiers, 4 Mo chacun)">Joindre</button>
                 <input type="file" id="file" accept="image/*" multiple hidden>
@@ -610,7 +610,8 @@ main { flex: 1; min-height: 0; }
           </div>
           <label class="clock" for="sim-persona">Interlocuteur
             <select id="sim-persona">
-              <option value="youssef">Youssef Alami · chef de zone, Amont Agricole</option>
+              <option value="karim">Karim Bennani · contrôleur de gestion, Finance</option>
+              <option value="leila">Leila Bennani · acheteuse, Achats</option>
               <option value="salma">Salma Idrissi · responsable qualité, raffinerie</option>
               <option value="hamid">Hamid Tazi · chef d'équipe maintenance, sucrerie</option>
             </select>
@@ -789,7 +790,7 @@ const URGENCES = ["Immédiat", "Court terme (< 3 mois)", "Moyen terme (3–12 mo
 const RESULTATS = ["Réduction de coûts", "Gain de temps", "Amélioration qualité", "Aide à la décision"];
 const SECTIONS = [
   { n: "1", titre: "Identification", fields: [
-    { k: "direction", label: "Direction / Entité", hint: "Ex. : Amont Agricole, Supply Chain…", w: 5 },
+    { k: "direction", label: "Direction / Entité", hint: "Ex. : Finance, Achats, Supply Chain…", w: 5 },
     { k: "responsable", label: "Responsable métier", hint: "Nom et fonction", w: 5 },
     { k: "urgence", label: "Niveau d'urgence", hint: URGENCES.join(" · "), w: 5, type: "enum" },
   ]},
@@ -824,7 +825,8 @@ const QUEUE_STATUTS = ["À qualifier", "En qualification", "Qualifié — à ins
 const CLOSED = ["Clos", "Réorienté", "Fusionné"];
 
 const EXAMPLES = [
-  { who: "Amont Agricole", text: "Pendant la campagne, on ressaisit à la main dans SAP les tickets de pesée et les bons de livraison de betteraves des agriculteurs. Ça prend énormément de temps et les erreurs créent des réclamations sur les paiements." },
+  { who: "Finance", text: "À chaque clôture mensuelle, le contrôle de gestion consolide à la main dans Excel les extractions SAP de tous les sites pour le reporting du comité de direction. Ça prend 3 jours et les écarts de dernière minute retardent la clôture." },
+  { who: "Achats", text: "Pour chaque consultation, les acheteurs comparent à la main dans Excel les devis reçus par e-mail. Il faut près de 2 jours pour consolider 5 offres, et on ne retrouve jamais les prix payés lors des achats précédents." },
   { who: "Maintenance", text: "On voudrait un outil d'IA pour prédire les pannes des centrifugeuses." },
   { who: "Commercial", text: "Chaque lundi, l'équipe passe la matinée à consolider dans Excel les ventes de chaque région pour le comité commercial." },
 ];
@@ -2054,13 +2056,13 @@ $("#tool-panel").addEventListener("click", async e => {
   const t = e.target;
   if (t.id === "sig-ex") {
     $("#sig-type").value = "Compte rendu de réunion";
-    $("#sig-text").value = "Comité de préparation de campagne — 07/10\n- Amont Agricole : la campagne betteravière démarre le 15/04 ; volume attendu en hausse d'environ 20 % par rapport à l'an dernier.\n- Les pointeurs des centres de collecte saisissent toujours les tickets de pesée sur papier ; 2 saisisseurs intérimaires seront recrutés pour la campagne.\n- Maintenance sucrerie : 3 arrêts non planifiés des centrifugeuses en septembre, environ 6 h chacun ; l'historique d'interventions est dans SAP PM depuis 2021.\n- DSI : la migration SAP S/4HANA est confirmée pour mars, gel des développements SAP de février à avril.";
+    $("#sig-text").value = "Comité de direction — 07/10\n- Finance : la clôture de septembre a été bouclée à J+9, pour un objectif de J+5 ; le reporting consolidé reste préparé dans Excel à partir des extractions SAP des sites.\n- Achats : à partir de janvier, 3 devis sont obligatoires pour tout achat de plus de 50 000 MAD ; environ 400 consultations par an sont concernées.\n- Maintenance sucrerie : 3 arrêts non planifiés des centrifugeuses en septembre, environ 6 h chacun ; l'historique d'interventions est dans SAP PM depuis 2021.\n- DSI : la migration SAP S/4HANA est confirmée pour mars, gel des développements SAP de février à avril.";
     return;
   }
   if (t.id === "em-ex") {
-    $("#em-from").value = "k.benali@exemple.ma"; $("#em-name").value = "Karim Benali";
-    $("#em-subject").value = "Suivi des tournées de collecte";
-    $("#em-body").value = "Bonjour,\n\nPendant la campagne, nos chefs de zone appellent chaque matin les transporteurs pour savoir quels camions passent dans quels points de collecte. Tout est noté sur un tableau Excel partagé qui n'est jamais à jour, et on découvre trop tard les points saturés, ce qui fait attendre les agriculteurs plusieurs heures. Est-ce qu'un outil pourrait nous aider ?\n\nCordialement,\nKarim Benali\nChef de service Logistique amont";
+    $("#em-from").value = "l.bennani@exemple.ma"; $("#em-name").value = "Leila Bennani";
+    $("#em-subject").value = "Suivi des contrats fournisseurs";
+    $("#em-body").value = "Bonjour,\n\nNos contrats-cadres fournisseurs sont rangés dans des dossiers partagés et suivis dans un fichier Excel que personne ne tient à jour. On découvre les échéances de renouvellement trop tard : certains contrats sont reconduits tacitement à des prix que l'on aurait pu renégocier. Est-ce qu'un outil pourrait nous aider ?\n\nCordialement,\nLeila Bennani\nResponsable Achats indirects";
     return;
   }
   if (t.id === "run-nudges") return runNudges(t);
@@ -2262,13 +2264,14 @@ async function openFicheFromLink() {
 
 /* ================= Messaging simulator ================= */
 const PERSONAS = {
-  youssef: { name: "Youssef Alami", phone: "212661234567", ex: ["Salam, pendant la campagne les camions attendent des heures au centre de collecte, on ne sait jamais combien vont arriver.", "Les agriculteurs m'appellent tout le temps pour savoir quand ils seront payés."] },
+  karim: { name: "Karim Bennani", phone: "212665678901", ex: ["Salam, à chaque clôture on passe 3 jours à consolider les extractions SAP des sites dans Excel.", "Les notes de frais arrivent sur papier, on les ressaisit toutes à la main."] },
+  leila: { name: "Leila Bennani", phone: "212664567890", ex: ["On compare les devis fournisseurs à la main dans Excel, ça prend des jours.", "On découvre trop tard les échéances de nos contrats fournisseurs."] },
   salma: { name: "Salma Idrissi", phone: "212662345678", ex: ["On perd beaucoup de temps à compiler les résultats du labo dans Excel pour les certificats qualité des clients.", "Les non-conformités sont notées sur papier, on n'arrive pas à voir les tendances."] },
   hamid: { name: "Hamid Tazi", phone: "212663456789", ex: ["Les pièces de rechange des centrifugeuses ne sont jamais en stock quand on en a besoin.", "On découvre les pannes trop tard, souvent la nuit."] },
 };
-let simChannel = "whatsapp", simPersona = "youssef", simMsgs = [], simFicheId = null, simTimer = null, simBusy = false, simSig = "";
-try { simChannel = localStorage.getItem("intake-sim-ch") || "whatsapp"; simPersona = localStorage.getItem("intake-sim-p") || "youssef"; } catch {}
-if (!PERSONAS[simPersona]) simPersona = "youssef";
+let simChannel = "whatsapp", simPersona = "karim", simMsgs = [], simFicheId = null, simTimer = null, simBusy = false, simSig = "";
+try { simChannel = localStorage.getItem("intake-sim-ch") || "whatsapp"; simPersona = localStorage.getItem("intake-sim-p") || "karim"; } catch {}
+if (!PERSONAS[simPersona]) simPersona = "karim";
 const simSender = () => PERSONAS[simPersona].phone;
 const hhmm = d => { const t = toMs(d); return t ? new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : ""; };
 function simSyncControls() {
@@ -2888,7 +2891,7 @@ $("#app-bar").addEventListener("click", async e => {
 /* ================= Roles & sign-in ================= */
 const DEMO_USERS = [
   { role: "metier", name: "Salma Idrissi", email: "salma.idrissi@exemple.ma", fn: "Responsable qualité · Raffinerie" },
-  { role: "metier", name: "Youssef Alami", email: "youssef.alami@exemple.ma", fn: "Chef de zone · Amont agricole" },
+  { role: "metier", name: "Karim Bennani", email: "karim.bennani@exemple.ma", fn: "Contrôleur de gestion · Finance" },
   { role: "dsi", name: "Nadia Berrada", email: "nadia.berrada@exemple.ma", fn: "Responsable Innovation Digitale & IA · DSI & TD" },
   { role: "direction", name: "Omar El Fassi", email: "omar.elfassi@exemple.ma", fn: "Directeur industriel · Comité de direction" },
   { role: "admin", name: "Administrateur", email: "admin@exemple.ma", fn: "Administration de la plateforme" },
