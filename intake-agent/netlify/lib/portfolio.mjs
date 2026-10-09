@@ -19,7 +19,7 @@ export async function buildPortfolio() {
     const v = valueForAgent(q); if (v) o.indicateurs_valeur = v;
     return JSON.stringify(o);
   }).join("\n");
-  const res = await askJSON({ system: PORTFOLIO, effort: "medium", messages: [{ role: "user", content: `DATE DU JOUR : ${frDate(Date.now())}\n\nBESOINS (un JSON par ligne, ${all.length} au total) :\n${lines}` }] });
+  const res = await askJSON({ system: PORTFOLIO, effort: "medium", maxTokens: 32000, messages: [{ role: "user", content: `DATE DU JOUR : ${frDate(Date.now())}\n\nBESOINS (un JSON par ligne, ${all.length} au total) :\n${lines}` }] });
   if (!Array.isArray(res.cas_usage)) throw new Error("Réponse de l'agent inexploitable.");
   const ids = new Set(all.map((q) => q.id));
   res.cas_usage = res.cas_usage.map((c) => ({ ...c, besoins: (c.besoins || []).filter((id) => ids.has(id)) }));

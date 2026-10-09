@@ -45,7 +45,7 @@ export async function buildCadrage(id) {
     (doc.alertes || []).length ? `POINTS SIGNALÉS PAR L'AGENT D'INTAKE :\n${doc.alertes.map((x) => "- " + x.texte).join("\n")}` : "",
     `JOURNAL (derniers événements) :\n${(doc.events || []).slice(-12).map((e) => `- ${frDate(e.at)} ${e.text}`).join("\n")}`,
   ].filter(Boolean);
-  const res = await askJSON({ system: CADRAGE, effort: "medium", messages: [{ role: "user", content: parts.join("\n\n") }] });
+  const res = await askJSON({ system: CADRAGE, effort: "medium", maxTokens: 32000, messages: [{ role: "user", content: parts.join("\n\n") }] });
   const c = clean(res);
   if (!c.user_stories.length) throw new Error("dossier incomplet : aucune user story");
   const fresh = await fs.get(id, { type: "json" });

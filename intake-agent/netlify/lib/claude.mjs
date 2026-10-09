@@ -75,12 +75,13 @@ export function streamAgent({ system, messages, effort = "low", prelude = null }
   return new Response(rs, { headers: { "content-type": "application/x-ndjson; charset=utf-8", "cache-control": "no-store" } });
 }
 
-// Server-side call that returns the parsed JSON answer (used by the inbound e-mail channel).
-export async function askJSON({ system, messages, effort = "low" }) {
-  const final = await client.messages.stream({ model: MODEL, max_tokens: 16000, system, output_config: { effort }, messages }).finalMessage();
+// Server-side call that returns the parsed JSON answer (channels, autopilot, background jobs).
+// Long answers (portfolio, scoping file) pass a higher maxTokens: thinking counts against it too.
+export async function askJSON({ system, messages, effort = "low", maxTokens = 16000 }) {
+  const final = await client.messages.stream({ model: MODEL, max_tokens: maxTokens, system, output_config: { effort }, messages }).finalMessage();
   if (final.stop_reason === "refusal") throw new Error("refusal");
   const text = final.content.filter((b) => b.type === "text").map((b) => b.text).join("");
   const obj = parseLoose(text);
-  if (!obj || typeof obj !== "object") throw new Error("invalid json");
+  if (!obj || typeof obj !== "object") throw new Error(final.stop_reason === "max_tokens" ? `réponse tronquée (plafond de ${maxTokens} jetons atteint)` : "invalid json");
   return obj;
 }
