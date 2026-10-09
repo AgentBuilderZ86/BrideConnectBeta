@@ -2742,10 +2742,10 @@ async function exportPptx() {
   const p = pf?.portfolio; if (!p) { toast("Construisez d'abord la feuille de route."); return; }
   await loadScript("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js");
   const INK = "0E1A2B", ACC = "2A5A93", GOLD = "B08A4F", NIGHT = "090C11", MUT = "6E7E94", LINE = "D3DCE7", FONT = "Calibri";
-  const logo = await brandImage("/brand/ai-bridge-nuit.png");
+  const logo = await brandImage("/brand/ai-bridge-nuit.png"), logoClair = await brandImage("/brand/ai-bridge-clair.png");
   const pptx = new window.PptxGenJS(); pptx.layout = "LAYOUT_WIDE";
   const foot = (s, n) => { s.addText("Proposition IA — à valider en COPIL · DSI & TD, Innovation Digitale & IA", { x: 0.5, y: 7.0, w: 10, h: 0.3, fontSize: 9, color: MUT, fontFace: FONT }); s.addText(String(n), { x: 12.3, y: 7.0, w: 0.6, h: 0.3, fontSize: 9, color: MUT, align: "right", fontFace: FONT }); };
-  const title = (s, t) => { s.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.45, w: 0.08, h: 0.55, fill: { color: GOLD }, line: { color: GOLD } }); s.addText(t, { x: 0.75, y: 0.4, w: 11.2, h: 0.65, fontSize: 26, bold: true, color: INK, fontFace: FONT }); if (logo) s.addImage({ data: logo, x: 11.95, y: 0.3, w: 1.0, h: 0.56 }); };
+  const title = (s, t) => { s.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.45, w: 0.08, h: 0.55, fill: { color: GOLD }, line: { color: GOLD } }); s.addText(t, { x: 0.75, y: 0.4, w: 11.2, h: 0.65, fontSize: 26, bold: true, color: INK, fontFace: FONT }); if (logoClair) s.addImage({ data: logoClair, x: 11.85, y: 0.32, w: 1.06, h: 0.57 }); };
   let n = 1;
   let s = pptx.addSlide();
   s.background = { color: NIGHT };
