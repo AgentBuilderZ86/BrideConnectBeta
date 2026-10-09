@@ -1,0 +1,395 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>AI Bridge — comment ça marche</title>
+<link rel="stylesheet" href="../fonts/brand.css">
+<style>html,body{margin:0;height:100%;background:#090C11;display:grid;place-items:center}canvas{max-width:100vw;max-height:100vh}</style>
+<canvas id="c"></canvas>
+<script src="../lib/motion.js"></script>
+<script src="ai-bridge.assets.js"></script>
+<script>
+// AI Bridge : du besoin métier au projet. Vrais écrans de l'application (agent simulé, données de démo).
+// window.seek(t) peint l'image t, fonction pure du temps.
+
+// ── réglages ──
+window.DUR = 44;
+window.BPM = 120;
+const C = {
+  bg: '#090C11', panel: '#121923', line: '#253140', ink: '#E9EEF5', dim: '#A3B0C2', accent: '#CFAA6B',
+};
+// pastilles de statut de l'application (couleurs du CSS de la page)
+const ST = [
+  { label: "À compléter", fg: '#7D8B9C', bg: '#EDF1F5' },
+  { label: "Proposé par l'agent", fg: '#9A5B00', bg: '#FBEFD8' },
+  { label: "Déclaré", fg: '#1D5A9E', bg: '#E1EBF7' },
+  { label: "Confirmé", fg: '#1C6E45', bg: '#DDF1E5' },
+];
+
+// ── scène ──
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1920, H = +q.get('h') || 1080, u = Math.min(W, H) / 1080;
+const cv = document.getElementById('c'); cv.width = W; cv.height = H;
+const g = cv.getContext('2d');
+const b = (n) => n * 60 / BPM;
+const TITLE = 'Montserrat', TEXT = 'IBM Plex Sans', MONO = 'IBM Plex Mono';
+const font = (size, weight = 700, face = TITLE) => `${weight} ${size * u}px "${face}", system-ui, sans-serif`;
+
+const IMG = {};
+window.ready = Promise.all([
+  ...['800 10px Montserrat', '700 10px Montserrat', '500 10px "IBM Plex Sans"', '500 10px "IBM Plex Mono"']
+    .map((f) => document.fonts.load(f).catch(() => {})),
+  ...Object.entries(window.ASSETS).map(([k, src]) => new Promise((res) => {
+    const im = new Image(); im.onload = () => { IMG[k] = im; res(); }; im.onerror = res; im.src = src;
+  })),
+]);
+
+// ── outils ──
+const mix = (a, c, k) => {
+  const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const A = p(a), B = p(c);
+  return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',')})`;
+};
+// texte qui monte d'une fente (pas de fondu)
+function slot(text, x, y, size, t, { weight = 700, face = TITLE, color = C.ink, align = 'left', k = 260, d = 34 } = {}) {
+  g.save(); g.font = font(size, weight, face); g.textAlign = align;
+  const s = spring(t, k, d), wdt = g.measureText(text).width;
+  const x0 = align === 'left' ? x : align === 'right' ? x - wdt : x - wdt / 2;
+  g.beginPath(); g.rect(x0 - 8 * u, y - size * u * 1.0, wdt + 16 * u, size * u * 1.28); g.clip();
+  g.fillStyle = color; g.fillText(text, x, y + (1 - s) * size * u * 1.3);
+  g.restore();
+  return wdt;
+}
+// en-tête d'étape : numéro or + titre sur plusieurs lignes + sous-titre
+function stepHead(n, lines, sub, x, y, t, size = 64) {
+  if (n) slot(n, x, y, 34, t, { weight: 500, face: MONO, color: C.accent });
+  const y0 = y + (n ? 34 * u + size * u * 1.15 : 0);
+  lines.forEach((l, i) => slot(l, x, y0 + i * size * u * 1.18, size, t - b(0.25) - i * 0.06));
+  (sub || []).forEach((l, i) => slot(l, x, y0 + (lines.length - 1) * size * u * 1.18 + 70 * u + i * 52 * u, 38, t - b(1) - i * 0.06,
+    { weight: 500, face: TEXT, color: C.dim }));
+}
+// une capture d'écran, recadrée (sx..sh dans l'image), dans un cadre arrondi
+function shot(key, sx, sy, sw, sh, dx, dy, dw, dh, r = 18) {
+  const im = IMG[key]; if (!im) return;
+  g.save(); g.beginPath(); g.roundRect(dx, dy, dw, dh, r * u); g.clip();
+  g.drawImage(im, sx, sy, sw, sh, dx, dy, dw, dh); g.restore();
+  g.save(); g.strokeStyle = 'rgba(233,238,245,0.10)'; g.lineWidth = 2 * u;
+  g.beginPath(); g.roundRect(dx, dy, dw, dh, r * u); g.stroke(); g.restore();
+}
+function cursor(x, y, press = 0) {
+  const s = (1 - 0.18 * press) * 1.15 * u;
+  g.save(); g.translate(x, y); g.scale(s, s);
+  g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 34); g.lineTo(9, 26); g.lineTo(15, 40); g.lineTo(21, 37); g.lineTo(15, 24); g.lineTo(26, 24); g.closePath();
+  g.fillStyle = '#0E1A2B'; g.fill(); g.lineWidth = 2.5; g.strokeStyle = '#FFFFFF'; g.stroke();
+  g.restore();
+}
+function chip(text, x, y, t, { dot = false } = {}) {
+  const s = spring(t, 320, 30); if (s <= 0) return;
+  g.save(); g.font = font(34, 500, TEXT);
+  const w = g.measureText(text).width + (dot ? 74 : 48) * u, h = 64 * u, xx = x - (1 - s) * 80 * u;
+  g.beginPath(); g.rect(x - 20 * u, y - 4 * u, W, h + 8 * u); g.clip();
+  g.fillStyle = C.panel; g.strokeStyle = C.line; g.lineWidth = 2 * u;
+  g.beginPath(); g.roundRect(xx, y, w, h, h / 2); g.fill(); g.stroke();
+  if (dot) { g.fillStyle = C.accent; g.beginPath(); g.arc(xx + 32 * u, y + h / 2, 8 * u, 0, 7); g.fill(); }
+  g.fillStyle = C.ink; g.textBaseline = 'middle'; g.fillText(text, xx + (dot ? 52 : 24) * u, y + h / 2 + 1 * u);
+  g.restore();
+}
+const pushUp = (t, at) => g.translate(0, -H * spring(t - at, 170, 26));
+const pushLeft = (t, at) => g.translate(-W * spring(t - at, 170, 26), 0);
+const enterUp = (t) => g.translate(0, H * (1 - spring(t, 170, 26)));
+const enterLeft = (t) => g.translate(W * (1 - spring(t, 170, 26)), 0);
+
+const X0 = 0.07 * W;                         // marge gauche commune
+const SW = 1120 * u;                         // largeur des écrans
+const RX = W - 0.04 * W - SW;                // colonne des écrans
+
+// ── son : partition originale + un son par événement visuel ──
+window.CUES = [
+  ...beatBed(BPM, DUR),
+  // 1 accroche
+  { t: 0, type: 'thump' }, ...[0, 1, 2, 3, 4, 5].map((i) => ({ t: i * b(0.125), type: 'tick', gain: 0.5 })),
+  { t: b(1), type: 'pop' }, { t: b(2), type: 'whoosh' }, ...[0, 1, 2, 3, 4, 5, 6].map((i) => ({ t: b(3) + i * b(0.125), type: 'tick', gain: 0.4 })),
+  { t: b(6), type: 'whoosh' },
+  // 2 capture
+  ...[0, 1, 2, 3, 4].map((i) => ({ t: b(7.5) + i * b(0.5), type: 'pop', gain: 0.6 })), { t: b(7), type: 'thump', gain: 0.6 },
+  { t: b(14), type: 'whoosh' },
+  // 3 intake
+  { t: b(18), type: 'click' }, { t: b(19), type: 'whoosh', gain: 0.5 }, { t: b(24), type: 'whoosh', gain: 0.6 }, { t: b(25.5), type: 'tick' },
+  { t: b(15), type: 'pop', gain: 0.5 }, { t: b(20), type: 'pop', gain: 0.5 }, { t: b(24), type: 'pop', gain: 0.5 },
+  { t: b(30), type: 'whoosh' },
+  // 4 statuts
+  ...[1, 2.5, 4.5, 6].map((n) => ({ t: b(30 + n), type: 'pop' })), { t: b(33), type: 'thump', gain: 0.6 },
+  { t: b(38), type: 'whoosh' },
+  // 5 file DSI
+  ...[0, 1, 2, 3, 4].map((i) => ({ t: b(39) + i * b(0.5), type: 'pop', gain: 0.6 })),
+  ...[0, 1, 2, 3, 4].map((i) => ({ t: b(43) + i * b(0.5), type: 'tick' })), { t: b(45.5), type: 'thump', gain: 0.6 },
+  { t: b(48), type: 'whoosh' },
+  // 6 copilote → matrice
+  { t: b(50), type: 'pop', gain: 0.5 }, { t: b(51), type: 'pop', gain: 0.5 }, { t: b(54), type: 'whoosh' },
+  { t: b(56), type: 'pop' }, { t: b(57), type: 'pop', gain: 0.6 },
+  { t: b(60), type: 'whoosh' },
+  // 7 fiche vivante
+  { t: b(61), type: 'whoosh', gain: 0.5 }, ...[2, 3.5, 5, 6.5].map((n) => ({ t: b(60 + n), type: 'tick' })),
+  ...[2, 3.5, 5, 6.5].map((n) => ({ t: b(60 + n), type: 'pop', gain: 0.5 })),
+  { t: b(70), type: 'whoosh' },
+  // 8 feuille de route
+  ...[1, 2.5, 4].map((n) => ({ t: b(70 + n), type: 'thump', gain: 0.5 })), { t: b(77), type: 'pop' }, { t: b(77.5), type: 'pop' },
+  { t: b(80), type: 'whoosh' },
+  // 9 lockup
+  { t: b(80.5), type: 'thump' }, { t: b(82), type: 'chime' },
+];
+
+// ── plans ──
+const SCENES = [
+  // 1. Accroche : MÉTIER ⟷ DSI, un pont d'or se tend entre les deux
+  { from: 0, to: b(7), draw(t) {
+      pushUp(t, b(6));
+      const size = 168, y = H * 0.5;
+      g.font = font(size, 800);
+      const wM = g.measureText('MÉTIER').width, wD = g.measureText('DSI').width;
+      let x = X0;
+      g.save(); g.beginPath(); g.rect(0, y - size * u * 0.86, W, size * u * 0.9); g.clip(); g.fillStyle = C.ink;
+      'MÉTIER'.split('').forEach((ch, i) => { const s = spring(t + 0.55 - i * 0.05, 260, 34); g.fillText(ch, x, y + (1 - s) * size * u); x += g.measureText(ch).width; });
+      const xD = W - X0 - wD, sD = spring(t - b(0.5), 260, 34);
+      g.fillText('DSI', xD, y + (1 - sD) * size * u);
+      g.restore();
+      // le pont : câble porteur, tablier, suspentes
+      const x1 = X0 + wM + 44 * u, x2 = xD - 44 * u, top = y - size * u * 0.72, deck = y - size * u * 0.12;
+      const p = spring(t - b(1), 120, 22), cable = (k) => top + Math.sin(Math.PI * k) * (deck - top) * 0.78;
+      g.save(); g.strokeStyle = C.accent; g.lineCap = t > b(1.2) ? 'round' : 'butt';
+      g.lineWidth = 9 * u; g.beginPath();
+      for (let i = 0; i <= 60 * p; i++) { const k = i / 60, xx = x1 + (x2 - x1) * k; i ? g.lineTo(xx, cable(k)) : g.moveTo(xx, cable(k)); }
+      g.stroke();
+      g.lineWidth = 12 * u; g.beginPath(); g.moveTo(x1, deck); g.lineTo(x1 + (x2 - x1) * spring(t - b(1.5), 170, 26), deck); g.stroke();
+      g.lineWidth = 4 * u;
+      for (let i = 1; i < 8; i++) {
+        const k = i / 8, xx = x1 + (x2 - x1) * k, s = spring(t - b(2) - i * b(0.125), 260, 30);
+        if (s > 0) { g.beginPath(); g.moveTo(xx, cable(k)); g.lineTo(xx, cable(k) + (deck - cable(k)) * s); g.stroke(); }
+      }
+      g.restore();
+      slot("Comment un besoin métier devient un projet", X0, y + 120 * u, 46, t - b(2.5), { weight: 500, face: TEXT, color: C.dim });
+  }},
+
+  // 2. 01 Capture multicanal + vrai téléphone WhatsApp
+  { from: b(6), to: b(15), draw(t) {
+      enterUp(t); pushLeft(t, b(8));
+      stepHead('01', ['Le métier décrit', 'son besoin'], ['sur le canal de son choix'], X0, 230 * u, t + b(0.5), 76);
+      ['Site web', 'WhatsApp', 'Teams', 'E-mail', 'Note vocale · darija'].forEach((c, i) =>
+        chip(c, X0, 610 * u + i * 82 * u, t - b(1) - i * b(0.5), { dot: i === 4 }));
+      const ph = IMG.phone, dh = 0.88 * H, dw = dh * 798 / 1205, px = W - 0.08 * W - dw, py = 0.06 * H;
+      const s = spring(t - b(0.25), 170, 26);
+      g.save(); g.translate(0, (1 - s) * H * 0.9);
+      shot('phone', 0, 0, 798, 1205, px, py, dw, dh, 36);
+      // marque d'or le long de la note vocale transcrite (darija → français)
+      const k = dh / 1205, m = spring(t - b(4), 170, 26);
+      g.fillStyle = C.accent; g.fillRect(px - 26 * u, py + 154 * k, 8 * u, (410 - 154) * k * m * (1 - spring(t - b(5.5), 320, 30)));
+      const m2 = spring(t - b(5.5), 320, 30);
+      g.fillRect(px - 26 * u, py + 953 * k, 8 * u, (1047 - 953) * k * m2);
+      if (m2 > 0) slot('« OUI » : la fiche part à la DSI', px - 48 * u, py + 1015 * k, 36, t - b(5.5), { weight: 500, face: TEXT, color: C.accent, align: 'right' });
+      g.restore();
+  }},
+
+  // 3. 02 L'agent challenge et remplit la fiche (vraie conversation, curseur, volet, zoom)
+  { from: b(14), to: b(31), draw(t) {
+      enterLeft(t); pushUp(t, b(16));
+      slot('02', X0, 118 * u, 34, t - b(0.25), { weight: 500, face: MONO, color: C.accent });
+      slot("L'agent challenge et remplit la fiche en direct", X0 + 70 * u, 118 * u, 52, t - b(0.5));
+      // colonne d'annotations
+      const notes = [['Au plus 3 questions', 'par tour'], ['Le coût, chiffré', 'avec vous'], ['Vous validez', 'chaque champ']];
+      notes.forEach((n, i) => {
+        const at = [b(1), b(6), b(11)][i], yy = 330 * u + i * 210 * u;
+        const s = spring(t - at, 320, 30);
+        g.fillStyle = C.accent; g.fillRect(X0, yy - 44 * u, 6 * u, 104 * u * s);
+        n.forEach((l, j) => slot(l, X0 + 28 * u, yy + j * 50 * u, 38, t - at - j * 0.05, { weight: 500, face: TEXT }));
+      });
+      // l'écran et sa caméra
+      const fw = 1290 * u, fh = fw / 1.6, fx = W - 0.04 * W - fw, fy = 190 * u;
+      const sx = track(t, [[0, 0], [b(9), 1880]], 120, 24), sy = track(t, [[0, 520], [b(9), 92]], 120, 24);
+      const sw = track(t, [[0, 2050], [b(9), 1000]], 120, 24), sh = sw / 1.6;
+      const sc = fw / sw, map = (x, y) => [fx + (x - sx) * sc, fy + (y - sy) * sc];
+      const e = spring(t, 170, 26);
+      g.save(); g.translate(0, (1 - e) * 60 * u);
+      shot('c1', sx, sy, sw, sh, fx, fy, fw, fh);
+      // volet : l'état suivant balaie de gauche à droite
+      const wp = spring(t - b(5), 170, 26);
+      if (wp > 0) {
+        g.save(); g.beginPath(); g.roundRect(fx, fy, fw * wp, fh, 18 * u); g.clip();
+        shot('c2', sx, sy, sw, sh, fx, fy, fw, fh); g.restore();
+        if (wp < 0.995) { g.fillStyle = C.accent; g.fillRect(fx + fw * wp - 3 * u, fy, 6 * u, fh); }
+      }
+      // le curseur vient cliquer « 3 personnes, 6 sites »
+      const [cx, cy] = map(250, 1478);
+      const kx = track(t, [[0, fx + fw * 0.62], [b(2), cx], [b(6), fx + fw * 0.4]], 170, 26);
+      const ky = track(t, [[0, fy + fh + 140 * u], [b(2), cy], [b(6), fy + fh + 160 * u]], 170, 26);
+      const press = spring(t - b(4), 400, 20) - spring(t - b(4.3), 400, 20);
+      if (t > b(1) && t < b(8)) {
+        if (press > 0.02) { g.strokeStyle = C.accent; g.lineWidth = 3 * u; g.beginPath(); g.arc(cx, cy, (14 + 40 * spring(t - b(4), 170, 26)) * u, 0, 7); g.stroke(); }
+        cursor(kx, ky, press);
+      }
+      // zoom : l'or encadre la jauge de maturité (63 %)
+      const hl = spring(t - b(11), 170, 26);
+      if (hl > 0) {
+        const [ax, ay] = map(1950, 262), [bx, by] = map(2860, 330);
+        g.save(); g.strokeStyle = C.accent; g.lineWidth = 5 * u;
+        g.setLineDash([((bx - ax) + (by - ay)) * 2 * hl, 99999]);
+        g.beginPath(); g.roundRect(ax, ay, bx - ax, by - ay, 12 * u); g.stroke(); g.restore();
+      }
+      g.restore();
+  }},
+
+  // 4. Rien n'est inventé : une seule pastille se transforme à travers les statuts
+  { from: b(30), to: b(39), draw(t) {
+      enterUp(t); pushLeft(t, b(8));
+      slot("Rien n'est inventé.", X0, 330 * u, 104, t - b(0.25), { weight: 800, k: 200, d: 28 });
+      slot("Chaque information garde son statut et sa source.", X0, 420 * u, 42, t - b(0.75), { weight: 500, face: TEXT, color: C.dim });
+      const keys = [b(1), b(2.5), b(4.5), b(6)];
+      g.font = font(44, 500, MONO);
+      const widths = ST.map((s) => g.measureText(s.label).width + 72 * u);
+      const pw = track(t, [[0, 0], ...keys.map((k, i) => [k, widths[i]])], 320, 30);
+      const col = (f) => { let c = ST[0][f]; keys.slice(1).forEach((k, i) => { c = mix(c.startsWith('#') ? c : rgbHex(c), ST[i + 1][f], spring(t - k, 320, 30)); }); return c; };
+      const py = 500 * u, ph = 92 * u;
+      if (pw > 1) {
+        g.fillStyle = col('bg'); g.beginPath(); g.roundRect(X0, py, pw, ph, ph / 2); g.fill();
+        g.save(); g.beginPath(); g.roundRect(X0, py, pw, ph, ph / 2); g.clip();
+        g.textBaseline = 'middle'; g.fillStyle = col('fg');
+        ST.forEach((s, i) => { const a = swapAlpha(t, keys[i], keys[i + 1] ?? Infinity); if (a > 0) { g.globalAlpha = a; g.fillText(s.label, X0 + 36 * u, py + ph / 2 + 2 * u); } });
+        g.restore(); g.globalAlpha = 1;
+      }
+      // le calcul que l'agent montre, écrit au clavier
+      const calc = '3 personnes × 3 jours × 12 clôtures = 108 jours-homme';
+      const nch = Math.floor(Math.max(0, t - b(2.8)) * 44);
+      if (nch > 0) {
+        slot('Calcul montré par l\'agent', X0, 690 * u, 34, t - b(2.6), { weight: 500, face: TEXT, color: C.dim });
+        g.font = font(40, 500, MONO); g.fillStyle = C.ink; g.textBaseline = 'alphabetic';
+        g.fillText(calc.slice(0, nch), X0, 752 * u);
+      }
+      // le chiffre retenu, à droite
+      const n = Math.round(108 * spring(t - b(3), 90, 19));
+      if (t > b(3)) {
+        g.save(); g.textAlign = 'right';
+        slot(String(n), W - X0, 590 * u, 300, t - b(3), { weight: 500, face: MONO, color: C.accent, align: 'right', k: 200, d: 26 });
+        slot('jours-homme par an', W - X0, 660 * u, 38, t - b(3.5), { weight: 500, face: TEXT, color: C.dim, align: 'right' });
+        g.restore();
+      }
+  }},
+
+  // 5. 03 File DSI : les fiches reçues arrivent une à une
+  { from: b(38), to: b(49), draw(t) {
+      enterLeft(t); pushUp(t, b(10));
+      stepHead('03', ['La DSI reçoit', 'des fiches', 'prêtes', 'à qualifier'], null, X0, 200 * u, t - b(0.25), 60);
+      // compteur d'échéance
+      const day = Math.min(5, Math.max(0, Math.floor((t - b(5)) / b(0.5)) + 1));
+      if (t > b(4.5)) {
+        slot(`J+${day}`, X0, 800 * u, 120, t - b(4.5), { weight: 500, face: MONO, color: C.accent });
+        slot('échéance de retour : 5 jours ouvrables', X0, 870 * u, 36, t - b(5), { weight: 500, face: TEXT, color: C.dim });
+      }
+      const sc = SW / 2080, x = RX, y0 = (H - 835 * sc) / 2;
+      [[0, 140], [161, 140], [324, 184], [531, 140], [692, 143]].forEach(([sy, sh], i) => {
+        const s = spring(t - b(1) - i * b(0.5), 200, 26);
+        if (s <= 0) return;
+        shot('dsi', 0, sy, 2080, sh, x, y0 + sy * sc + (1 - s) * H * 0.75, 2080 * sc, sh * sc, 14);
+      });
+      const m = spring(t - b(7.5), 320, 30);
+      g.fillStyle = C.accent; g.fillRect(x - 22 * u, y0, 8 * u, 140 * sc * m);
+  }},
+
+  // 6. Le copilote propose, la DSI décide : copilote → matrice valeur / faisabilité
+  { from: b(48), to: b(61), draw(t) {
+      enterUp(t); pushLeft(t, b(12));
+      stepHead(null, ['Le copilote IA', 'propose,', 'la DSI décide'], ['valeur, faisabilité,', 'trajectoire, bottleneck shift'], X0, 300 * u, t - b(0.25), 66);
+      // copilote, puis il monte et laisse place à la matrice
+      const out = spring(t - b(6), 170, 26), cw = SW, csc = cw / 2010, ch = 803 * csc, cy = (H - ch) / 2;
+      if (out < 0.999) {
+        g.save(); g.translate(0, -H * out);
+        shot('copilot', 0, 0, 2010, 803, RX, cy, cw, ch);
+        [[79, 2], [736, 3]].forEach(([ux, at]) => { const s = spring(t - b(at), 320, 30); g.fillStyle = C.accent; g.fillRect(RX + ux * csc, cy + 236 * csc, 100 * csc * s, 7 * u); });
+        g.restore();
+      }
+      const ms = spring(t - b(6), 170, 26);
+      if (ms > 0) {
+        const mh = 0.74 * H, msc = mh / 864, mw = 1253 * msc, mx = RX + (SW - mw) / 2, my = (H - mh) / 2;
+        g.save(); g.translate(0, H * (1 - ms));
+        shot('matrix', 0, 0, 1253, 864, mx, my, mw, mh);
+        // anneau d'or sur la fiche n° 1 (clôture mensuelle) : quick win
+        const r1 = spring(t - b(8), 200, 14), r2 = spring(t - b(9), 260, 30);
+        if (r1 > 0) {
+          const dx = mx + 910 * msc, dy = my + 248 * msc;
+          g.strokeStyle = C.accent; g.lineWidth = 6 * u;
+          g.beginPath(); g.arc(dx, dy, (24 + 10 * r1) * u, 0, 7); g.stroke();
+          g.lineWidth = 3 * u; g.beginPath(); g.arc(dx, dy, (34 + 34 * r2) * u, 0, 7 * r2); g.stroke();
+        }
+        g.restore();
+      }
+  }},
+
+  // 7. 04 Le besoin reste vivant : la ligne du temps se dessine
+  { from: b(60), to: b(71), draw(t) {
+      enterLeft(t); pushUp(t, b(10));
+      slot('04', X0, 230 * u, 34, t - b(0.25), { weight: 500, face: MONO, color: C.accent });
+      slot('Le besoin reste vivant', X0, 330 * u, 84, t - b(0.5), { weight: 800, k: 200, d: 28 });
+      slot("Chaque jour à 7 h, l'agent fait sa tournée et relance", X0, 410 * u, 40, t - b(1), { weight: 500, face: TEXT, color: C.dim });
+      slot("sur le canal d'origine : WhatsApp, Teams, e-mail ou application.", X0, 462 * u, 40, t - b(1.1), { weight: 500, face: TEXT, color: C.dim });
+      const y = 690 * u, x1 = X0, x2 = W - X0, L = spring(t - b(1), 90, 22);
+      g.fillStyle = C.line; g.fillRect(x1, y - 3 * u, x2 - x1, 6 * u);
+      g.fillStyle = C.accent; g.fillRect(x1, y - 3 * u, (x2 - x1) * L, 6 * u);
+      const M = [
+        [0, 'J0', ['Fiche transmise'], 'left'],
+        [0.33, 'J+7', ['Hypothèse non confirmée', '→ relance au porteur'], 'center'],
+        [0.66, 'J+30', ['En production :', 'mesure de la valeur'], 'center'],
+        [1, 'J+90', ['Coût à revalider'], 'right'],
+      ];
+      M.forEach(([k, d, ls, al], i) => {
+        const at = b([2, 3.5, 5, 6.5][i]), s = spring(t - at, 200, 14), x = x1 + (x2 - x1) * k;
+        if (s <= 0) return;
+        g.fillStyle = C.bg; g.beginPath(); g.arc(x, y, 22 * u * s, 0, 7); g.fill();
+        g.strokeStyle = C.accent; g.lineWidth = 6 * u; g.beginPath(); g.arc(x, y, 18 * u * Math.min(1, s), 0, 7); g.stroke();
+        slot(d, x, y - 50 * u, 46, t - at, { weight: 500, face: MONO, color: C.accent, align: al });
+        ls.forEach((l, j) => slot(l, x, y + 80 * u + j * 48 * u, 36, t - at - 0.05 - j * 0.05, { weight: 500, face: TEXT, align: al }));
+      });
+  }},
+
+  // 8. 05 Du portefeuille à la feuille de route : trois vagues révélées par masques
+  { from: b(70), to: b(81), draw(t) {
+      enterUp(t); pushUp(t, b(10));
+      stepHead('05', ['Du portefeuille', 'à la feuille', 'de route'], ['trois vagues, à valider', 'en COPIL'], X0, 210 * u, t - b(0.25), 62);
+      const sc = SW / 2016, ch = 1069 * sc, y = (H - ch) / 2;
+      [[3, 652], [681, 652], [1361, 652]].forEach(([sx, sw], i) => {
+        const at = b(1 + 1.5 * i), s = spring(t - at, 120, 22);
+        if (s <= 0) return;
+        const x = RX + sx * sc;
+        g.save(); g.beginPath(); g.rect(x - 4 * u, y - 30 * u, sw * sc + 8 * u, (ch + 34 * u) * s); g.clip();
+        shot('roadmap', sx, 0, sw, 1069, x, y, sw * sc, ch, 14);
+        g.restore();
+        g.fillStyle = C.accent; g.fillRect(x, y - 22 * u, sw * sc * spring(t - at, 320, 30), 8 * u);
+      });
+      chip('Export Excel · Suivi_Cas_Usage', X0, 810 * u, t - b(7));
+      chip('Support COPIL en PowerPoint', X0, 896 * u, t - b(7.5));
+  }},
+
+  // 9. Lockup : logo AI Bridge, la barre d'or devient le soulignement
+  { from: b(80), to: DUR, draw(t) {
+      enterUp(t);
+      const lw = 760 * u, lh = lw * 254 / 452, lx = (W - lw) / 2, ly = H * 0.40 - lh / 2;
+      const s = spring(t - b(0.5), 90, 19);
+      g.save(); g.beginPath(); g.rect(0, ly, W, lh); g.clip();
+      if (IMG.logo) g.drawImage(IMG.logo, lx, ly + (1 - s) * lh, lw, lh);
+      g.restore();
+      const bw = track(t, [[0, W * 0.86], [b(1.5), 380 * u]], 120, 22), by = H * 0.69;
+      g.fillStyle = C.accent; g.beginPath(); g.roundRect(W / 2 - bw / 2, by, bw, 10 * u, 5 * u); g.fill();
+      slot('Du besoin métier au projet', W / 2 + Math.sin(t * 0.9) * 2 * u, H * 0.80, 74, t - b(2), { weight: 800, align: 'center', k: 90, d: 19 });
+      slot('DSI & TD · Innovation Digitale & IA', W / 2, H * 0.87, 36, t - b(3), { weight: 500, face: TEXT, color: C.dim, align: 'center' });
+  }},
+];
+function rgbHex(c) { const m = c.match(/\d+/g).map(Number); return '#' + m.map((v) => v.toString(16).padStart(2, '0')).join(''); }
+
+function draw(t) {
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.setLineDash([]);
+  g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+  for (const s of SCENES) if (t >= s.from && t < s.to) { g.save(); s.draw(t - s.from, t); g.restore(); }
+}
+window.seek = (t) => { draw(t); return true; };
+
+// Aperçu en direct dans un navigateur, désactivé en rendu
+if (!navigator.webdriver) window.ready.then(() => {
+  const t0 = performance.now();
+  (function loop() { draw(((performance.now() - t0) / 1000) % DUR); requestAnimationFrame(loop); })();
+});
+</script>
