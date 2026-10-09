@@ -14,7 +14,7 @@ writeFileSync(new URL("./netlify/lib/rules.mjs", import.meta.url),
 
 const head = '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
   + '<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#090C11"><link rel="icon" type="image/png" href="/icons/favicon-64.png">'
-  + '<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="AI Bridge">'
+  + '<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bridge Connect">'
   + '<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>'
   + '</head><body>';
 mkdirSync(new URL("./public/", import.meta.url), { recursive: true });

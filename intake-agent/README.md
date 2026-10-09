@@ -1,4 +1,4 @@
-# AI Bridge — agent d'intake Innovation Digitale & IA
+# Bridge Connect — agent d'intake Innovation Digitale & IA
 
 Prototype d'un agent qui transforme un besoin exprimé en texte libre en **Fiche d'Expression de Besoin — Innovation Digitale & IA** complète et challengée, puis la transmet à une file de qualification DSI.
 
@@ -105,7 +105,7 @@ Prototype d'un agent qui transforme un besoin exprimé en texte libre en **Fiche
 ## Charte graphique
 
 - Charte complète : `charte.html`, servie sur `/charte.html` et liée depuis l'onglet Administration.
-- Fichiers du logo dans `static/brand/` : original, version nuit (fond `#090C11`), version nuit détourée, version claire détourée pour les documents. Icônes d'application dans `static/icons/`.
+- Fichiers du logo Bridge Connect dans `static/brand/` : version nuit (fond `#090C11`), version nuit détourée, version claire détourée pour les documents, bandeau horizontal (pont + nom) et l'illustration source du pont. Icônes d'application (le pont seul) dans `static/icons/`.
 - Couleurs relevées sur le logo : bleu pont `#2A5A93`, bleu profond `#1F4677`, or couronne `#B08A4F` (or texte `#7C5E28` sur fond clair), nuit `#090C11`, encre `#0E1A2B`, porcelaine `#F2F5F9`. À confirmer avec les références officielles (Pantone, CMJN) du Groupe avant tout usage imprimé.
 - Typographies : Montserrat (titres, onglets), IBM Plex Sans (texte), Source Serif 4 (la fiche document), IBM Plex Mono (chiffres).
 - Exports aux couleurs de la charte : couverture PowerPoint nuit avec logo, dossier de cadrage Word avec logo et titres bleus.
