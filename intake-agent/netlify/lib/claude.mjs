@@ -1,7 +1,17 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 // Credentials come from the Netlify AI Gateway (ANTHROPIC_API_KEY / ANTHROPIC_BASE_URL injected at runtime).
-export const client = new Anthropic();
+// The client is created on first use, inside a request: an instance started before the gateway variables
+// were available would otherwise keep a client without credentials for its whole life.
+let cached = null;
+const envGet = (k) => { try { return globalThis.Netlify?.env?.get(k) || process.env[k] || null; } catch { return process.env[k] || null; } };
+export function getClient() {
+  if (cached && cached.apiKey) return cached;
+  const apiKey = envGet("ANTHROPIC_API_KEY"), baseURL = envGet("ANTHROPIC_BASE_URL");
+  cached = new Anthropic(apiKey ? { apiKey, ...(baseURL ? { baseURL } : {}) } : {});
+  return cached;
+}
+export const client = { messages: { stream: (p) => getClient().messages.stream(p), create: (p) => getClient().messages.create(p) } };
 export const MODEL = "claude-opus-5-5";
 
 export function parseLoose(raw) {
@@ -20,6 +30,7 @@ const errInfo = (e) => ({
   code: e instanceof Anthropic.RateLimitError ? "rate_limited" : e instanceof Anthropic.APIUserAbortError ? "cancelled" : "upstream_error",
   status: e?.status ?? null,
   type: String(e?.error?.error?.type || e?.name || "error").slice(0, 60),
+  message: e?.status ? "" : String(e?.message || "").replace(/sk-[A-Za-z0-9_-]+/g, "[clé]").slice(0, 160),
 });
 export function streamAgent({ system, messages, effort = "low", prelude = null }) {
   const enc = new TextEncoder();
@@ -49,11 +60,12 @@ export function streamAgent({ system, messages, effort = "low", prelude = null }
           } catch (e2) {
             const i2 = errInfo(e2);
             console.error("agent fallback error", i2.status, i2.type, e2?.message);
-            try { controller.enqueue(line({ error: i2.code, status: i2.status, type: i2.type, stream: info })); } catch {}
+            if (i2.message.includes("API key") || i2.message.includes("authentication")) cached = null;
+            try { controller.enqueue(line({ error: i2.code, status: i2.status, type: i2.type, message: i2.message, stream: info })); } catch {}
             return;
           }
         }
-        try { controller.enqueue(line({ error: info.code, status: info.status, type: info.type })); } catch {}
+        try { controller.enqueue(line({ error: info.code, status: info.status, type: info.type, message: info.message })); } catch {}
       } finally {
         try { controller.close(); } catch {}
       }
