@@ -165,6 +165,10 @@ main { flex: 1; min-height: 0; }
 .alerts { padding: 12px 20px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
 .alerts h4 { margin: 0; font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .alert { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; font-size: 13px; color: var(--ink-2); }
+.al-d > summary { list-style: none; }
+.al-d > summary::-webkit-details-marker { display: none; }
+.al-list { display: grid; gap: 6px; margin-top: 6px; }
+@media (min-width: 761px) { .al-d > summary { pointer-events: none; } }
 .alert .k { font: 500 10.5px/1.6 var(--font-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--st-deduit); background: var(--st-deduit-bg); padding: 0 6px; border-radius: 4px; white-space: nowrap; }
 .alert .k.doublon, .alert .k.conformite { color: var(--danger); background: var(--danger-bg); }
 
@@ -203,7 +207,7 @@ main { flex: 1; min-height: 0; }
 .ready { color: var(--st-confirme); font-weight: 600; }
 
 /* ---------- modal / recap ---------- */
-.modal { position: fixed; inset: 0; background: rgb(8 14 18 / .55); display: flex; align-items: flex-start; justify-content: center; padding: max(24px, env(safe-area-inset-top, 0px)) 16px 24px; overflow-y: auto; z-index: 10; }
+.modal { position: fixed; inset: 0; background: rgb(8 14 18 / .55); display: flex; align-items: flex-start; justify-content: center; padding: max(24px, env(safe-area-inset-top, 0px)) 16px 24px; overflow-y: auto; z-index: 60; }
 .sheet { background: var(--surface); border-radius: 14px; width: 100%; max-width: 760px; box-shadow: 0 20px 60px rgb(0 0 0 / .3); }
 .sheet-h { display: flex; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--line); }
 .sheet-h h3 { margin: 0; flex: 1; font: 700 18px/1.3 var(--font-display); }
@@ -509,6 +513,161 @@ main { flex: 1; min-height: 0; }
   .card-h .right { justify-content: flex-start; }
   .sheet-h, .sheet-b, .sheet-f { padding-left: 16px; padding-right: 16px; }
 }
+
+/* ---------- phone (≤ 760 px): the conversation first, everything else one gesture away ----------
+   One-line bar on top, navigation at the bottom (hidden while typing), the fiche and the 09-08 notice
+   as sheets over the conversation, a one-line composer. Desktop and tablet keep the layout above. */
+.mbar, .bnav, .hero, .changed-m, .fiche-top, .fiche-close, .fiche-todo, .sec-tg, .sec-h .cnt, .sec-h .chev, .consent-t, #fiche-backdrop { display: none; }
+.msheet { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; }
+.msheet[hidden] { display: none; }
+.msheet-bg { position: absolute; inset: 0; background: rgb(8 14 18 / .55); }
+.msheet-p { position: relative; background: var(--surface); border-radius: 20px 20px 0 0; padding: 8px 12px calc(14px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 2px; max-height: 85%; overflow-y: auto; }
+.grab { justify-self: center; width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 2px 0 8px; }
+.msheet-p h2 { margin: 2px 8px 8px; font: 700 18px/1.3 var(--font-display); }
+.mitem { min-height: 52px; display: flex; align-items: center; gap: 14px; border: 0; background: transparent; padding: 0 10px; border-radius: 12px; font-size: 16px; font-weight: 500; color: var(--ink); text-align: left; text-decoration: none; }
+.mitem:hover { background: var(--surface-2); }
+.mitem[hidden] { display: none; }
+.mitem svg { flex: none; color: var(--ink-2); }
+.mitem.warn, .mitem.warn svg { color: var(--danger); }
+.more-who { margin: 0 4px 8px; }
+.more-who .who-chip { width: 100%; box-sizing: border-box; padding: 8px 8px 8px 14px; font-size: 14.5px; }
+.more-who .who-chip b { max-width: none; flex: 1; }
+.more-who .who-chip button { min-height: 36px; padding: 0 14px; font-size: 13.5px; }
+.linklike { border: 0; background: none; padding: 0; color: var(--accent); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+@media (max-width: 760px) {
+  .app { height: var(--vvh, 100%); }
+  .top { flex-wrap: nowrap; height: 58px; box-sizing: border-box; padding: 0 4px 0 14px; gap: 10px; }
+  .top .brand, .top .tabs, .top .who { display: none; }
+  .mbar { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; height: 100%; }
+  .mbar img { width: 60px; height: auto; flex: none; display: block; }
+  .mbar-t { flex: 1; min-width: 0; font: 600 14.5px/1.22 var(--font-display); color: #FFFFFF; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .al-d > summary { min-height: 40px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .al-d > summary::after { content: ""; width: 18px; height: 18px; background: var(--ink-3); -webkit-mask: var(--ic-down) center / contain no-repeat; mask: var(--ic-down) center / contain no-repeat; transition: transform .2s ease; }
+  .al-d[open] > summary::after { transform: rotate(180deg); }
+  .alert { font-size: 14px; }
+  .mbar-fiche { flex: none; height: 36px; padding: 0 12px 0 10px; border-radius: 18px; border: 1px solid rgb(207 170 107 / .55); background: rgb(255 255 255 / .04); color: var(--night-ink); display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+  .mbar-fiche[hidden] { display: none; }
+  .mbar-fiche svg { flex: none; }
+  .mbar-more { flex: none; width: 44px; height: 44px; border: 0; background: transparent; color: var(--night-ink); display: grid; place-items: center; border-radius: 22px; }
+  .bnav { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); background: var(--surface); border-top: 1px solid var(--line); padding: 0 4px env(safe-area-inset-bottom, 0px); }
+  .bnav button { position: relative; min-height: 58px; border: 0; border-top: 3px solid transparent; background: transparent; color: var(--ink-2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font: 500 11.5px/1.2 var(--font-ui); }
+  .bnav button[hidden] { display: none; }
+  .bnav button[aria-current="page"] { color: var(--accent); font-weight: 600; border-top-color: var(--gold); }
+  .bnav .count { position: absolute; top: 5px; left: calc(50% + 7px); }
+  body.kb .bnav { display: none; }
+  .toast { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  body.kb .toast { bottom: 12px; }
+
+  /* capture: the conversation fills the screen */
+  .panes { display: flex; flex-direction: column; height: 100%; }
+  .seg, .chat-head { display: none; }
+  .panes .chat, .panes.show-fiche .chat { display: flex; flex: 1; min-height: 0; }
+  .log { padding: 16px 16px 10px; gap: 16px; }
+  .msg { max-width: 100%; }
+  .msg .who { display: none; }
+  .msg.user { max-width: 86%; }
+  .msg.user .bubble { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); border-radius: 18px 18px 4px 18px; font-size: 15.5px; line-height: 1.45; padding: 11px 14px; }
+  .msg.agent { position: relative; padding-left: 42px; }
+  .msg.agent::before { content: ""; position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 16px; background: #090C11 var(--emblem, none) center / 24px auto no-repeat; }
+  .msg.agent .bubble { border-radius: 4px 18px 18px 18px; font-size: 15.5px; line-height: 1.5; padding: 12px 14px; }
+  .msg.welcome, .changed { display: none; }
+  .changed-m { display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; min-height: 36px; border: 0; border-radius: 18px; padding: 0 12px; background: var(--st-confirme-bg); color: var(--st-confirme); font-size: 13.5px; font-weight: 600; text-align: left; }
+  .attach-note { font-size: 12.5px; }
+
+  .hero { display: flex; flex-direction: column; gap: 22px; padding: 8px 2px 2px; }
+  .hero .eb { font: 500 11.5px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gold-ink); }
+  .hero h2 { margin: 8px 0 10px; font: 700 25px/1.22 var(--font-display); text-wrap: balance; }
+  .hero .lead { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ink-2); }
+  .hero .lbl { display: block; margin-bottom: 10px; font: 600 13px/1.2 var(--font-display); color: var(--ink-2); }
+  .hero .exs { display: grid; gap: 10px; }
+  .ex-m { position: relative; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 14px 40px 14px 16px; display: grid; gap: 6px; font-size: 15px; line-height: 1.4; color: var(--ink); }
+  .ex-m b { justify-self: start; font-size: 12px; font-weight: 600; color: var(--gold-ink); background: var(--gold-soft); padding: 3px 8px; border-radius: 6px; }
+  .ex-m span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .ex-m::after { content: ""; position: absolute; right: 14px; top: 50%; width: 18px; height: 18px; margin-top: -9px; background: var(--ink-3); -webkit-mask: var(--ic-chev) center / contain no-repeat; mask: var(--ic-chev) center / contain no-repeat; }
+  .hero .priv { margin: 0; display: flex; gap: 8px; align-items: flex-start; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+  .hero .priv svg { flex: none; margin-top: 1px; }
+
+  .notice { margin: 0 16px 10px; }
+  .suggest { flex-wrap: nowrap; align-items: flex-start; overflow-x: auto; scrollbar-width: none; padding: 2px 16px 10px; gap: 8px; }
+  .suggest::-webkit-scrollbar { display: none; }
+  .suggest button { flex: none; max-width: 78vw; min-height: 40px; padding: 8px 16px; border-radius: 20px; font-size: 14.5px; line-height: 1.3; }
+
+  .composer { padding: 8px 10px; }
+  .composer .box { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: end; gap: 6px; border: 0; background: transparent; padding: 0; }
+  .composer .box:focus-within { border-color: transparent; }
+  .composer .row { display: contents; }
+  .composer [hidden], .composer .hint { display: none !important; }
+  .composer .file-chip { grid-column: 1 / -1; grid-row: 1; margin-left: 50px; }
+  .composer textarea { grid-column: 2; grid-row: 2; box-sizing: border-box; min-height: 44px; max-height: 140px; border: 1px solid var(--line); border-radius: 22px; background: var(--bg); padding: 10px 16px; font-size: 16px; line-height: 1.4; }
+  .composer textarea:placeholder-shown { height: 44px; }
+  .composer textarea:focus { border-color: var(--accent); }
+  .composer #attach { grid-column: 1; grid-row: 2; }
+  .composer .mic, .composer #send, .composer #stop { grid-column: 3; grid-row: 2; }
+  .composer #attach, .composer .mic, .composer #send, .composer #stop { width: 44px; height: 44px; padding: 0; border-radius: 22px; font-size: 0; display: grid; place-items: center; box-shadow: none; }
+  .composer #attach { border: 0; background: transparent; color: var(--ink-2); --ic: var(--ic-clip); }
+  .composer .mic, .composer #send { border: 0; background: var(--accent); color: var(--accent-ink); }
+  .composer .mic { --ic: var(--ic-mic); }
+  .composer #send { --ic: var(--ic-send); }
+  .composer #stop { border: 1px solid var(--line); background: var(--surface); color: var(--ink); --ic: var(--ic-stop); }
+  .composer #attach::before, .composer .mic::before, .composer #send::before, .composer #stop::before { content: ""; width: 22px; height: 22px; background: currentColor; -webkit-mask: var(--ic) center / contain no-repeat; mask: var(--ic) center / contain no-repeat; }
+  .composer .mic.rec, .composer .mic:disabled { width: auto; padding: 0 14px; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+  .composer .mic.rec::before, .composer .mic:disabled::before { display: none; }
+  .composer:not(.typing) #send, .composer.typing .mic:not(.rec):not(:disabled) { display: none; }
+
+  /* 09-08 notice: a sheet the first time */
+  .consent { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; margin: 0; border: 0; border-radius: 20px 20px 0 0; padding: 22px 20px calc(20px + env(safe-area-inset-bottom, 0px)); max-height: 85%; overflow-y: auto; font-size: 15.5px; line-height: 1.5; color: var(--ink); gap: 14px; box-shadow: 0 0 0 100vmax rgb(8 14 18 / .55); }
+  .consent[hidden] { display: none; }
+  .consent .consent-t { display: block; margin: 0; font: 700 21px/1.25 var(--font-display); }
+  .consent .d-only { display: none; }
+  .consent details summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; color: var(--accent); cursor: pointer; }
+  .consent .row-end .btn-primary { width: 100%; min-height: 52px; border-radius: 12px; font: 600 16px/1 var(--font-display); }
+
+  /* the fiche: a sheet over the conversation */
+  .panes:not(.show-fiche) .fiche { display: none; }
+  .panes.show-fiche .fiche { display: flex; position: fixed; left: 0; right: 0; bottom: 0; top: 84px; z-index: 40; border: 0; border-radius: 20px 20px 0 0; overflow: hidden; box-shadow: 0 -8px 30px rgb(0 0 0 / .25); }
+  .panes.show-fiche #fiche-backdrop { display: block; position: fixed; inset: 0; z-index: 39; background: rgb(8 14 18 / .55); }
+  .fiche-head { position: relative; padding: 6px 16px 14px; gap: 10px; }
+  .fiche-top { display: flex; justify-content: center; }
+  .fiche-top .grab { margin: 2px 0 4px; }
+  .fiche-close { display: grid; place-items: center; position: absolute; right: 4px; top: 8px; width: 44px; height: 44px; border: 0; background: transparent; color: var(--ink-2); border-radius: 22px; }
+  .fiche-head .eyebrow { padding-right: 44px; }
+  .fiche-todo { display: block; margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ink-2); }
+  .legend { gap: 4px 12px; }
+  .sec { position: relative; padding: 0 16px; }
+  .sec-h { margin: 0; min-height: 56px; align-items: center; gap: 12px; }
+  .sec-h .n { flex: none; width: 26px; height: 26px; border-radius: 13px; background: var(--accent-soft); color: var(--accent-strong); display: grid; place-items: center; font: 600 13px/1 var(--font-display); }
+  .sec.open .sec-h .n { background: var(--accent); color: var(--accent-ink); }
+  .sec-h h4 { font: 600 15.5px/1.3 var(--font-display); }
+  .sec-h .pct { display: none; }
+  .sec-h .cnt { display: inline; font: 500 13px/1 var(--font-mono); color: var(--ink-2); }
+  .sec-h .chev { display: block; width: 20px; height: 20px; background: var(--ink-3); -webkit-mask: var(--ic-down) center / contain no-repeat; mask: var(--ic-down) center / contain no-repeat; transition: transform .2s ease; }
+  .sec.open .sec-h .chev { transform: rotate(180deg); }
+  .sec-tg { display: block; position: absolute; left: 0; right: 0; top: 0; height: 56px; border: 0; background: transparent; padding: 0; }
+  .sec:not(.open) .field { display: none; }
+  .sec.open { padding-bottom: 10px; }
+  .field { padding: 10px 0 12px 38px; gap: 6px; }
+  .f-label { font-size: 13px; }
+  .f-val { font-size: 15px; line-height: 1.45; }
+  .f-val.empty { font-size: 14px; }
+  .pill { font-size: 11.5px; padding: 1px 8px; }
+  .f-actions { gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+  .f-actions button { min-height: 40px; padding: 0 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 14px; }
+  .f-actions button[data-act="confirm"], .f-actions button[data-act="save"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .f-actions button + button { margin-left: 0; }
+  .edit textarea, .edit select, .edit input[type=text] { font-size: 16px; }
+  .fiche-foot { padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px)); }
+  .fiche-foot .btn-primary { min-height: 50px; border-radius: 12px; font: 600 16px/1 var(--font-display); }
+  .fiche-foot .sub { font-size: 13px; }
+}
+:root {
+  --ic-clip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9'/%3E%3C/svg%3E");
+  --ic-mic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='3' width='6' height='11' rx='3'/%3E%3Cpath d='M5 11a7 7 0 0 0 14 0M12 18v3'/%3E%3C/svg%3E");
+  --ic-send: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M5 12l7-7 7 7'/%3E%3C/svg%3E");
+  --ic-stop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='7' y='7' width='10' height='10' rx='2' fill='black'/%3E%3C/svg%3E");
+  --ic-chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E");
+  --ic-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
@@ -532,11 +691,18 @@ main { flex: 1; min-height: 0; }
       <button id="tab-admin" role="tab" aria-selected="false" aria-controls="view-admin" hidden>Administration</button>
     </nav>
     <div class="who" id="who" hidden></div>
+    <div class="mbar">
+      <img id="mbar-logo" src="data:image/webp;base64,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" alt="Bridge Connect" width="137" height="48">
+      <div class="mbar-t" id="mbar-title">Nouveau besoin</div>
+      <button type="button" class="mbar-fiche" id="mbar-fiche"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7" fill="none" stroke="rgb(255 255 255 / .18)" stroke-width="2.5"/><circle id="mbar-ring" cx="9" cy="9" r="7" fill="none" stroke="#CFAA6B" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="0 44" transform="rotate(-90 9 9)"/></svg>Fiche <span id="mbar-pct">0 %</span></button>
+      <button type="button" class="mbar-more" id="mbar-more" aria-label="Plus d'actions" aria-haspopup="dialog"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
+    </div>
   </header>
 
   <main>
     <section id="view-capture" class="view" role="tabpanel" aria-labelledby="tab-capture">
       <div class="panes" id="panes">
+        <div id="fiche-backdrop" aria-hidden="true"></div>
         <div class="seg" role="group" aria-label="Affichage">
           <button id="seg-chat" aria-pressed="true">Conversation</button>
           <button id="seg-fiche" aria-pressed="false">Fiche · <span id="seg-pct">0 %</span></button>
@@ -573,12 +739,15 @@ main { flex: 1; min-height: 0; }
         <aside class="pane fiche" aria-label="Fiche d'expression de besoin">
           <div class="fiche-scroll">
             <div class="fiche-head">
+              <div class="fiche-top"><span class="grab"></span></div>
+              <button type="button" class="fiche-close" id="fiche-close" aria-label="Revenir à la conversation"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
               <div class="eyebrow">Fiche d'Expression de Besoin · en direct</div>
               <h3 id="fiche-title">Besoin sans titre</h3>
               <div class="meter" aria-label="Maturité de la fiche">
                 <div class="bar"><i id="meter-bar" style="width:0%"></i></div>
                 <b id="meter-val">0 %</b>
               </div>
+              <p class="fiche-todo" id="fiche-todo"></p>
               <div class="legend">
                 <span><i style="background:var(--st-vide)"></i>À compléter</span>
                 <span><i style="background:var(--st-deduit)"></i>Proposé par l'agent</span>
@@ -746,6 +915,25 @@ main { flex: 1; min-height: 0; }
       </div>
     </section>
   </main>
+  <nav class="bnav" id="bnav" aria-label="Navigation principale">
+    <button type="button" data-go="capture"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Exprimer</button>
+    <button type="button" data-go="mine"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Mes besoins<span class="count" hidden></span></button>
+    <button type="button" data-go="dsi"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>File DSI<span class="count" hidden></span></button>
+    <button type="button" data-go="more"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Plus</button>
+  </nav>
+</div>
+
+<div class="msheet" id="more" hidden>
+  <div class="msheet-bg" data-close></div>
+  <div class="msheet-p" role="dialog" aria-modal="true" aria-labelledby="more-t">
+    <span class="grab"></span>
+    <h2 id="more-t">Plus</h2>
+    <div class="more-who" id="more-who"></div>
+    <button type="button" class="mitem" data-more="reset"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Nouveau besoin</span></button>
+    <button type="button" class="mitem" data-more="chat"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Messagerie (WhatsApp, Teams)</span></button>
+    <button type="button" class="mitem" data-more="admin"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span>Administration</span></button>
+    <a class="mitem" href="/charte.html" target="_blank" rel="noopener"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.5-1.6 0-1.3 1-2.4 2.3-2.4H18a3 3 0 0 0 3-3c0-5-4-9-9-9z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="14.5" cy="7" r="1"/></svg><span>Charte graphique</span></a>
+  </div>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -962,19 +1150,31 @@ function renderFiche() {
   const al = $("#alerts");
   if (state.alertes.length) {
     al.hidden = false;
-    al.innerHTML = `<h4>Points à renforcer · ${state.alertes.length}</h4>` + state.alertes.map(a =>
-      `<div class="alert"><span class="k ${esc(a.type)}">${esc(a.type || "point")}</span><span>${esc(a.texte)}</span></div>`).join("");
+    // Always open on a large screen; folded by default on a phone, so the sections stay in view.
+    const open = alertsOpen || !matchMedia("(max-width: 760px)").matches;
+    al.innerHTML = `<details class="al-d"${open ? " open" : ""}><summary><h4>Points à renforcer · ${state.alertes.length}</h4></summary><div class="al-list">` + state.alertes.map(a =>
+      `<div class="alert"><span class="k ${esc(a.type)}">${esc(a.type || "point")}</span><span>${esc(a.texte)}</span></div>`).join("") + `</div></details>`;
   } else { al.hidden = true; al.innerHTML = ""; }
   if ((state.pieces || []).length) {
     al.hidden = false;
     al.insertAdjacentHTML("beforeend", `<h4>Pièces jointes · ${state.pieces.length}</h4>${piecesHTML(state.pieces)}`);
   }
 
-  $("#fiche-body").innerHTML = SECTIONS.map(sec => `
-    <section class="sec">
-      <div class="sec-h"><span class="n">${sec.n}</span><h4>${esc(sec.titre)}</h4><span class="pct">${sectionPct(sec, state.fiche)} %</span></div>
+  // On a phone, one section is open at a time: the one being edited, the one the person chose, the one
+  // the agent just filled, else the first with something to complete.
+  if (flashKeys.size) lastSec = secOf([...flashKeys][0]) || lastSec;
+  const autoSec = (SECTIONS.find(s => s.fields.some(f => ["vide", "déduit"].includes(statutOf(f.k)))) || SECTIONS[0]).n;
+  const openN = (editing && secOf(editing)) || openSec || lastSec || autoSec;
+  $("#fiche-body").innerHTML = SECTIONS.map(sec => {
+    const filled = sec.fields.filter(f => statutOf(f.k) !== "vide").length;
+    return `
+    <section class="sec${sec.n === openN ? " open" : ""}" data-sec="${sec.n}">
+      <div class="sec-h"><span class="n">${sec.n}</span><h4>${esc(sec.titre)}</h4><span class="pct">${sectionPct(sec, state.fiche)} %</span><span class="cnt">${filled}/${sec.fields.length}</span><span class="chev" aria-hidden="true"></span></div>
+      <button type="button" class="sec-tg" data-sec-tg="${sec.n}" aria-expanded="${sec.n === openN}" aria-label="${esc(sec.titre)} : ${filled} sur ${sec.fields.length} renseignés"></button>
       ${sec.fields.map(fieldHTML).join("")}
-    </section>`).join("");
+    </section>`;
+  }).join("");
+  renderFicheChrome(score);
 
   const locked = !!state.submitted;
   const deduits = FIELDS.filter(f => statutOf(f.k) === "déduit").length;
@@ -990,6 +1190,20 @@ function renderFiche() {
     else sub.textContent = `${state.alertes.length ? state.alertes.length + " point" + (state.alertes.length > 1 ? "s" : "") + " à renforcer · " : ""}transmission possible à tout moment`;
   }
   flashKeys.clear();
+}
+let openSec = null, lastSec = null, alertsOpen = false;
+$("#alerts").addEventListener("toggle", e => { if (e.target.classList?.contains("al-d") && matchMedia("(max-width: 760px)").matches) alertsOpen = e.target.open; }, true);
+const secOf = k => SECTIONS.find(s => s.fields.some(f => f.k === k))?.n || null;
+const KEY_FIELDS = { probleme: "le problème", processus: "le processus", cout: "le coût actuel", decision: "la décision améliorée", donnees_existantes: "les données existantes" };
+const listFr = a => a.length > 1 ? a.slice(0, -1).join(", ") + " et " + a[a.length - 1] : a.join("");
+// Phone chrome around the fiche: the pill in the top bar and the "still missing" line of the sheet.
+function renderFicheChrome(score) {
+  $("#mbar-pct").textContent = score + " %";
+  $("#mbar-ring").setAttribute("stroke-dasharray", `${(44 * score / 100).toFixed(1)} 44`);
+  const miss = Object.keys(KEY_FIELDS).filter(k => statutOf(k) === "vide").map(k => KEY_FIELDS[k]);
+  $("#fiche-todo").textContent = state.submitted ? `Transmise à la DSI le ${fmtDate(state.submitted.at)}.`
+    : miss.length ? `Encore ${miss.length} information${miss.length > 1 ? "s" : ""} clé${miss.length > 1 ? "s" : ""} : ${listFr(miss)}.`
+    : "Les informations clés sont renseignées.";
 }
 function fieldHTML(f) {
   const e = state.fiche[f.k], st = statutOf(f.k), S = STATUTS[st];
@@ -1021,6 +1235,8 @@ function editorHTML(f, e) {
   return `<textarea id="edit-${f.k}" rows="3" aria-label="${esc(f.label)}">${esc(valText(v))}</textarea>`;
 }
 $("#fiche-body").addEventListener("click", ev => {
+  const tg = ev.target.closest("[data-sec-tg]");
+  if (tg) { const n = tg.dataset.secTg; openSec = tg.closest(".sec").classList.contains("open") ? "none" : n; renderFiche(); return; }
   const b = ev.target.closest("button[data-act]"); if (!b) return;
   const k = b.dataset.k, act = b.dataset.act;
   if (act === "confirm") { state.fiche[k] = { ...state.fiche[k], statut: "confirmé", maj: nowIso() }; flashKeys.add(k); }
@@ -1040,8 +1256,17 @@ $("#fiche-body").addEventListener("click", ev => {
 });
 
 /* ================= Chat pane ================= */
+// Phone first screen (hidden on larger screens, where the agent's welcome message below plays this role).
+function heroHTML() {
+  return `<div class="hero">
+    <div><span class="eb">Innovation Digitale &amp; IA</span><h2>Quel besoin voulez-vous faire remonter ?</h2>
+    <p class="lead">Racontez-le avec vos mots, par écrit ou à la voix. L'agent vous pose quelques questions et prépare la fiche pour la DSI.</p></div>
+    <div><span class="lbl">Partir d'un exemple</span><div class="exs">${EXAMPLES.map((e, i) => `<button type="button" class="ex-m" data-ex="${i}"><b>${esc(e.who)}</b><span>${esc(e.text)}</span></button>`).join("")}</div></div>
+    <p class="priv"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Vos messages servent uniquement à décrire votre besoin (loi 09-08). <button type="button" class="linklike" data-go="mine">Vos données</button></span></p>
+  </div>`;
+}
 function welcomeHTML() {
-  return `<div class="msg agent"><span class="who">Agent</span><div class="bubble">
+  return `${state.turns.length ? "" : heroHTML()}<div class="msg agent welcome"><span class="who">Agent</span><div class="bubble">
     <p>Bonjour. Décrivez votre besoin comme vous le raconteriez à un collègue : quelques phrases suffisent, sans vous soucier de la forme.</p>
     <p>Je remplis la fiche pour vous, puis je vous pose quelques questions pour la rendre solide avant qu'elle parte en qualification à la DSI. Vous gardez la main : chaque information affiche son statut et vous validez tout avant l'envoi.</p>
   </div>${state.turns.length ? "" : `<div class="examples"><span class="lbl">Exemples pour essayer</span>${EXAMPLES.map((e, i) => `<button type="button" class="ex" data-ex="${i}"><b>${esc(e.who)}</b>${esc(e.text)}</button>`).join("")}</div>`}</div>`;
@@ -1049,18 +1274,20 @@ function welcomeHTML() {
 function turnHTML(t, i) {
   if (t.role === "user") { const f = t.files || (t.image ? [t.image] : []); return `<div class="msg user"><span class="who">Vous</span><div class="bubble">${esc(t.content)}</div>${f.length ? `<span class="attach-note">Pièce${f.length > 1 ? "s" : ""} jointe${f.length > 1 ? "s" : ""} : ${esc(f.join(", "))}</span>` : ""}</div>`; }
   if (t.error) return `<div class="msg agent err"><span class="who">Agent</span><div class="bubble">${esc(t.content)}${t.retry ? ` <button type="button" class="btn-ghost" data-retry="${i}">Renvoyer le message</button>` : ""}</div></div>`;
-  const ch = t.changed?.length ? `<div class="changed">Fiche mise à jour : ${t.changed.map(c => `<span class="c">${esc(c)}</span>`).join("")}</div>` : "";
+  const n = t.changed?.length || 0;
+  const ch = n ? `<div class="changed">Fiche mise à jour : ${t.changed.map(c => `<span class="c">${esc(c)}</span>`).join("")}</div><button type="button" class="changed-m" data-open-fiche><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>${n} information${n > 1 ? "s" : ""} ajoutée${n > 1 ? "s" : ""} à la fiche · Voir</button>` : "";
   return `<div class="msg agent"><span class="who">Agent</span><div class="bubble">${md(t.content)}</div>${ch}</div>`;
 }
 function renderChat() {
   const log = $("#log");
   log.innerHTML = welcomeHTML() + state.turns.map(turnHTML).join("");
   renderSuggestions(); renderComposer(); renderHead();
-  log.scrollTop = log.scrollHeight;
+  log.scrollTop = state.turns.length ? log.scrollHeight : 0;
 }
 function renderHead() {
   $("#chat-eyebrow").textContent = state.submitted ? "Transmis à la DSI" : state.turns.length ? "Besoin en cours de définition" : "Nouveau besoin";
   $("#chat-title").textContent = state.titre || "Décrivez votre besoin, l'agent s'occupe de la fiche";
+  syncChrome();
 }
 function renderSuggestions() {
   const el = $("#suggest");
@@ -1079,8 +1306,12 @@ function renderComposer() {
   $("#send").disabled = !agentReady || agentOff;
   $("#msg").disabled = !agentReady || agentOff;
   $("#composer-hint").textContent = !agentReady ? "Connexion à l'agent…" : agentOff ? "Agent indisponible : remplissez la fiche directement." : "Entrée pour envoyer · Maj+Entrée pour un retour à la ligne";
+  // A phone shows a one-line field: a short placeholder.
+  $("#msg").placeholder = !matchMedia("(max-width: 760px)").matches ? "Ex. : chaque clôture mensuelle, on consolide à la main dans Excel les extractions SAP de tous les sites…"
+    : !agentReady ? "Connexion à l'agent…" : agentOff ? "Agent indisponible" : state.turns.length ? "Votre réponse…" : "Décrivez votre besoin…";
 }
 $("#log").addEventListener("click", ev => {
+  if (ev.target.closest("[data-open-fiche]")) { openSec = null; renderFiche(); showPane("fiche"); return; }
   const ex = ev.target.closest("[data-ex]");
   if (ex && agentReady && !agentOff && !busy) { send(EXAMPLES[+ex.dataset.ex].text); return; }
   const r = ev.target.closest("[data-retry]");
@@ -1096,7 +1327,17 @@ $("#suggest").addEventListener("click", ev => {
 
 /* ================= Composer ================= */
 const msgEl = $("#msg");
-function autosize() { msgEl.style.height = "auto"; msgEl.style.height = Math.min(msgEl.scrollHeight, 180) + "px"; }
+function autosize() {
+  msgEl.style.height = "auto";
+  msgEl.style.height = msgEl.value ? Math.min(msgEl.scrollHeight, 180) + "px" : "";
+  composerMode();
+}
+// Phone: the round button is the microphone while the message is empty, and becomes Send as soon as there is
+// something to send (or when dictation is not available).
+function composerMode() {
+  const mic = $("#composer .mic");
+  $("#composer")?.classList.toggle("typing", !!msgEl.value.trim() || pendingFiles.length > 0 || !mic || mic.hidden);
+}
 msgEl.addEventListener("input", () => { autosize(); try { localStorage.setItem(KEY + "-msg", msgEl.value); } catch {} });
 msgEl.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("#composer").requestSubmit(); } });
 $("#composer").addEventListener("submit", e => {
@@ -1124,6 +1365,7 @@ function setFile(list) {
   pendingFiles = ok;
   $("#file-chip").hidden = !ok.length;
   $("#file-name").textContent = ok.map(f => f.name).join(", ");
+  composerMode();
 }
 try { const d = localStorage.getItem(KEY + "-msg"); if (d) { msgEl.value = d; } } catch {}
 
@@ -1222,7 +1464,8 @@ async function postAgent(body, signal, onText, onMeta) {
         const line = buf.slice(0, i); buf = buf.slice(i + 1);
         if (!line.trim()) continue;
         let ev; try { ev = JSON.parse(line); } catch { continue; }
-        if (typeof ev.d === "string") { out += ev.d; onText({ text: out }); }
+        if (ev.reset) { out = ""; onText({ text: out }); }
+        else if (typeof ev.d === "string") { out += ev.d; onText({ text: out }); }
         else if (ev.pieces && onMeta) onMeta(ev);
         else if (ev.done) stop = ev.stop;
         else if (ev.error) err = ev.error;
@@ -1543,11 +1786,14 @@ $("#reset").addEventListener("click", () => {
     return;
   }
   clearTimeout(resetArmed); resetArmed = null; b.textContent = "Nouveau besoin"; b.classList.remove("warn");
+  resetDraft();
+});
+function resetDraft() {
   ctl?.abort();
   state = fresh(); editing = null; prefillIdentity();
   saveState();
   location.reload();
-});
+}
 
 /* ================= Tabs & mobile panes ================= */
 function showTab(which) {
@@ -1560,6 +1806,7 @@ function showTab(which) {
   if (which === "chat") simOpen();
   if (which === "admin") { admLoad(); admLoadAudit(); }
   if (which !== "chat") simClose();
+  syncChrome();
 }
 $("#tab-capture").addEventListener("click", () => showTab("capture"));
 $("#tab-mine").addEventListener("click", () => showTab("mine"));
@@ -1572,6 +1819,83 @@ function showPane(p) {
 }
 $("#seg-chat").addEventListener("click", () => showPane("chat"));
 $("#seg-fiche").addEventListener("click", () => showPane("fiche"));
+
+/* ================= Phone shell: top bar, bottom navigation, "Plus" sheet, keyboard ================= */
+const VIEW_TITLES = { chat: "Messagerie", mine: "Mes besoins", dsi: "File DSI", admin: "Administration" };
+const currentView = () => ["capture", "chat", "mine", "dsi", "admin"].find(t => !$("#view-" + t).hidden) || "capture";
+// Mirrors the desktop tabs (visibility by role, selection, counters) into the phone bar and bottom navigation.
+function syncChrome() {
+  const view = currentView();
+  $("#mbar-title").textContent = view === "capture" ? (state.titre || "Nouveau besoin") : VIEW_TITLES[view];
+  $("#mbar-fiche").hidden = view !== "capture";
+  for (const b of $("#bnav").querySelectorAll("[data-go]")) {
+    const go = b.dataset.go;
+    if (go === "more") { b.toggleAttribute("aria-current", false); if (["chat", "admin"].includes(view)) b.setAttribute("aria-current", "page"); continue; }
+    b.hidden = $("#tab-" + go).hidden;
+    if (go === view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    const src = $("#tab-" + go + " .count"), dst = b.querySelector(".count");
+    if (src && dst) { dst.textContent = src.textContent; dst.hidden = src.hidden; }
+  }
+}
+new MutationObserver(syncChrome).observe($(".tabs"), { subtree: true, attributes: true, attributeFilter: ["hidden", "aria-selected"], childList: true, characterData: true });
+document.documentElement.style.setProperty("--emblem", `url("${$("#mbar-logo").src}")`);
+
+function openMore() {
+  const v = currentView();
+  $("#more-who").innerHTML = $("#who").innerHTML.replace('id="who-switch"', 'data-who-switch');
+  $("#more-who").hidden = MODE !== "web";
+  $("#more [data-more=reset]").hidden = v !== "capture" || (!state.turns.length && !Object.keys(state.fiche).length);
+  $("#more [data-more=chat]").hidden = $("#tab-chat").hidden;
+  $("#more [data-more=admin]").hidden = $("#tab-admin").hidden;
+  resetMoreItem();
+  $("#more").hidden = false;
+  $("#more .mitem:not([hidden])")?.focus();
+}
+const closeMore = () => { $("#more").hidden = true; resetMoreItem(); };
+let moreResetArmed = null;
+function resetMoreItem() { clearTimeout(moreResetArmed); moreResetArmed = null; const b = $("#more [data-more=reset]"); b.classList.remove("warn"); b.querySelector("span").textContent = "Nouveau besoin"; }
+$("#more").addEventListener("click", async e => {
+  if (e.target.closest("[data-close]")) { closeMore(); return; }
+  if (e.target.closest("[data-who-switch]")) { closeMore(); await whoSwitch(); return; }
+  const it = e.target.closest("[data-more]"); if (!it) return;
+  if (it.dataset.more === "reset") {
+    if (!moreResetArmed) { it.classList.add("warn"); it.querySelector("span").textContent = "Confirmer : effacer le brouillon"; moreResetArmed = setTimeout(resetMoreItem, 4000); return; }
+    closeMore(); resetDraft(); return;
+  }
+  closeMore(); showTab(it.dataset.more);
+});
+$("#mbar-more").addEventListener("click", openMore);
+$("#mbar-fiche").addEventListener("click", () => { openSec = null; renderFiche(); showPane("fiche"); });
+$("#fiche-close").addEventListener("click", () => showPane("chat"));
+$("#fiche-backdrop").addEventListener("click", () => showPane("chat"));
+$("#bnav").addEventListener("click", e => {
+  const b = e.target.closest("[data-go]"); if (!b) return;
+  if (b.dataset.go === "more") openMore(); else showTab(b.dataset.go);
+});
+// Links such as « Vos données » on the first screen.
+document.addEventListener("click", e => {
+  const g = e.target.closest(".linklike[data-go]"); if (!g) return;
+  showTab(g.dataset.go);
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("#more").hidden) closeMore();
+  else if ($("#panes").classList.contains("show-fiche") && matchMedia("(max-width: 760px)").matches) showPane("chat");
+});
+// Keyboard on a phone: hide the bottom navigation while typing, and size the app to the visible area
+// so the composer stays right above the keyboard (iOS keeps the layout viewport full height).
+const coarse = matchMedia("(pointer: coarse)");
+const isField = el => el && (el.tagName === "TEXTAREA" || el.tagName === "SELECT" || (el.tagName === "INPUT" && !["checkbox", "radio", "button", "file"].includes(el.type)));
+document.addEventListener("focusin", e => { if (coarse.matches && isField(e.target)) document.body.classList.add("kb"); });
+document.addEventListener("focusout", () => setTimeout(() => { if (!isField(document.activeElement)) document.body.classList.remove("kb"); }, 60));
+if (window.visualViewport) {
+  const vv = window.visualViewport;
+  const fit = () => {
+    document.documentElement.style.setProperty("--vvh", Math.round(vv.height) + "px");
+    if (vv.offsetTop) window.scrollTo(0, 0);
+  };
+  vv.addEventListener("resize", fit); vv.addEventListener("scroll", fit); fit();
+}
 
 /* ================= DSI queue ================= */
 function renderQueue() {
@@ -2946,9 +3270,12 @@ async function afterIdentityChange() {
 }
 $("#who").addEventListener("click", async e => {
   if (e.target.id !== "who-switch") return;
+  await whoSwitch();
+});
+async function whoSwitch() {
   if (me.session && me.session.via !== "démo") { await fetch("/api/auth/logout", { method: "POST", headers: apiHeaders() }).catch(() => {}); await afterIdentityChange(); return; }
   openLogin();
-});
+}
 $("#login-close").addEventListener("click", () => { $("#login").hidden = true; });
 $("#login").addEventListener("click", async e => {
   if (e.target.id === "login") { $("#login").hidden = true; return; }
@@ -2982,8 +3309,9 @@ function renderConsent() {
   const el = $("#consent");
   el.hidden = consentOk() || !!state.submitted;
   if (el.hidden) return;
-  const short = privacy.short.replace(/ : écrivez MES DONNÉES ou SUPPRIMER MES DONNÉES, ou contactez/, " depuis « Mes besoins » ou auprès de");
-  el.innerHTML = `<p><b>Avant de commencer.</b> ${esc(short)}</p><details><summary>Information complète (loi 09-08)</summary><pre>${esc(privacy.notice)}</pre></details><div class="row-end"><button type="button" class="btn-primary" id="consent-ok">J'ai compris, continuer</button></div>`;
+  let short = privacy.short.replace(/ : écrivez MES DONNÉES ou SUPPRIMER MES DONNÉES, ou contactez/, " depuis « Mes besoins » ou auprès de").replace(/^Avant de commencer\s*:\s*/i, "");
+  short = short.charAt(0).toUpperCase() + short.slice(1);
+  el.innerHTML = `<h3 class="consent-t">Avant de commencer</h3><p><b class="d-only">Avant de commencer.</b> ${esc(short)}</p><details><summary>Information complète (loi 09-08)</summary><pre>${esc(privacy.notice)}</pre></details><div class="row-end"><button type="button" class="btn-primary" id="consent-ok">J'ai compris, continuer</button></div>`;
 }
 function flashConsent() { const c = $("#consent"); c.hidden = false; c.classList.add("flash"); c.scrollIntoView({ block: "nearest" }); setTimeout(() => c.classList.remove("flash"), 1500); }
 $("#consent").addEventListener("click", e => {
@@ -3406,6 +3734,7 @@ if (MODE === "web") {
   loadMe().then(loadPrivacy);
   loadPublicConfig();
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) for (const m of document.querySelectorAll(".mic")) m.hidden = false;
+  composerMode();
   $("#demo-clock").value = String(demoOffsetDays);
   if (![0, 7, 30, 100].includes(demoOffsetDays)) { demoOffsetDays = 0; $("#demo-clock").value = "0"; }
   renderChat();

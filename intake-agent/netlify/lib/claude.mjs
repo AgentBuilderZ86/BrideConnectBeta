@@ -40,20 +40,28 @@ export function streamAgent({ system, messages, effort = "low", prelude = null }
   try { stream = client.messages.stream(params); } catch (e) { early = e; }
   const rs = new ReadableStream({
     async start(controller) {
-      let sent = false;
+      // A stream can stall or end early. Watch it: silent for 20 s once the answer has started (90 s before,
+      // to leave room for thinking), it is aborted; then, whatever went wrong, the answer is fetched once more
+      // without streaming. When part of it was already sent, a {"reset": true} line tells the page to drop it.
+      let sent = false, stalled = false, lastEvt = Date.now(), watch = null;
       try {
         if (prelude) controller.enqueue(line(prelude));
         if (early) throw early;
+        stream.on("streamEvent", () => { lastEvt = Date.now(); });
         stream.on("text", (delta) => { sent = true; controller.enqueue(line({ d: delta })); });
+        watch = setInterval(() => {
+          if (!stalled && Date.now() - lastEvt > (sent ? 20_000 : 90_000)) { stalled = true; stream.abort(); }
+        }, 2_000);
         const final = await stream.finalMessage();
         controller.enqueue(line({ done: true, stop: final.stop_reason }));
       } catch (e) {
-        const info = errInfo(e);
+        const info = stalled ? { code: "upstream_error", status: null, type: "stalled", message: "flux de réponse bloqué" } : errInfo(e);
         console.error("agent stream error", info.status, info.type, e?.message);
-        if (!sent && info.code === "upstream_error") {
+        if (info.code === "upstream_error") {
           try {
             const final = await client.messages.create(params);
             const text = final.content.filter((b) => b.type === "text").map((b) => b.text).join("");
+            if (sent) controller.enqueue(line({ reset: true }));
             controller.enqueue(line({ d: text }));
             controller.enqueue(line({ done: true, stop: final.stop_reason, fallback: true }));
             return;
@@ -67,6 +75,7 @@ export function streamAgent({ system, messages, effort = "low", prelude = null }
         }
         try { controller.enqueue(line({ error: info.code, status: info.status, type: info.type, message: info.message })); } catch {}
       } finally {
+        clearInterval(watch);
         try { controller.close(); } catch {}
       }
     },

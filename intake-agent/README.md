@@ -71,6 +71,14 @@ Prototype d'un agent qui transforme un besoin exprimé en texte libre en **Fiche
 
 **Application mobile**
 - Le site s'installe comme une application (manifeste, service worker, icônes) et s'ouvre même hors connexion sur la dernière version chargée.
+- Sur téléphone (760 px et moins), la conversation occupe l'écran :
+  - une barre d'en-tête d'une ligne : titre du besoin, pastille « Fiche % », menu ;
+  - une navigation en bas, filtrée selon le rôle et masquée pendant la saisie ;
+  - une saisie d'une ligne : joindre, micro, puis Envoyer dès qu'il y a du texte ;
+  - la fiche et la notice loi 09-08 s'ouvrent en volets par-dessus la conversation ;
+  - les sections de la fiche se replient et affichent un compteur, avec une phrase qui dit ce qui reste à compléter.
+
+  Ordinateur et tablette gardent les deux colonnes.
 - Notifications Web Push sur chaque appareil abonné, pour les besoins qu'il suit : questions de l'agent (relances), réponses de la DSI, changements de statut. Un clic ouvre directement le besoin.
 - Clés VAPID : `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (facultatif). Sur iPhone, les notifications ne fonctionnent qu'une fois l'application ajoutée à l'écran d'accueil (iOS 16.4 ou plus récent).
 
