@@ -1464,7 +1464,8 @@ async function postAgent(body, signal, onText, onMeta) {
         const line = buf.slice(0, i); buf = buf.slice(i + 1);
         if (!line.trim()) continue;
         let ev; try { ev = JSON.parse(line); } catch { continue; }
-        if (typeof ev.d === "string") { out += ev.d; onText({ text: out }); }
+        if (ev.reset) { out = ""; onText({ text: out }); }
+        else if (typeof ev.d === "string") { out += ev.d; onText({ text: out }); }
         else if (ev.pieces && onMeta) onMeta(ev);
         else if (ev.done) stop = ev.stop;
         else if (ev.error) err = ev.error;
